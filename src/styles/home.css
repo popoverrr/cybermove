@@ -6,7 +6,7 @@ body.is-home {
 }
 @media (min-width: 900px) and (min-height: 561px) {
   body.is-home {
-    --rail-offset: 56px;
+    --rail-offset: 72px;
   }
 }
 /* На главной контент сдвинут вправо от Rail */

@@ -76,7 +76,7 @@ const screens = [
     position: absolute;
     left: 0;
     top: calc(var(--i) * (100% / 7));
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
   }
   .rail__stage {
     position: absolute;
@@ -95,7 +95,7 @@ const screens = [
     align-items: center;
     gap: 10px;
     padding: 6px;
-    margin: -6px;
+    margin: -6px 0 -6px -8.5px; /* центр точки — на линии */
     pointer-events: auto;
   }
   .rail__dot {

@@ -42,9 +42,8 @@ export default defineConfig({
             const p = id.split('\\').join('/');
             if (p.includes('vite/preload-helper')) return 'preload';
             // Весь 3D — отдельный чанк, грузится динамически после первой отрисовки.
-            if (/node_modules\/(three|postprocessing|tweakpane|@tweakpane)\//.test(p) || p.includes('/src/webgl/')) {
-              return 'three';
-            }
+            if (/node_modules\/(tweakpane|@tweakpane)\//.test(p) || p.includes('/src/webgl/debug')) return 'debug';
+            if (/node_modules\/(three|postprocessing)\//.test(p) || p.includes('/src/webgl/')) return 'three';
             if (/node_modules\/(gsap|lenis)\//.test(p)) return 'motion';
           },
         },

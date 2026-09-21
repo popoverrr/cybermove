@@ -36,15 +36,24 @@ export default defineConfig({
       // Скрипты всегда внешние, шрифты не превращаются в data: URI.
       assetsInlineLimit: 0,
       cssCodeSplit: true,
-      rollupOptions: {
+      // Vite 8 = Rolldown: группы чанков через advancedChunks (manualChunks-совместимость сливала
+      // state.ts с чанком Tweakpane, и three-чанк тянул панель отладки на каждую страницу).
+      rolldownOptions: {
         output: {
-          manualChunks(id) {
-            const p = id.split('\\').join('/');
-            if (p.includes('vite/preload-helper')) return 'preload';
-            // Весь 3D — отдельный чанк, грузится динамически после первой отрисовки.
-            if (/node_modules\/(tweakpane|@tweakpane)\//.test(p) || p.includes('/src/webgl/debug')) return 'debug';
-            if (/node_modules\/(three|postprocessing)\//.test(p) || p.includes('/src/webgl/')) return 'three';
-            if (/node_modules\/(gsap|lenis)\//.test(p)) return 'motion';
+          advancedChunks: {
+            groups: [
+              // Хелпер динамических импортов Vite — отдельно, иначе утянет тяжёлый чанк в статический граф
+              { name: 'preload', test: /vite[\/]dist[\/]client[\/]modulepreload|preload-helper/, priority: 200 },
+              // Общее состояние DOM↔WebGL и аналитика — отдельный маленький чанк
+              { name: 'state', test: /[\/]src[\/]lib[\/](state|analytics)\.ts/, priority: 150 },
+              // Панель отладки (Tweakpane) — ленивый чанк, только при ?debug
+              { name: 'debug', test: /node_modules[\\/](tweakpane|@tweakpane)[\\/]|[\\/]src[\\/]webgl[\\/]debug/, priority: 100 },
+              // Лёгкий фон внутренних страниц и GLSL-строки — без three
+              { name: 'litebg', test: /[\\/]src[\\/]webgl[\\/](backgrounds[\\/](lite-bg|bgShader)|shaders[\\/]noise)/, priority: 90 },
+              // Весь 3D — отдельный чанк, грузится динамически после первой отрисовки
+              { name: 'three', test: /node_modules[\\/](three|postprocessing)[\\/]|[\\/]src[\\/]webgl[\\/]/, priority: 80 },
+              { name: 'motion', test: /node_modules[\\/](gsap|lenis)[\\/]/, priority: 70 },
+            ],
           },
         },
       },

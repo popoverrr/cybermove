@@ -204,3 +204,29 @@ body.orbit-hover .cursor__ring {
   background: rgba(10, 36, 245, 0.35);
   backdrop-filter: blur(4px);
 }
+
+/* Режим постера (?poster): виден только канвас */
+body.is-poster .stage,
+body.is-poster .screen--s8,
+body.is-poster .header,
+body.is-poster .rail,
+body.is-poster .orbit-labels,
+body.is-poster .anchor-labels,
+body.is-poster .audio,
+body.is-poster .cursor,
+body.is-poster .preloader {
+  opacity: 0 !important;
+}
+
+/* Фолбэк без WebGL / reduced-motion: постеры экранов с кроссфейдом */
+.gl-poster__layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.9s var(--ease-out);
+}
+.gl-poster__layer.is-on {
+  opacity: 1;
+}

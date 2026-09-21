@@ -24,6 +24,7 @@ const SCREEN = q.get('screen');
 const LOCAL = q.get('local');
 const T = q.get('t');
 const HOVER = q.get('hover');
+const POSTER = q.has('poster');
 
 let engine: Engine | null = null;
 let lenis: Lenis | null = null;
@@ -104,6 +105,7 @@ function measure() {
   const exitT = a ? Math.max(0, Math.min(1, (state.screens[active] - a.exitStart) / (1 - a.exitStart))) : 0;
   syncTheme(themes, active, exitT);
   updateRail(active, state.progress);
+  updatePoster();
   const growthIdx = screens.findIndex((x) => x.el.id === 'growth');
   if (growthIdx >= 0) updateGrowth(state.screens[growthIdx], state.reduced);
 }
@@ -282,10 +284,36 @@ function initHeroText(delay: number) {
   }
 }
 
-/* ---------- постер / фолбэк ---------- */
+/* ---------- постер / фолбэк: статичные постеры экранов с кроссфейдом ---------- */
+let posterLayers: HTMLElement[] = [];
+let posterCurrent = '';
 function showFallback(reason: string) {
   document.body.classList.add('gl-fallback');
   document.body.dataset.glFallback = reason;
+  const host = document.querySelector<HTMLElement>('[data-poster]');
+  if (!host) return;
+  posterLayers = [0, 1].map(() => {
+    const l = document.createElement('div');
+    l.className = 'gl-poster__layer';
+    host.appendChild(l);
+    return l;
+  });
+  updatePoster(true);
+}
+function updatePoster(force = false) {
+  if (!posterLayers.length) return;
+  const active = currentScreen();
+  const mobile = window.innerWidth < 900 && window.innerHeight > window.innerWidth;
+  const name = `s${active + 1}${mobile ? '-m' : ''}`;
+  if (name === posterCurrent && !force) return;
+  posterCurrent = name;
+  const on = posterLayers.find((l) => !l.classList.contains('is-on')) || posterLayers[0];
+  const off = posterLayers.find((l) => l !== on)!;
+  on.style.backgroundImage = `url(/posters/${name}.webp)`;
+  on.style.backgroundImage = `image-set(url(/posters/${name}.avif) type("image/avif"), url(/posters/${name}.webp) type("image/webp"))`;
+  if (!on.style.backgroundImage) on.style.backgroundImage = `url(/posters/${name}.webp)`;
+  on.classList.add('is-on');
+  off.classList.remove('is-on');
 }
 
 async function loadEngine(canvas: HTMLCanvasElement) {
@@ -322,6 +350,7 @@ function applyProgressParam() {
 
 export function initHome() {
   state.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (POSTER) document.body.classList.add('is-poster'); // только канвас — для генерации постеров
   stageWrap = document.querySelector<HTMLElement>('[data-stage-wrap]');
   for (const el of Array.from(document.querySelectorAll<HTMLElement>('[data-screen]'))) {
     const first = screens.length === 0;

@@ -6,6 +6,7 @@
   --steel-900: #1a1c20;
   --steel-700: #33373d;
   --steel-600: #5b616b;
+  --steel-500: #7a8190;
   --steel-400: #8a9099;
   --steel-300: #aab0b8;
   --steel-200: #c9ced6;
@@ -20,7 +21,7 @@
   --bg: var(--black);
   --fg: var(--white);
   --fg-2: var(--steel-300);
-  --fg-3: var(--steel-600);
+  --fg-3: var(--steel-500);
   --hair: rgba(244, 246, 250, 0.14);
   --hair-strong: rgba(244, 246, 250, 0.32);
   --accent: var(--blue-glow);
@@ -89,7 +90,7 @@
   --bg: var(--black);
   --fg: var(--white);
   --fg-2: var(--steel-300);
-  --fg-3: var(--steel-600);
+  --fg-3: var(--steel-500);
   --hair: rgba(244, 246, 250, 0.14);
   --hair-strong: rgba(244, 246, 250, 0.32);
   --accent: var(--blue-glow);
@@ -100,7 +101,7 @@
   --bg: var(--graphite);
   --fg: var(--white);
   --fg-2: var(--steel-300);
-  --fg-3: var(--steel-600);
+  --fg-3: var(--steel-500);
   --hair: rgba(244, 246, 250, 0.14);
   --hair-strong: rgba(244, 246, 250, 0.32);
   --accent: var(--blue-glow);
@@ -111,7 +112,7 @@
   --bg: #cfd3d9;
   --fg: var(--graphite);
   --fg-2: var(--steel-700);
-  --fg-3: var(--steel-600);
+  --fg-3: #4f5560;
   --hair: rgba(5, 5, 5, 0.16);
   --hair-strong: rgba(5, 5, 5, 0.36);
   --accent: var(--blue);
@@ -122,7 +123,7 @@
   --bg: var(--blue);
   --fg: var(--white);
   --fg-2: var(--blue-ice);
-  --fg-3: rgba(191, 212, 255, 0.7);
+  --fg-3: rgba(191, 212, 255, 0.82);
   --hair: rgba(244, 246, 250, 0.22);
   --hair-strong: rgba(244, 246, 250, 0.45);
   --accent: var(--white);
@@ -133,7 +134,7 @@
   --bg: #d9dce1;
   --fg: var(--steel-900);
   --fg-2: var(--steel-700);
-  --fg-3: var(--steel-600);
+  --fg-3: #525863;
   --hair: rgba(5, 5, 5, 0.14);
   --hair-strong: rgba(5, 5, 5, 0.34);
   --accent: var(--blue);

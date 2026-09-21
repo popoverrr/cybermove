@@ -154,11 +154,11 @@ export function initAnchors() {
 /* ---------- синхронная интерполяция темы ---------- */
 type ThemeVars = Record<string, string>;
 const THEMES: Record<string, ThemeVars> = {
-  black: { '--fg': '#f4f6fa', '--fg-2': '#aab0b8', '--fg-3': '#5b616b', '--hair': 'rgba(244,246,250,0.14)', '--hair-strong': 'rgba(244,246,250,0.32)', '--accent': '#4d7cff', '--btn-fill': '#f4f6fa', '--btn-fill-fg': '#050505', '--bg': '#050505' },
-  graphite: { '--fg': '#f4f6fa', '--fg-2': '#aab0b8', '--fg-3': '#5b616b', '--hair': 'rgba(244,246,250,0.14)', '--hair-strong': 'rgba(244,246,250,0.32)', '--accent': '#4d7cff', '--btn-fill': '#f4f6fa', '--btn-fill-fg': '#050505', '--bg': '#0e0f12' },
-  steel: { '--fg': '#0e0f12', '--fg-2': '#33373d', '--fg-3': '#5b616b', '--hair': 'rgba(5,5,5,0.16)', '--hair-strong': 'rgba(5,5,5,0.36)', '--accent': '#0a24f5', '--btn-fill': '#0e0f12', '--btn-fill-fg': '#f4f6fa', '--bg': '#cfd3d9' },
-  blue: { '--fg': '#f4f6fa', '--fg-2': '#bfd4ff', '--fg-3': 'rgba(191,212,255,0.7)', '--hair': 'rgba(244,246,250,0.22)', '--hair-strong': 'rgba(244,246,250,0.45)', '--accent': '#f4f6fa', '--btn-fill': '#f4f6fa', '--btn-fill-fg': '#0a24f5', '--bg': '#0a24f5' },
-  silver: { '--fg': '#1a1c20', '--fg-2': '#33373d', '--fg-3': '#5b616b', '--hair': 'rgba(5,5,5,0.14)', '--hair-strong': 'rgba(5,5,5,0.34)', '--accent': '#0a24f5', '--btn-fill': '#0a24f5', '--btn-fill-fg': '#f4f6fa', '--bg': '#d9dce1' },
+  black: { '--fg': '#f4f6fa', '--fg-2': '#aab0b8', '--fg-3': '#7a8190', '--hair': 'rgba(244,246,250,0.14)', '--hair-strong': 'rgba(244,246,250,0.32)', '--accent': '#4d7cff', '--btn-fill': '#f4f6fa', '--btn-fill-fg': '#050505', '--bg': '#050505' },
+  graphite: { '--fg': '#f4f6fa', '--fg-2': '#aab0b8', '--fg-3': '#7a8190', '--hair': 'rgba(244,246,250,0.14)', '--hair-strong': 'rgba(244,246,250,0.32)', '--accent': '#4d7cff', '--btn-fill': '#f4f6fa', '--btn-fill-fg': '#050505', '--bg': '#0e0f12' },
+  steel: { '--fg': '#0e0f12', '--fg-2': '#33373d', '--fg-3': '#4f5560', '--hair': 'rgba(5,5,5,0.16)', '--hair-strong': 'rgba(5,5,5,0.36)', '--accent': '#0a24f5', '--btn-fill': '#0e0f12', '--btn-fill-fg': '#f4f6fa', '--bg': '#cfd3d9' },
+  blue: { '--fg': '#f4f6fa', '--fg-2': '#bfd4ff', '--fg-3': 'rgba(191,212,255,0.82)', '--hair': 'rgba(244,246,250,0.22)', '--hair-strong': 'rgba(244,246,250,0.45)', '--accent': '#f4f6fa', '--btn-fill': '#f4f6fa', '--btn-fill-fg': '#0a24f5', '--bg': '#0a24f5' },
+  silver: { '--fg': '#1a1c20', '--fg-2': '#33373d', '--fg-3': '#525863', '--hair': 'rgba(5,5,5,0.14)', '--hair-strong': 'rgba(5,5,5,0.34)', '--accent': '#0a24f5', '--btn-fill': '#0a24f5', '--btn-fill-fg': '#f4f6fa', '--bg': '#d9dce1' },
 };
 
 function parseColor(c: string): [number, number, number, number] {

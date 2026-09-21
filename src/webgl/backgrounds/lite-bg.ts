@@ -60,7 +60,8 @@ export function mountLiteBackground(canvas: HTMLCanvasElement, mode: BgMode, opt
   const start = performance.now();
 
   const resize = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1);
+    // фон мягкий — половинного разрешения достаточно, экономим GPU/CPU
+    const dpr = Math.min(window.devicePixelRatio || 1, 1) * 0.6;
     const w = Math.max(1, Math.floor(canvas.clientWidth * dpr));
     const h = Math.max(1, Math.floor(canvas.clientHeight * dpr));
     if (canvas.width !== w || canvas.height !== h) {
@@ -78,10 +79,15 @@ export function mountLiteBackground(canvas: HTMLCanvasElement, mode: BgMode, opt
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   };
 
-  const loop = () => {
+  let last = 0;
+  const loop = (t: number) => {
     raf = 0;
     if (!visible || document.hidden) return;
-    draw();
+    // ~30 fps достаточно для медленного фона
+    if (t - last >= 30) {
+      last = t;
+      draw();
+    }
     if (!reduced) raf = requestAnimationFrame(loop);
   };
 

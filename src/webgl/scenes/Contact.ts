@@ -43,7 +43,7 @@ export class ContactScene implements SceneModule {
     rig.layoutOffset = lerp(0.5, 1, enter);
     rig.parallax = 0.6;
     rig.pointerBulge = 0.4;
-    rig.atomScale = 1.0;
+    rig.atomScale = 0.8;
     rig.coreVisible = true;
     rig.coreScale = 1.0 + this.pulse * 0.08;
     rig.coreStretch.set(1, 1, 1);

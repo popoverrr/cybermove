@@ -2,6 +2,21 @@
 
 body.is-home {
   background: var(--black);
+  --rail-offset: 0px;
+}
+@media (min-width: 900px) and (min-height: 561px) {
+  body.is-home {
+    --rail-offset: 56px;
+  }
+}
+/* На главной контент сдвинут вправо от Rail */
+body.is-home .screen .container,
+body.is-home .screen--s8 .container {
+  padding-left: calc(var(--gutter) + var(--rail-offset));
+}
+body.is-home .s1__corner--tl,
+body.is-home .s1__cross--a {
+  left: calc(var(--gutter) + var(--rail-offset));
 }
 
 .gl-wrap {

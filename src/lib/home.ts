@@ -9,6 +9,9 @@ import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 import { state, SCREEN_IDS, setHover } from './state';
 import { initRows, initDrawer, initAnchors, syncTheme } from './home-ui';
+import { updateGrowth, initRail, updateRail, initPreloader } from './home-extra';
+import { initForms } from './form';
+import { initAudio } from './audio';
 import type { Engine } from '../webgl/boot';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -24,6 +27,9 @@ const HOVER = q.get('hover');
 
 let engine: Engine | null = null;
 let lenis: Lenis | null = null;
+/** идёт программный скролл (Rail, якоря, клик по орбите) — snap не вмешивается */
+let autoScrolling = false;
+let autoTimer = 0;
 
 function supportsWebGL2(): boolean {
   try {
@@ -97,6 +103,9 @@ function measure() {
   const a = screens[active];
   const exitT = a ? Math.max(0, Math.min(1, (state.screens[active] - a.exitStart) / (1 - a.exitStart))) : 0;
   syncTheme(themes, active, exitT);
+  updateRail(active, state.progress);
+  const growthIdx = screens.findIndex((x) => x.el.id === 'growth');
+  if (growthIdx >= 0) updateGrowth(state.screens[growthIdx], state.reduced);
 }
 const themes: string[] = [];
 function currentScreen() {
@@ -162,7 +171,7 @@ function initSnap() {
     lastY = scroll;
     if (Math.abs(velocity) > 0.5) return;
     timer = window.setTimeout(() => {
-      if (document.body.classList.contains('drawer-open')) return;
+      if (document.body.classList.contains('drawer-open') || autoScrolling) return;
       const pts = snapTargets();
       let best = -1;
       let bestD = window.innerHeight * 0.18;
@@ -231,7 +240,10 @@ export function scrollToScreen(index: number, hold = true) {
   const s = screens[index];
   if (!s) return;
   const y = s.inFlow ? s.start + s.dur : s.start + (hold ? s.dur * (index === 0 ? 0.22 : 0.42) : 0);
-  if (lenis) lenis.scrollTo(y, { duration: 1.4, easing: (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) });
+  autoScrolling = true;
+  clearTimeout(autoTimer);
+  autoTimer = window.setTimeout(() => (autoScrolling = false), 1800);
+  if (lenis) lenis.scrollTo(y, { duration: 1.4, easing: (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), onComplete: () => (autoScrolling = false) });
   else window.scrollTo({ top: y, behavior: state.reduced ? 'auto' : 'smooth' });
 }
 
@@ -328,6 +340,10 @@ export function initHome() {
   initRows();
   initDrawer();
   initAnchors();
+  initRail((i) => scrollToScreen(i));
+  initPreloader(STILL);
+  initForms();
+  initAudio();
   const canvas = document.querySelector<HTMLCanvasElement>('#gl');
   // якоря #audit и т.п. → плавный скролл к экрану
   document.addEventListener('click', (e) => {

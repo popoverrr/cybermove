@@ -7,3 +7,5 @@ Thumbs.db
 *.log
 .playwright-cache/
 docs/screens/**/*.tmp.png
+public/api/.leads/*.log
+public/api/.leads/rate_*.json

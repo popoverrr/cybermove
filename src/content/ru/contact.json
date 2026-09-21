@@ -8,10 +8,22 @@
     "company": "Компания или сайт",
     "format": "Формат",
     "formatOptions": [
-      { "value": "audit", "label": "Аудит и roadmap" },
-      { "value": "launch", "label": "Запуск проекта" },
-      { "value": "growth", "label": "Партнёрство по росту" },
-      { "value": "other", "label": "Другое" }
+      {
+        "value": "audit",
+        "label": "Аудит и roadmap"
+      },
+      {
+        "value": "launch",
+        "label": "Запуск проекта"
+      },
+      {
+        "value": "growth",
+        "label": "Партнёрство по росту"
+      },
+      {
+        "value": "other",
+        "label": "Другое"
+      }
     ],
     "message": "Сообщение",
     "submit": "Отправить",
@@ -22,7 +34,9 @@
     "consent": "Отправляя форму, вы соглашаетесь с политикой конфиденциальности.",
     "required": "Обязательное поле",
     "invalidContact": "Укажите телефон, WhatsApp или Telegram",
-    "tooFast": "Похоже, форма заполнена слишком быстро. Проверьте поля и отправьте ещё раз."
+    "tooFast": "Похоже, форма заполнена слишком быстро. Проверьте поля и отправьте ещё раз.",
+    "consentPrefix": "Отправляя форму, вы соглашаетесь с",
+    "consentLink": "политикой конфиденциальности"
   },
   "channelsTitle": "Каналы",
   "whatsappLabel": "WhatsApp",

@@ -33,10 +33,10 @@ export class GrowthScene implements SceneModule {
     rig.cam.set(0, 0, lerp(7.4, 8.6, enter));
     rig.look.set(0, 0, 0);
     rig.fov = 30;
-    rig.layoutOffset = 0.5;
+    rig.layoutOffset = 1;
     rig.parallax = 0.8;
     rig.pointerBulge = 0.5;
-    rig.atomScale = lerp(0.86, 1.0, enter);
+    rig.atomScale = lerp(0.86, 0.8, enter);
     rig.coreVisible = true;
     rig.coreScale = lerp(1.3, 1.0, enter);
     rig.coreStretch.set(1, 1, 1);
@@ -50,8 +50,8 @@ export class GrowthScene implements SceneModule {
     const rings = smooth(range(local, 0.05, 0.6));
     rig.orbits.visible = enter;
     rig.orbits.count = Math.round(lerp(5, e.orbits.length, rings));
-    rig.orbits.spread = lerp(1, 1.9, rings) * (1 - ex * 0.45);
-    rig.orbits.opacity = 0.55;
+    rig.orbits.spread = lerp(1, 1.35, rings) * (1 - ex * 0.25);
+    rig.orbits.opacity = 0.32;
     rig.orbits.speedMul = 1;
     rig.envRot = 4.2 + local * 0.4;
 

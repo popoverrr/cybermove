@@ -22,9 +22,13 @@ export function initRows() {
     const btn = row.querySelector<HTMLButtonElement>('[data-service]')!;
     if (!coarse) {
       row.addEventListener('pointerenter', () => activate(row));
-      row.addEventListener('pointerleave', () => activate(null));
+      row.addEventListener('pointerleave', () => {
+        if (!state.open) activate(null);
+      });
       btn.addEventListener('focus', () => activate(row));
-      btn.addEventListener('blur', () => activate(null));
+      btn.addEventListener('blur', () => {
+        if (!state.open) activate(null);
+      });
       btn.addEventListener('click', () => openDrawer(btn.dataset.service!, btn));
     } else {
       // тач: первый тап — активная строка (реакция сцены), второй по той же — Drawer
@@ -34,8 +38,11 @@ export function initRows() {
       });
     }
   });
-  // при уходе с экрана — сброс hover
-  document.addEventListener('cm:screenchange', () => activate(null));
+  // при уходе с экрана — сброс hover (если Drawer закрыт)
+  document.addEventListener('cm:screenchange', () => {
+    if (!state.open) activate(null);
+  });
+  document.addEventListener('cm:drawerclose', () => activate(null));
 }
 
 /* ---------- Drawer ---------- */
@@ -81,6 +88,7 @@ export function closeDrawer() {
   document.querySelectorAll<HTMLElement>('[data-service]').forEach((b) => b.setAttribute('aria-expanded', 'false'));
   state.open = null;
   setHover(null);
+  document.dispatchEvent(new CustomEvent('cm:drawerclose'));
   const d = drawer;
   const b = backdrop;
   window.setTimeout(() => {

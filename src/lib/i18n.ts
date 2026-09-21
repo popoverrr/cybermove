@@ -3,6 +3,7 @@
  * Новый язык: добавить в LANGS (site.config.ts) и папку src/content/<code>/ с теми же файлами.
  */
 import { LANGS, DEFAULT_LANG, type LangCode, type LangDef } from '../../site.config';
+import { BASE } from './base';
 
 import ruUi from '../content/ru/ui.json';
 import ruHome from '../content/ru/home.json';
@@ -70,8 +71,8 @@ export function getContent(lang: LangCode = DEFAULT_LANG): Content {
 export function localePath(lang: LangCode, path: string): string {
   const def = LANGS.find((l) => l.code === lang) ?? LANGS[0];
   const clean = path.startsWith('/') ? path : `/${path}`;
-  if (!def.prefix) return clean;
-  return `/${def.prefix}${clean === '/' ? '/' : clean}`;
+  if (!def.prefix) return `${BASE}${clean}`;
+  return `${BASE}/${def.prefix}${clean === '/' ? '/' : clean}`;
 }
 
 /** Параметры getStaticPaths для страниц вида [...lang]/… */

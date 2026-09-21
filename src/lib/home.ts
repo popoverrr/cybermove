@@ -309,9 +309,10 @@ function updatePoster(force = false) {
   posterCurrent = name;
   const on = posterLayers.find((l) => !l.classList.contains('is-on')) || posterLayers[0];
   const off = posterLayers.find((l) => l !== on)!;
-  on.style.backgroundImage = `url(/posters/${name}.webp)`;
-  on.style.backgroundImage = `image-set(url(/posters/${name}.avif) type("image/avif"), url(/posters/${name}.webp) type("image/webp"))`;
-  if (!on.style.backgroundImage) on.style.backgroundImage = `url(/posters/${name}.webp)`;
+  const base = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '');
+  on.style.backgroundImage = `url(${base}/posters/${name}.webp)`;
+  on.style.backgroundImage = `image-set(url(${base}/posters/${name}.avif) type("image/avif"), url(${base}/posters/${name}.webp) type("image/webp"))`;
+  if (!on.style.backgroundImage) on.style.backgroundImage = `url(${base}/posters/${name}.webp)`;
   on.classList.add('is-on');
   off.classList.remove('is-on');
 }

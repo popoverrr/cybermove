@@ -61,7 +61,7 @@ function show(form: HTMLFormElement, which: 'sending' | 'success' | 'error' | nu
 
 async function send(form: HTMLFormElement, payload: Record<string, string>): Promise<{ ok: boolean; error?: string }> {
   const q = new URLSearchParams(location.search);
-  const mock = import.meta.env.DEV || q.has('mock') || q.has('mockfail');
+  const mock = import.meta.env.DEV || import.meta.env.PUBLIC_PREVIEW === '1' || q.has('mock') || q.has('mockfail');
   if (mock) {
     await new Promise((r) => setTimeout(r, 800));
     if (q.has('mockfail')) return { ok: false, error: 'mock' };

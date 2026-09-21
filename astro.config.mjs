@@ -5,8 +5,13 @@ import { SITE_URL, LANGS, DEFAULT_LANG } from './site.config.ts';
 
 const LABS = process.env.CYBERMOVE_LABS === '1';
 
+// Превью на GitHub Pages: CYBERMOVE_SITE=https://<логин>.github.io CYBERMOVE_BASE=/<репозиторий>/ (см. .github/workflows/pages.yml)
+const SITE = process.env.CYBERMOVE_SITE || SITE_URL;
+const BASE = process.env.CYBERMOVE_BASE || '/';
+
 export default defineConfig({
-  site: SITE_URL,
+  site: SITE,
+  base: BASE,
   output: 'static',
   devToolbar: { enabled: false },
   trailingSlash: 'always',

@@ -7,6 +7,7 @@ const names: Record<string, string> = {
   c: 'C · Новый знак',
 };
 const files = import.meta.glob<string>('../../assets/logo/*.svg', { query: '?raw', import: 'default', eager: true });
+import { withBase } from '../../lib/base';
 const get = (name: string) => files[`../../assets/logo/${name}.svg`] ?? '';
 const bgs = [
   { id: 'black', bg: '#050505', scheme: 'color-dark', mono: 'mono-white' },
@@ -41,10 +42,10 @@ const bgs = [
   <section class="lab__section">
     <p class="t-micro">Favicon</p>
     <div class="fav">
-      <img src="/favicon.svg" width="64" height="64" alt="" />
-      <img src="/favicon-32.png" width="32" height="32" alt="" />
-      <img src="/favicon-16.png" width="16" height="16" alt="" />
-      <img src="/apple-touch-icon.png" width="60" height="60" alt="" />
+      <img src={withBase('/favicon.svg')} width="64" height="64" alt="" />
+      <img src={withBase('/favicon-32.png')} width="32" height="32" alt="" />
+      <img src={withBase('/favicon-16.png')} width="16" height="16" alt="" />
+      <img src={withBase('/apple-touch-icon.png')} width="60" height="60" alt="" />
     </div>
   </section>
 </div>

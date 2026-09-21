@@ -1,6 +1,7 @@
 /** SEO: title/description, canonical, hreflang, Open Graph, JSON-LD. */
 import { SITE_URL, SITE_NAME, SITE_LEGAL_NAME, LANGS, DEFAULT_LANG, WHATSAPP_NUMBER, GEOGRAPHY, type LangCode } from '../../site.config';
 import { alternates, localePath } from './i18n';
+import { BASE } from './base';
 
 export interface HeadMeta {
   lang: LangCode;
@@ -14,9 +15,12 @@ export interface HeadMeta {
   noindex?: boolean;
 }
 
+/** Абсолютный URL: домен из конфига Astro (`site`; в превью на Pages — github.io) + базовый путь */
 export function absolute(path: string): string {
-  const base = SITE_URL.replace(/\/$/, '');
-  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+  const site = (import.meta.env.SITE || SITE_URL).replace(/\/+$/, '');
+  const p = path.startsWith('/') ? path : `/${path}`;
+  // localePath уже содержит BASE — не дублируем
+  return p.startsWith(`${BASE}/`) || (BASE && p === BASE) ? `${site}${p}` : `${site}${BASE}${p}`;
 }
 
 export function canonical(lang: LangCode, path: string): string {
@@ -42,7 +46,7 @@ export function organizationLd(lang: LangCode) {
     '@id': `${SITE_URL}/#organization`,
     name: SITE_NAME,
     legalName: SITE_LEGAL_NAME,
-    url: SITE_URL,
+    url: absolute('/'),
     logo: absolute('/icon-512.png'),
     slogan: lang === 'ru' ? 'Мы двигаем бизнес вперёд.' : 'We move business forward.',
     telephone: WHATSAPP_NUMBER,

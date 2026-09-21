@@ -18,6 +18,7 @@
 npm run dev          # dev-сервер (в этом окружении: preview_start "cybermove-dev", порт 4330)
 npm run build        # боевая сборка в dist/ (страницы /dev/* исключены)
 npm run build:labs   # сборка с лабораториями /dev/*
+# превью GitHub Pages: CYBERMOVE_BASE=/<репо>/ CYBERMOVE_SITE=https://<логин>.github.io PUBLIC_PREVIEW=1 npm run build (см. docs/DEPLOY.md)
 npm run preview      # предпросмотр dist/ (preview_start "cybermove-preview", порт 4331)
 npm run check        # astro check
 python scripts/build-logo.py [--active a|b|c]   # пересобрать логотип и favicon

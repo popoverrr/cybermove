@@ -18,6 +18,7 @@ import Footer from '../components/Footer.astro';
 import { getContent, type LangCode } from '../lib/i18n';
 import { canonical, hreflangLinks, ogLocale, absolute, organizationLd, websiteLd } from '../lib/seo';
 import { ANALYTICS } from '../../site.config';
+import { withBase, PREVIEW } from '../lib/base';
 
 export interface Props {
   lang: LangCode;
@@ -67,7 +68,7 @@ const analyticsOn = Boolean(ANALYTICS.ga4 || ANALYTICS.metaPixel || ANALYTICS.ti
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {(noindex || PREVIEW) && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonicalUrl} />
     {alts.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
 
@@ -85,10 +86,10 @@ const analyticsOn = Boolean(ANALYTICS.ga4 || ANALYTICS.metaPixel || ANALYTICS.ti
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage.startsWith('http') ? ogImage : absolute(ogImage)} />
 
-    <link rel="icon" href="/favicon.ico" sizes="48x48" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" href={withBase('/favicon.ico')} sizes="48x48" />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
+    <link rel="manifest" href={withBase('/site.webmanifest')} />
     <meta name="theme-color" content="#050505" />
     <meta name="color-scheme" content="dark" />
 

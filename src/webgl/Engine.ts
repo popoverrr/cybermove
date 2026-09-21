@@ -9,7 +9,11 @@ import { buildEnvironments, type EnvironmentMaps } from './Environment';
 import { Background } from './backgrounds/Background';
 import { LiquidChrome } from './objects/LiquidChrome';
 import { ParticleField } from './objects/ParticleField';
-import { Orbit, CORE_ORBITS } from './objects/Orbits';
+import { Orbit, CORE_ORBITS, GROWTH_ORBITS } from './objects/Orbits';
+import { Scan } from './objects/Scan';
+import { Nodes } from './objects/Nodes';
+import { Streams } from './objects/Streams';
+import { Plates } from './objects/Plates';
 import { mulberry32 } from './objects/orbitals';
 import { Post, POST_DARK } from './Post';
 import { Story } from './Story';
@@ -32,6 +36,10 @@ export class Engine {
   readonly particles: ParticleField;
   readonly orbits: Orbit[] = [];
   readonly atom = new THREE.Group();
+  readonly scan: Scan;
+  readonly nodes: Nodes;
+  readonly streams: Streams;
+  readonly plates: Plates;
   readonly story: Story;
   post: Post | null = null;
   tier: TierSpec;
@@ -84,9 +92,18 @@ export class Engine {
     this.core = new LiquidChrome({ detail: this.tier.sphereDetail, worley: this.tier.worley, envDark: this.env.dark, envLight: this.env.light });
     this.particles = new ParticleField(TIERS.high.particles, rng, { curl: tierName !== 'low', dpr: 1 });
     this.particles.setDrawCount(this.tier.particles);
-    for (const p of CORE_ORBITS) this.orbits.push(new Orbit(p, this.resolution, this.tier.trailSegments));
+    for (const p of [...CORE_ORBITS, ...GROWTH_ORBITS]) this.orbits.push(new Orbit(p, this.resolution, this.tier.trailSegments));
 
-    this.atom.add(this.core.mesh, this.particles.points);
+    this.renderer.localClippingEnabled = true;
+    this.core.material.emissive = new THREE.Color(0xdfe9ff);
+    this.core.material.emissiveIntensity = 0;
+    const envMix = this.core.uniforms.uEnvMix;
+    this.scan = new Scan(this.core, this.resolution, this.env.dark, this.env.light, envMix);
+    this.nodes = new Nodes(this.resolution, this.env.dark, this.env.light, envMix);
+    this.streams = new Streams(this.resolution);
+    this.plates = new Plates(this.resolution, this.env.dark, this.env.light, envMix);
+
+    this.atom.add(this.core.mesh, this.particles.points, this.scan.group, this.nodes.group, this.streams.group, this.plates.group);
     for (const o of this.orbits) this.atom.add(o.group);
     this.scene.add(this.atom);
 
@@ -146,10 +163,13 @@ export class Engine {
     }
   };
 
+  private stillStart = 0;
+
   start() {
     if (this.running) return;
     this.running = true;
     this.last = performance.now();
+    this.stillStart = performance.now();
     if (PARAMS.still) {
       this.time = PARAMS.time ?? 4.0;
     }
@@ -194,8 +214,8 @@ export class Engine {
       this.onFirstFrame?.();
       state.events.emit('ready', undefined);
     }
-    // при ?still рисуем несколько кадров (прогрев шейдеров), затем останавливаемся
-    if (PARAMS.still && this.time > 0 && this.frameTimes.length >= 6) {
+    // при ?still рисуем кадры ~2.5 с (DOM успевает выставить прогресс и hover), затем останавливаемся
+    if (PARAMS.still && performance.now() - this.stillStart > 2500 && this.frameTimes.length >= 6) {
       this.canvas.dataset.still = '1';
       return;
     }
@@ -248,6 +268,10 @@ export class Engine {
     this.core.dispose();
     this.particles.dispose();
     this.orbits.forEach((o) => o.dispose());
+    this.scan.dispose();
+    this.nodes.dispose();
+    this.streams.dispose();
+    this.plates.dispose();
     this.background.dispose();
     this.env.dispose();
     this.renderer.dispose();

@@ -2,6 +2,8 @@
 /** Главная: 8 экранов со сквозной 3D-сценой (BRIEF §7). */
 import Base from '../../layouts/Base.astro';
 import S1Core from '../../components/home/S1Core.astro';
+import ScreenServices from '../../components/home/ScreenServices.astro';
+import Drawer from '../../components/home/Drawer.astro';
 import { getContent, langStaticPaths } from '../../lib/i18n';
 import '../../styles/home.css';
 
@@ -12,13 +14,21 @@ export function getStaticPaths() {
 const { lang } = Astro.props;
 const c = getContent(lang);
 const s1 = c.home.s1;
-const stubs = c.services.directions;
 ---
 
 <Base lang={lang} path="/" title={c.ui.meta.home.title} description={c.ui.meta.home.description} theme="black" bodyClass="is-home" noFooter>
   <div class="gl-wrap" aria-hidden="true">
     <div class="gl-poster" data-poster></div>
     <canvas id="gl" class="gl-canvas"></canvas>
+  </div>
+
+  <div class="anchor-labels" aria-hidden="true">
+    {c.services.directions[0].dataPoints.map((label, i) => (
+      <span class="anchor t-micro" data-anchor={`dp-${i}`}><span class="anchor__tick"></span>{label}</span>
+    ))}
+    {c.services.directions[3].services.map((s) => (
+      <span class="anchor anchor--metric t-micro" data-anchor={`metric-${s.id}`}>{s.metric}</span>
+    ))}
   </div>
 
   <div class="orbit-labels" aria-hidden="true">
@@ -34,16 +44,8 @@ const stubs = c.services.directions;
     <div class="stage" data-stage>
       <S1Core lang={lang} />
 
-      {stubs.map((d) => (
-        <section class="screen screen--stub" data-screen={d.id} data-dur="160" id={d.id} data-theme={d.theme}>
-          <div class="screen__pin">
-            <div class="container stub">
-              <p class="t-micro">{d.screenLabel}</p>
-              <h2 class="t-h1">{d.h2}</h2>
-              <p class="t-lead">{d.phrase}</p>
-            </div>
-          </div>
-        </section>
+      {c.services.directions.map((d, i) => (
+        <ScreenServices lang={lang} direction={d} index={i + 1} />
       ))}
       <section class="screen screen--stub screen--s7" data-screen="growth" data-dur="170" id="growth" data-theme="black">
         <div class="screen__pin">
@@ -65,6 +67,8 @@ const stubs = c.services.directions;
       </div>
     </div>
   </section>
+
+  <Drawer lang={lang} />
 
   <script>
     import { initHome } from '../../lib/home';

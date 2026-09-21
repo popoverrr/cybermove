@@ -7,7 +7,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
-import { state, SCREEN_IDS } from './state';
+import { state, SCREEN_IDS, setHover } from './state';
+import { initRows, initDrawer, initAnchors, syncTheme } from './home-ui';
 import type { Engine } from '../webgl/boot';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -16,7 +17,10 @@ const q = new URLSearchParams(location.search);
 const STILL = q.has('still');
 const FORCE_FALLBACK = q.has('nogl');
 const PROGRESS = q.get('progress');
+const SCREEN = q.get('screen');
+const LOCAL = q.get('local');
 const T = q.get('t');
+const HOVER = q.get('hover');
 
 let engine: Engine | null = null;
 let lenis: Lenis | null = null;
@@ -87,8 +91,14 @@ function measure() {
     const isActive = i === active || (i === active + 1 && state.screens[active] > screens[active].exitStart && !s.inFlow);
     s.el.classList.toggle('is-active', isActive);
   }
+  const prev = document.body.dataset.screen;
   document.body.dataset.screen = String(active);
+  if (prev !== String(active)) document.dispatchEvent(new CustomEvent('cm:screenchange', { detail: active }));
+  const a = screens[active];
+  const exitT = a ? Math.max(0, Math.min(1, (state.screens[active] - a.exitStart) / (1 - a.exitStart))) : 0;
+  syncTheme(themes, active, exitT);
 }
+const themes: string[] = [];
 function currentScreen() {
   let a = 0;
   for (let i = 0; i < screens.length; i++) if (state.screens[i] > 0) a = i;
@@ -281,10 +291,18 @@ async function loadEngine(canvas: HTMLCanvasElement) {
 
 /* ---------- ?progress: поставить страницу в точку ---------- */
 function applyProgressParam() {
-  if (PROGRESS === null) return;
-  const p = Math.min(1, Math.max(0, Number(PROGRESS)));
-  const total = document.documentElement.scrollHeight - window.innerHeight;
-  const y = Math.round(p * total);
+  if (PROGRESS === null && SCREEN === null) return;
+  let y = 0;
+  if (SCREEN !== null) {
+    // ?screen=2&local=0.4 — точка внутри экрана
+    const s = screens[Number(SCREEN)];
+    if (!s) return;
+    y = Math.round(s.start + s.dur * Math.min(1, Math.max(0, Number(LOCAL ?? 0.4))));
+  } else {
+    const p = Math.min(1, Math.max(0, Number(PROGRESS)));
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    y = Math.round(p * total);
+  }
   if (lenis) lenis.scrollTo(y, { immediate: true });
   window.scrollTo(0, y);
   measure();
@@ -306,6 +324,10 @@ export function initHome() {
     });
   }
   layoutScreens();
+  themes.push(...screens.map((s) => s.el.dataset.theme || 'black'));
+  initRows();
+  initDrawer();
+  initAnchors();
   const canvas = document.querySelector<HTMLCanvasElement>('#gl');
   // якоря #audit и т.п. → плавный скролл к экрану
   document.addEventListener('click', (e) => {
@@ -343,6 +365,14 @@ export function initHome() {
     setTimeout(applyProgressParam, 300);
   });
 
+  if (HOVER) {
+    // отладка: ?hover=<id услуги> — активная строка и реакция сцены
+    setTimeout(() => {
+      const row = document.querySelector<HTMLElement>(`[data-service="${HOVER}"]`)?.closest<HTMLElement>('[data-row]');
+      row?.classList.add('is-active');
+      setHover(HOVER);
+    }, 400);
+  }
   document.body.classList.add('home-ready');
   (window as unknown as { __cmScrollTo: typeof scrollToScreen }).__cmScrollTo = scrollToScreen;
 }

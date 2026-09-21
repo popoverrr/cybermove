@@ -82,17 +82,20 @@ vec3 bgSteel(vec2 uv, vec2 p) {
 
 vec3 bgBlue(vec2 uv, vec2 p) {
   // электрик-синий с размытыми бело-голубыми каустиками (domain-warped noise, ref-02, ref-09)
-  vec2 q = p * 0.9;
+  vec2 q = p * 1.35;
   float t = uTime * 0.05;
   vec2 warp = vec2(snoise(vec3(q * 0.9, t)), snoise(vec3(q * 0.9 + 5.3, t + 2.0)));
   vec2 w2 = vec2(snoise(vec3(q * 1.6 + warp * 1.3, t * 1.3 + 9.0)), snoise(vec3(q * 1.6 - warp * 1.1, t * 1.1 + 4.0)));
   float n = snoise(vec3(q * 1.1 + w2 * 0.9 + warp * 0.6, t * 0.7)) * 0.5 + 0.5;
-  float caustic = smoothstep(0.52, 0.86, n);
+  float caustic = smoothstep(0.55, 0.88, n);
   float glow = smoothstep(0.3, 0.9, n) * 0.35;
+  // слева, под текстом, каустики тише
+  float textZone = smoothstep(0.5, -0.9, p.x);
+  caustic *= 1.0 - textZone * 0.75;
   vec3 blue = srgb2lin(vec3(0.04, 0.14, 0.96));
   vec3 ice = srgb2lin(vec3(0.78, 0.86, 1.0));
-  vec3 col = mix(blue, ice, caustic * 0.92);
-  col += srgb2lin(vec3(0.3, 0.5, 1.0)) * glow * 0.6;
+  vec3 col = mix(blue, ice, caustic * 0.5);
+  col += srgb2lin(vec3(0.3, 0.5, 1.0)) * glow * 0.45 * (1.0 - textZone * 0.5);
   // светящийся короб: чуть светлее к центру
   col += vec3(0.02, 0.05, 0.12) * smoothstep(1.8, 0.2, length(p));
   return col;

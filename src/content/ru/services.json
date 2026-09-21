@@ -20,7 +20,14 @@
       "phrase": "Любую работу начинаем с аудита: находим, где бизнес теряет деньги и клиентов и что даст рост быстрее всего.",
       "result": "Карта проблем и возможностей · приоритеты · roadmap · бюджет",
       "note": "«Финансовый аудит» здесь — управленческая финансовая диагностика бизнеса, а не обязательный лицензируемый аудит отчётности. «Инвестиции» — вложения в собственный бизнес, а не рекомендации по ценным бумагам.",
-      "micro": ["CAC", "LTV", "ROMI", "CASH FLOW", "MARGIN", "CR"],
+      "micro": [
+        "CAC",
+        "LTV",
+        "ROMI",
+        "CASH FLOW",
+        "MARGIN",
+        "CR"
+      ],
       "services": [
         {
           "id": "business-audit",
@@ -36,7 +43,14 @@
           ],
           "result": "Структурированная диагностика и карта проблем и возможностей.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["usyk", "brsm-nafta", "tpk", "gaia"]
+          "cases": [
+            "usyk",
+            "brsm-nafta",
+            "tpk",
+            "gaia"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "financial-audit",
@@ -51,7 +65,13 @@
           ],
           "result": "Понятная картина, где бизнес зарабатывает и где теряет.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["barbershops-kyiv", "toscana-wine", "sii-concept"]
+          "cases": [
+            "barbershops-kyiv",
+            "toscana-wine",
+            "sii-concept"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "investment",
@@ -65,7 +85,13 @@
           ],
           "result": "Финансовый план изменений с цифрами.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["apicapsules", "maharadj", "furniture-factory"]
+          "cases": [
+            "apicapsules",
+            "maharadj",
+            "furniture-factory"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "strategy",
@@ -80,8 +106,22 @@
           ],
           "result": "План, по которому можно работать с нами или самостоятельно.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["hydrosta-kazakhstan", "hsta-group", "cybermove-games"]
+          "cases": [
+            "hydrosta-kazakhstan",
+            "hsta-group",
+            "cybermove-games"
+          ],
+          "metric": "",
+          "kind": ""
         }
+      ],
+      "dataPoints": [
+        "CAC",
+        "LTV",
+        "ROMI",
+        "Cash flow",
+        "Маржа",
+        "Конверсия"
       ]
     },
     {
@@ -99,7 +139,13 @@
       "phrase": "Сайт, CRM, телефония и AI собираем в одну связанную систему: каждая заявка видна, посчитана и доведена до продажи.",
       "result": "Сайт · CRM · телефония · AI · автоматизация — в одной связке",
       "note": "",
-      "micro": ["SITE", "CRM", "VOIP", "AI", "AUTO"],
+      "micro": [
+        "SITE",
+        "CRM",
+        "VOIP",
+        "AI",
+        "AUTO"
+      ],
       "services": [
         {
           "id": "websites",
@@ -116,7 +162,14 @@
           ],
           "result": "Сайт, который приносит заявки и связан с продажами.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["hydrosta-kazakhstan", "hsta-group", "building-time", "tpk"]
+          "cases": [
+            "hydrosta-kazakhstan",
+            "hsta-group",
+            "building-time",
+            "tpk"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "crm",
@@ -132,7 +185,13 @@
           ],
           "result": "Ни одна заявка не теряется, продажи прозрачны.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["hydrosta-service", "building-time", "fitness-room-menden"]
+          "cases": [
+            "hydrosta-service",
+            "building-time",
+            "fitness-room-menden"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "telephony",
@@ -147,7 +206,12 @@
           ],
           "result": "Каждый звонок записан, привязан к сделке и к источнику.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["hydrosta-service", "hsta-group"]
+          "cases": [
+            "hydrosta-service",
+            "hsta-group"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "ai",
@@ -162,7 +226,13 @@
           ],
           "result": "AI работает в процессе, а не впечатляет на презентации.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["oleg-baryshevsky", "tsepukh", "cybermove-games"]
+          "cases": [
+            "oleg-baryshevsky",
+            "tsepukh",
+            "cybermove-games"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "automation",
@@ -177,9 +247,16 @@
           ],
           "result": "Процессы не зависят от ручного труда и памяти сотрудников.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["barbershops-kyiv", "maharadj", "ecommerce"]
+          "cases": [
+            "barbershops-kyiv",
+            "maharadj",
+            "ecommerce"
+          ],
+          "metric": "",
+          "kind": ""
         }
-      ]
+      ],
+      "dataPoints": []
     },
     {
       "id": "brand-content",
@@ -196,7 +273,13 @@
       "phrase": "Определяем ядро бренда и превращаем его в контент, который продаёт, а не просто выходит по графику.",
       "result": "Ядро бренда · продакшн · SMM · PR · личный бренд",
       "note": "",
-      "micro": ["CORE", "LENS", "9:16", "WAVE", "BEAM"],
+      "micro": [
+        "CORE",
+        "LENS",
+        "9:16",
+        "WAVE",
+        "BEAM"
+      ],
       "services": [
         {
           "id": "brand-core",
@@ -210,7 +293,14 @@
           ],
           "result": "Ядро бренда, на которое опираются сайт, контент и реклама.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["gaia", "sii-concept", "furniture-factory", "cybermove-games"]
+          "cases": [
+            "gaia",
+            "sii-concept",
+            "furniture-factory",
+            "cybermove-games"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "production",
@@ -225,7 +315,14 @@
           ],
           "result": "Контент, готовый к публикации и запуску в рекламе.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["van-dog-agency", "intertop", "ukrainian-fashion-week", "kehhsha"]
+          "cases": [
+            "van-dog-agency",
+            "intertop",
+            "ukrainian-fashion-week",
+            "kehhsha"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "smm",
@@ -240,7 +337,14 @@
           ],
           "result": "Соцсети работают на доверие и продажи.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["fitness-room-menden", "spa-maharadj", "gaia", "good-market"]
+          "cases": [
+            "fitness-room-menden",
+            "spa-maharadj",
+            "gaia",
+            "good-market"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "pr",
@@ -255,7 +359,14 @@
           ],
           "result": "Бренд присутствует там, где ему доверяют.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["udar", "morris-group", "art-mango-production", "ukrainian-fashion-week"]
+          "cases": [
+            "udar",
+            "morris-group",
+            "art-mango-production",
+            "ukrainian-fashion-week"
+          ],
+          "metric": "",
+          "kind": ""
         },
         {
           "id": "personal-brand",
@@ -270,9 +381,17 @@
           ],
           "result": "Имя, которое продаёт. Опыт: шесть лет работы с личным брендом Александра Усика.",
           "format": "[PLACEHOLDER: формат и сроки]",
-          "cases": ["usyk", "ukrainian-radio", "oleg-baryshevsky", "miss-sverona"]
+          "cases": [
+            "usyk",
+            "ukrainian-radio",
+            "oleg-baryshevsky",
+            "miss-sverona"
+          ],
+          "metric": "",
+          "kind": ""
         }
-      ]
+      ],
+      "dataPoints": []
     },
     {
       "id": "traffic",
@@ -289,7 +408,12 @@
       "phrase": "Запускаем и ведём рекламу там, где есть ваша аудитория. Считаем CPL, CAC и ROMI, а не клики.",
       "result": "CPL · CAC · ROMI — по каждому каналу",
       "note": "",
-      "micro": ["CPL", "CAC", "ROMI", "CTR"],
+      "micro": [
+        "CPL",
+        "CAC",
+        "ROMI",
+        "CTR"
+      ],
       "services": [
         {
           "id": "targeting",
@@ -305,7 +429,13 @@
           "result": "Стабильный поток заявок с управляемой стоимостью.",
           "format": "[PLACEHOLDER: формат и сроки]",
           "metric": "CPL",
-          "cases": ["brsm-nafta", "good-market", "intertop", "ecommerce"]
+          "cases": [
+            "brsm-nafta",
+            "good-market",
+            "intertop",
+            "ecommerce"
+          ],
+          "kind": ""
         },
         {
           "id": "google-ads",
@@ -321,7 +451,13 @@
           "result": "Горячий спрос из поиска с понятной окупаемостью.",
           "format": "[PLACEHOLDER: формат и сроки]",
           "metric": "CAC",
-          "cases": ["hydrosta-kazakhstan", "building-time", "tpk", "toscana-wine"]
+          "cases": [
+            "hydrosta-kazakhstan",
+            "building-time",
+            "tpk",
+            "toscana-wine"
+          ],
+          "kind": ""
         },
         {
           "id": "tiktok-ads",
@@ -337,7 +473,12 @@
           "result": "Новый канал клиентов с низкой стоимостью контакта.",
           "format": "[PLACEHOLDER: формат и сроки]",
           "metric": "CPL",
-          "cases": ["ecommerce", "education", "meshtiish"]
+          "cases": [
+            "ecommerce",
+            "education",
+            "meshtiish"
+          ],
+          "kind": ""
         },
         {
           "id": "seo",
@@ -354,9 +495,16 @@
           "result": "Органический трафик, который растёт без оплаты за клик.",
           "format": "[PLACEHOLDER: формат и сроки]",
           "metric": "ROMI",
-          "cases": ["hydrosta-kazakhstan", "hsta-group", "hydrosta-service", "tpk"]
+          "cases": [
+            "hydrosta-kazakhstan",
+            "hsta-group",
+            "hydrosta-service",
+            "tpk"
+          ],
+          "kind": ""
         }
-      ]
+      ],
+      "dataPoints": []
     },
     {
       "id": "tenders-legal",
@@ -373,7 +521,12 @@
       "phrase": "Находим тендеры, готовим заявки и ведём сделку юридически: от документации до подписанного договора.",
       "result": "Тендеры · заявки · договоры · корпоративное сопровождение",
       "note": "",
-      "micro": ["TENDER", "BID", "CONTRACT", "CORP"],
+      "micro": [
+        "TENDER",
+        "BID",
+        "CONTRACT",
+        "CORP"
+      ],
       "services": [
         {
           "id": "tender-monitoring",
@@ -388,7 +541,12 @@
           "result": "Список тендеров, в которых стоит участвовать.",
           "format": "[PLACEHOLDER: формат и сроки]",
           "kind": "tender",
-          "cases": ["medical-protective-equipment", "hsta-group", "building-time"]
+          "cases": [
+            "medical-protective-equipment",
+            "hsta-group",
+            "building-time"
+          ],
+          "metric": ""
         },
         {
           "id": "tender-application",
@@ -404,7 +562,11 @@
           "result": "Корректная заявка, поданная в срок.",
           "format": "[PLACEHOLDER: формат и сроки]",
           "kind": "tender",
-          "cases": ["medical-protective-equipment", "hydrosta-kazakhstan"]
+          "cases": [
+            "medical-protective-equipment",
+            "hydrosta-kazakhstan"
+          ],
+          "metric": ""
         },
         {
           "id": "contracts",
@@ -419,7 +581,12 @@
           "result": "Сделки, в которых риски учтены заранее.",
           "format": "[PLACEHOLDER: формат и сроки]",
           "kind": "legal",
-          "cases": ["morris-group", "sii-concept", "hsta-group"]
+          "cases": [
+            "morris-group",
+            "sii-concept",
+            "hsta-group"
+          ],
+          "metric": ""
         },
         {
           "id": "corporate",
@@ -434,9 +601,15 @@
           "result": "Порядок в документах и предсказуемость в спорных ситуациях.",
           "format": "[PLACEHOLDER: формат и сроки]",
           "kind": "legal",
-          "cases": ["morris-group", "barbershops-kyiv", "maharadj"]
+          "cases": [
+            "morris-group",
+            "barbershops-kyiv",
+            "maharadj"
+          ],
+          "metric": ""
         }
-      ]
+      ],
+      "dataPoints": []
     }
   ]
 }

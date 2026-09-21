@@ -153,3 +153,39 @@ body.orbit-hover .cursor__ring {
   height: 48px;
   margin: -24px 0 0 -24px;
 }
+
+/* Лейблы к 3D-точкам (точки данных S2, метрики S5) */
+.anchor-labels {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.anchor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: -0.6em 0 0 10px;
+  color: var(--fg);
+  opacity: 0;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+.anchor__tick {
+  width: 14px;
+  height: 1px;
+  background: var(--hair-strong);
+}
+.anchor.is-hot {
+  color: var(--accent);
+}
+.anchor--metric {
+  margin: -0.6em 0 0 14px;
+  padding: 4px 8px;
+  border: 1px solid var(--hair-strong);
+  background: rgba(10, 36, 245, 0.35);
+  backdrop-filter: blur(4px);
+}

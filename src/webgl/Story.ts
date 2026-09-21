@@ -10,7 +10,15 @@ import { POST_DARK, lerpPost, type PostParams } from './Post';
 import type { BgMode, MASK } from './backgrounds/Background';
 import { damp, clamp01 } from './math';
 import { CoreScene } from './scenes/Core';
+import { AuditScene } from './scenes/Audit';
+import { SystemsScene } from './scenes/Systems';
+import { BrandScene } from './scenes/Brand';
+import { TrafficScene } from './scenes/Traffic';
+import { LegalScene } from './scenes/Legal';
+import { GrowthScene } from './scenes/Growth';
+import { ContactScene } from './scenes/Contact';
 import type { SceneModule } from './scenes/types';
+import './objects/fields';
 
 export interface Rig {
   cam: THREE.Vector3;
@@ -24,6 +32,10 @@ export interface Rig {
   coreScale: number;
   coreStretch: THREE.Vector3;
   coreVisible: boolean;
+  /** свечение ядра 0..1 (S5 «раскалено добела», импульс отправки формы) */
+  coreEmissive: number;
+  /** 1 — ядро стоит вертикально без покачивания (монолит) */
+  coreUpright: number;
   envMix: number;
   envRot: number;
   bg: { a: BgMode; b: BgMode; mix: number; mask: keyof typeof MASK };
@@ -51,6 +63,12 @@ export class Story {
   private lastPointer = new THREE.Vector2(-1, -1);
   private hoverDist = Infinity;
   readonly postNow: PostParams = { ...POST_DARK };
+  private particleDarkA = new THREE.Color(0xb8c2d4);
+  private particleDarkB = new THREE.Color(0x5d86ff);
+  private particleDarkSpark = new THREE.Color(0xffffff);
+  private particleLightA = new THREE.Color(0x33373d);
+  private particleLightB = new THREE.Color(0x0a24f5);
+  private particleLightSpark = new THREE.Color(0x0e0f12);
 
   constructor(engine: Engine) {
     this.engine = engine;
@@ -64,6 +82,8 @@ export class Story {
       coreScale: 1,
       coreStretch: new THREE.Vector3(1, 1, 1),
       coreVisible: true,
+      coreEmissive: 0,
+      coreUpright: 0,
       envMix: 0,
       envRot: 0,
       bg: { a: 'black', b: 'black', mix: 0, mask: 'uniform' },
@@ -74,7 +94,7 @@ export class Story {
       parallax: 1,
       pointerBulge: 1,
     };
-    this.scenes = [new CoreScene()];
+    this.scenes = [new CoreScene(), new AuditScene(), new SystemsScene(), new BrandScene(), new TrafficScene(), new LegalScene(), new GrowthScene(), new ContactScene()];
     for (const s of this.scenes) s.init(engine, this.rig);
     this.onResize(window.innerWidth, window.innerHeight);
   }
@@ -103,7 +123,10 @@ export class Story {
     this.active = this.pickActive();
     const local = clamp01(state.screens[this.active]);
     state.screen = this.active;
+    rig.coreEmissive = 0;
+    rig.coreUpright = 0;
     this.scenes[this.active].update(rig, local, dt, time, e);
+    this.applyObjectDefaults(dt, time);
 
     // --- камера + параллакс от курсора (инерционный)
     const px = state.pointer.active ? state.pointer.nx : 0;
@@ -138,7 +161,8 @@ export class Story {
     core.uniforms.uStretch.value.copy(rig.coreStretch);
     core.uniforms.uEnvMix.value = rig.envMix;
     core.mesh.rotation.y = time * 0.05;
-    core.mesh.rotation.x = Math.sin(time * 0.11) * 0.08;
+    core.mesh.rotation.x = Math.sin(time * 0.11) * 0.08 * (1 - rig.coreUpright);
+    core.material.emissiveIntensity = rig.coreEmissive * 2.6;
     // прогиб к курсору: направление в объектных координатах
     if (rig.pointerBulge > 0 && state.pointer.active && !state.reduced) {
       this.tmp.set(this.smoothPointer.x * 3.5, this.smoothPointer.y * 2.2, 2.5).sub(this.tmp2.copy(e.atom.position));
@@ -161,6 +185,9 @@ export class Story {
     e.background.uniforms.uMouse.value.set(this.smoothPointer.x, this.smoothPointer.y);
     e.background.uniforms.uScroll.value = state.progress;
     e.background.uniforms.uBeam.value = rig.beam;
+    // луч — под атомом: экранная x-координата атома в координатах фона
+    this.tmp.copy(e.atom.position).project(e.camera);
+    e.background.uniforms.uBeamPos.value.set(this.tmp.x * (e.camera.aspect), -1.0);
 
     // --- орбиты
     const ob = rig.orbits;
@@ -179,12 +206,37 @@ export class Story {
     pu.uOpacity.value = rig.particles.opacity;
     pu.uAdditive.value = rig.particles.additive;
     pu.uSize.value = rig.particles.size;
+    // на светлых темах частицы тёмные (обычная альфа), на тёмных — светлые (additive)
+    const light = 1 - rig.particles.additive;
+    pu.uColorA.value.copy(this.particleDarkA).lerp(this.particleLightA, light);
+    pu.uColorB.value.copy(this.particleDarkB).lerp(this.particleLightB, light);
+    pu.uColorSpark.value.copy(this.particleDarkSpark).lerp(this.particleLightSpark, light);
 
     // --- пост-эффекты
     lerpPost(this.postNow, rig.post, dt === 0 ? 1 : 1 - Math.exp(-5 * dt), this.postNow);
     e.post?.apply(this.postNow);
 
     this.updateOrbitHover();
+  }
+
+  /** Объекты, не тронутые активной сценой в этом кадре, получают состояние «выключено» */
+  private applyObjectDefaults(dt: number, time: number) {
+    const e = this.engine;
+    if (!e.scan.touched) {
+      e.scan.updateClipping(e.core, e.atom, false);
+      e.scan.update({ time, scan: 1, on: 0, layers: 0, hist: 0, split: 0, traj: 0, pointsSpread: 4 });
+      for (let i = 0; i < 6; i++) {
+        const a = state.anchors[`dp-${i}`];
+        if (a) a.visible = 0;
+      }
+    }
+    if (!e.nodes.touched) e.nodes.update({ time, dt, assemble: 1, collapse: 1, hovered: -1, additive: 1, on: 0 });
+    if (!e.streams.touched) {
+      e.streams.update({ time, dt, draw: 1, on: 0, hovered: -1, freeze: 1 });
+      for (const k of Object.keys(state.anchors)) if (k.startsWith('metric-')) state.anchors[k].visible = 0;
+    }
+    if (!e.plates.touched) e.plates.update({ time, dt, assemble: 0, contour: 0, seal: 0, open: 0, fan: 0, close: 0, on: 0 });
+    e.scan.touched = e.nodes.touched = e.streams.touched = e.plates.touched = false;
   }
 
   /** Hover/подписи орбит: проекция орбит в экран, расстояние до курсора (только на первом экране) */

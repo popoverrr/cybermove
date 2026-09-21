@@ -57,6 +57,8 @@ export interface SceneState {
   introDone: boolean;
   /** экранные позиции подписей орбит (пишет WebGL, читает DOM) */
   orbitLabels: Array<{ x: number; y: number; visible: number }>;
+  /** произвольные HTML-лейблы, привязанные к 3D-точкам: id → экранная позиция */
+  anchors: Record<string, { x: number; y: number; visible: number; hot: number }>;
   events: Emitter<SceneEvents>;
 }
 
@@ -74,6 +76,7 @@ export const state: SceneState = {
   reduced: false,
   introDone: false,
   orbitLabels: Array.from({ length: 5 }, () => ({ x: 0, y: 0, visible: 0 })),
+  anchors: {},
   events: new Emitter<SceneEvents>(),
 };
 

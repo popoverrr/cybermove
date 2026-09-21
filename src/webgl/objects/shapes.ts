@@ -70,7 +70,7 @@ export function sdf(shape: number, p: V3): number {
       return sdSphere(p, 1.0);
     case 1: {
       // Звезда: 4 сужающихся шипа в плоскости XY + ядро; лёгкая толщина по z у центра
-      const L = 1.75;
+      const L = 1.6;
       const arms = Math.min(
         Math.min(sdSpike(p, [0, 0, 0], [L, 0, 0], 0.34, 0.02), sdSpike(p, [0, 0, 0], [-L, 0, 0], 0.34, 0.02)),
         Math.min(sdSpike(p, [0, 0, 0], [0, L, 0], 0.34, 0.02), sdSpike(p, [0, 0, 0], [0, -L, 0], 0.34, 0.02)),
@@ -94,15 +94,15 @@ export function sdf(shape: number, p: V3): number {
     case 4: {
       // Концентрические волны: диск, толщина которого колеблется по радиусу
       const r = len2(p[0], p[1]);
-      const wave = 0.16 + 0.11 * Math.cos(r * 9.0 - 0.6) * Math.exp(-r * 0.35);
-      const disk = Math.max(r - 1.45, Math.abs(p[2]) - wave);
+      const wave = 0.15 + 0.1 * Math.cos(r * 6.5 - 0.6) * Math.exp(-r * 0.3);
+      const disk = Math.max(r - 1.25, Math.abs(p[2]) - wave);
       const round = disk - 0.06;
       return smin(round, sdSphere(p, 0.28), 0.2);
     }
     case 5: {
       // Монолит: высокий скруглённый брус, чуть шире у основания
       const w = 0.36 + 0.05 * clamp(-p[1] * 0.4, -0.2, 0.3);
-      return sdRoundBox(p, w, 1.55, 0.26, 0.08);
+      return sdRoundBox(p, w, 1.35, 0.24, 0.08);
     }
     case 6: {
       // Капля: сплющенный эллипсоид с лёгкой асимметрией

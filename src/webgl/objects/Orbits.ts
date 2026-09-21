@@ -269,3 +269,15 @@ export const CORE_ORBITS: OrbitParams[] = [
   { a: 2.55, b: 2.4, tilt: [-0.75, 0.35, 1.25], phase: 0.2, speed: 0.095 },
   { a: 3.3, b: 2.15, tilt: [0.25, 1.35, -0.55], phase: 0.88, speed: 0.06 },
 ];
+
+/** Дополнительные орбиты для экрана «Рост» (кольца роста): всего с CORE_ORBITS — 13 */
+export const GROWTH_ORBITS: OrbitParams[] = [
+  { a: 3.6, b: 2.5, tilt: [0.9, 0.5, -0.8], phase: 0.12, speed: 0.05 },
+  { a: 3.9, b: 3.1, tilt: [-0.4, 1.1, 0.3], phase: 0.6, speed: 0.045 },
+  { a: 4.2, b: 2.7, tilt: [1.3, -0.6, 1.0], phase: 0.33, speed: 0.04 },
+  { a: 4.5, b: 3.6, tilt: [0.2, 0.9, -1.2], phase: 0.8, speed: 0.038 },
+  { a: 4.8, b: 3.0, tilt: [-1.1, 0.2, 0.6], phase: 0.47, speed: 0.035 },
+  { a: 5.1, b: 4.1, tilt: [0.7, -1.3, 0.1], phase: 0.05, speed: 0.032 },
+  { a: 5.4, b: 3.4, tilt: [1.6, 0.4, -0.4], phase: 0.66, speed: 0.03 },
+  { a: 5.8, b: 4.6, tilt: [-0.6, -0.8, 1.4], phase: 0.27, speed: 0.028 },
+];

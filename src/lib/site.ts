@@ -108,7 +108,6 @@ function initHeader() {
   const onScroll = () => {
     const y = window.scrollY;
     header.classList.toggle('is-scrolled', y > 24);
-    header.classList.toggle('is-hidden', y > 240 && y > last + 4 && !document.body.classList.contains('menu-open'));
     last = y;
   };
   window.addEventListener('scroll', onScroll, { passive: true });

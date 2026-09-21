@@ -1,0 +1,59 @@
+---
+/** Главная: 8 экранов со сквозной 3D-сценой. Фаза 0 — каркас; сцены в Фазах 1–3. */
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import { getContent, langStaticPaths, localePath } from '../../lib/i18n';
+import { TICKER } from '../../../site.config';
+
+export function getStaticPaths() {
+  return langStaticPaths();
+}
+
+const { lang } = Astro.props;
+const c = getContent(lang);
+const s1 = c.home.s1;
+---
+
+<Base lang={lang} path="/" title={c.ui.meta.home.title} description={c.ui.meta.home.description} theme="black" bodyClass="is-home">
+  <section class="s1" id="core">
+    <div class="s1__inner container">
+      <div class="s1__micro t-micro" aria-hidden="true">{s1.micro.join(' / ')}</div>
+      <h1 class="t-display s1__h1">{s1.h1}</h1>
+      <p class="t-lead s1__lead">{s1.lead}</p>
+      <div class="s1__ctas">
+        <Button href={localePath(lang, '/contact/')} variant="fill" size="lg">{s1.ctaPrimary}</Button>
+        <Button href={localePath(lang, '/services/')} variant="ghost" size="lg" arrow>{s1.ctaSecondary}</Button>
+      </div>
+    </div>
+    <div class="s1__ticker hair">
+      <p class="t-micro">{s1.tickerTitle} · {TICKER.join(' · ')}</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .s1 {
+    min-height: 100vh;
+    display: grid;
+    align-content: end;
+    padding-top: var(--header-h);
+  }
+  .s1__inner {
+    display: grid;
+    gap: var(--space-6);
+    padding-bottom: var(--space-12);
+    max-width: 1100px;
+    margin-inline: 0;
+  }
+  .s1__lead {
+    max-width: 52ch;
+  }
+  .s1__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+  .s1__ticker {
+    padding: var(--space-4) var(--gutter);
+  }
+</style>

@@ -11,11 +11,12 @@ body.is-home {
 }
 /* На главной контент сдвинут вправо от Rail */
 body.is-home .screen .container,
-body.is-home .screen--s8 .container {
+body.is-home .screen--s8 .container,
+body.is-home .habout .container {
   padding-left: calc(var(--gutter) + var(--rail-offset));
 }
 body.is-home .s1__corner--tl,
-body.is-home .s1__cross--a {
+body.is-home .s1__corner--bl {
   left: calc(var(--gutter) + var(--rail-offset));
 }
 

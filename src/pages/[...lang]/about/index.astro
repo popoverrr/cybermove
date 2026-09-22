@@ -2,6 +2,7 @@
 /** /about/ — подход CHAOS → CORE → SYSTEM → GROWTH, почему, что измеряем, форматы, команда [PLACEHOLDER], география. */
 import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
+import ImageSlot from '../../../components/ImageSlot.astro';
 import CtaBlock from '../../../components/CtaBlock.astro';
 import { getContent, langStaticPaths } from '../../../lib/i18n';
 import { breadcrumbLd } from '../../../lib/seo';
@@ -70,9 +71,9 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: a.t
       <p class="t-micro">{a.teamTitle}</p>
       <p class="t-small team__ph">{a.teamPlaceholder}</p>
       <ul class="team__grid">
-        {a.team.map((m) => (
+        {a.team.slice(0, 4).map((m, i) => (
           <li class="member">
-            <div class="member__photo" aria-hidden="true"><span class="t-micro">PHOTO</span></div>
+            <ImageSlot id={`team-${i + 1}`} ratio="1:1" alt="" sizes="(max-width: 899px) 50vw, 25vw" class="member__photo" />
             <p class="member__name">{m.name}</p>
             <p class="t-micro">{m.role}</p>
           </li>
@@ -168,19 +169,21 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: a.t
   }
   .team__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--space-6);
+  }
+  @media (max-width: 899px) {
+    .team__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
   }
   .member {
     display: grid;
     gap: var(--space-2);
   }
-  .member__photo {
-    aspect-ratio: 3 / 4;
-    border: 1px solid var(--hair);
-    display: grid;
-    place-items: center;
-    background: repeating-linear-gradient(135deg, transparent 0 8px, rgba(244, 246, 250, 0.03) 8px 9px);
+  .member :global(.member__photo) {
+    margin-bottom: var(--space-2);
   }
   .member__name {
     font-weight: 540;

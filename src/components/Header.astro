@@ -23,7 +23,7 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
       <ul class="header__list">
         {c.ui.nav.map((item) => (
           <li>
-            <a class="header__link" href={localePath(lang, item.href)} aria-current={current(item.href) ? 'page' : undefined}>
+            <a class="header__link t-micro" href={localePath(lang, item.href)} aria-current={current(item.href) ? 'page' : undefined}>
               {item.label}
             </a>
           </li>
@@ -110,7 +110,7 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-8);
   }
   .header__logo {
     display: inline-flex;
@@ -118,13 +118,11 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
   }
   .header__list {
     display: flex;
-    gap: clamp(1.25rem, 2.4vw, 2.5rem);
+    gap: clamp(1.25rem, 2.2vw, 2.25rem);
   }
+  /* меню моношрифтом в верхнем регистре (ref-12) */
   .header__link {
     position: relative;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    letter-spacing: -0.005em;
     padding: 0.5rem 0;
     color: var(--fg-2);
     transition: color var(--dur-fast);
@@ -168,8 +166,9 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
   .lang__link[aria-current='true'] {
     color: var(--fg);
   }
+  /* гамбургер справа на всех ширинах (ref-12): на десктопе открывает тот же оверлей */
   .burger {
-    display: none;
+    display: block;
     width: 40px;
     height: 40px;
     position: relative;
@@ -177,17 +176,17 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
   }
   .burger span {
     position: absolute;
-    left: 10px;
-    width: 20px;
-    height: 1px;
+    left: 8px;
+    width: 24px;
+    height: 1.25px;
     background: currentColor;
     transition: transform var(--dur) var(--ease-out), top var(--dur) var(--ease-out);
   }
   .burger span:first-child {
-    top: 16px;
+    top: 15px;
   }
   .burger span:last-child {
-    top: 23px;
+    top: 24px;
   }
   :global(body.menu-open) .burger span:first-child {
     top: 20px;
@@ -257,6 +256,13 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
     gap: var(--space-6);
   }
 
+  :global(body.menu-open) {
+    overflow: hidden;
+  }
+  :global(body.menu-open) .header {
+    color: var(--paper);
+    transform: none !important;
+  }
   @media (max-width: 1023px) {
     .header__inner {
       grid-template-columns: auto 1fr;
@@ -267,16 +273,6 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
     .header__right .lang,
     .header__cta {
       display: none;
-    }
-    .burger {
-      display: block;
-    }
-    :global(body.menu-open) {
-      overflow: hidden;
-    }
-    :global(body.menu-open) .header {
-      color: var(--paper);
-      transform: none !important;
     }
   }
 </style>

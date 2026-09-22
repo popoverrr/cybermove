@@ -99,7 +99,8 @@ export class Story {
   onResize(w: number, h: number) {
     const mobile = state.mobile;
     // сцена по центру-справа на десктопе, сверху на мобильном
-    this.layoutX = mobile ? 0 : 1.45 * Math.min(1, (w / h) / 1.6);
+    // атом справа, слегка заходит на текстовую колонку (ref-12)
+    this.layoutX = mobile ? 0 : 1.32 * Math.min(1, (w / h) / 1.6);
     this.layoutY = mobile ? 1.0 : 0;
     // на мобильном атом меньше и дальше: сцена занимает верхнюю треть
     this.layoutScale = mobile ? 0.62 : Math.min(1, Math.max(0.8, (w / h) / 1.5));

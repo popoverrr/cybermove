@@ -2,6 +2,7 @@
 /** /cases/ — все 34 проекта, фильтр по категориям (все карточки в DOM, JS показывает/скрывает). */
 import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
+import ImageSlot from '../../../components/ImageSlot.astro';
 import CtaBlock from '../../../components/CtaBlock.astro';
 import { getContent, langStaticPaths } from '../../../lib/i18n';
 import { breadcrumbLd } from '../../../lib/seo';
@@ -17,7 +18,7 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: k.t
 ---
 
 <Base lang={lang} path="/cases/" title={c.ui.meta.cases.title} description={c.ui.meta.cases.description} theme="ivory" jsonLd={jsonLd} ogImage="/posters/og-cases.jpg">
-  <PageHero theme="ivory" label={`${k.title} · ${k.items.length}`} title={k.h1} lead={k.lead} render="/posters/dir-growth.webp" beam={0.5} size="md" />
+  <PageHero theme="ivory" label={`${k.title} · ${k.items.length}`} title={k.h1} lead={k.lead} size="md" />
 
   <section class="cases">
     <div class="container cases__inner">
@@ -39,6 +40,7 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: k.t
           return (
             <li class="case" id={it.id} data-category={it.category}>
               <article class="case__inner">
+                <ImageSlot id={`cases-${it.id}`} ratio="4:3" alt="" sizes="(max-width: 899px) 100vw, (max-width: 1279px) 50vw, 33vw" class="case__photo" />
                 <p class="t-micro case__meta">
                   <span>{String(it.n).padStart(2, '0')}</span>
                   <span>{cat?.label}</span>
@@ -158,7 +160,10 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: k.t
   }
   .case:hover .case__inner,
   .case.is-target .case__inner {
-    background: rgba(77, 124, 255, 0.06);
+    background: var(--paper);
+  }
+  .case__inner :global(.case__photo) {
+    margin-bottom: var(--space-2);
   }
   .case__meta {
     display: flex;

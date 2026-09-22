@@ -1,5 +1,8 @@
 ---
-/** S1 · ЯДРО — CHAOS → CORE. H1 слева снизу, сцена по центру-справа, микрометки по углам, тикер. */
+/**
+ * S1 · ЯДРО — CHAOS → CORE (раскладка по ref-12, BRIEF-2 §6). H1 слева, атом справа и слегка заходит на
+ * текстовую колонку; четыре группы микрометок по углам; внизу строка «02 — Наши кейсы +» и бегущая строка брендов.
+ */
 import Button from '../Button.astro';
 import { getContent, localePath, type LangCode } from '../../lib/i18n';
 import { TICKER } from '../../../site.config';
@@ -11,33 +14,48 @@ const { lang } = Astro.props;
 const c = getContent(lang);
 const s1 = c.home.s1;
 const tickerItems = [...TICKER, ...TICKER];
+const directions = c.services.directions.map((d) => d.name);
 ---
 
 <section class="screen screen--s1" data-screen="core" data-dur="260" data-dur-mobile="180" id="core" aria-labelledby="h1">
   <div class="screen__pin">
     <div class="s1 container">
-      <p class="s1__corner s1__corner--tl t-micro" data-hero-micro>{s1.label}</p>
-      <p class="s1__corner s1__corner--tr t-micro" data-hero-micro>{s1.micro.join(' / ')}</p>
-      <p class="s1__corner s1__corner--br t-micro" data-hero-micro>{s1.scrollHint} <span aria-hidden="true">↓</span></p>
-      <span class="crosshair s1__cross s1__cross--a" aria-hidden="true"></span>
-      <span class="crosshair s1__cross s1__cross--b" aria-hidden="true"></span>
+      <p class="s1__corner s1__corner--tl t-micro" data-hero-micro>
+        <span class="s1__idx">{s1.index}</span>
+        <span class="s1__chain">{c.ui.formula.join(' → ')}</span>
+      </p>
+      <ul class="s1__corner s1__corner--tr t-micro" data-hero-micro aria-label={c.ui.services}>
+        {directions.map((d) => <li>{d}</li>)}
+      </ul>
+      <ul class="s1__corner s1__corner--bl t-micro" data-hero-micro>
+        {s1.microBL.map((d) => <li>{d}</li>)}
+      </ul>
+      <p class="s1__corner s1__corner--br t-micro" data-hero-micro>
+        <span class="s1__dash" aria-hidden="true"></span>
+        <span set:html={s1.microBR.replace(', ', ',<br />')} />
+      </p>
 
       <div class="s1__text">
         <h1 class="t-display s1__h1 split-mask" id="h1" data-hero-title set:html={s1.h1} />
         <p class="t-lead s1__lead" data-hero-lead>{s1.lead}</p>
         <div class="s1__ctas" data-hero-cta>
-          <Button href={localePath(lang, '/contact/')} variant="fill" size="lg">{s1.ctaPrimary}</Button>
+          <Button href={localePath(lang, '/contact/')} variant="fill" size="lg" arrow>{s1.ctaPrimary}</Button>
           <Button href={localePath(lang, '/services/')} variant="ghost" size="lg" arrow>{s1.ctaSecondary}</Button>
         </div>
       </div>
     </div>
 
-    <div class="s1__ticker" data-hero-ticker aria-label={s1.tickerTitle}>
-      <div class="s1__ticker-inner">
-        <p class="t-micro s1__ticker-title">{s1.tickerTitle}</p>
+    <div class="s1__foot" data-hero-ticker>
+      <a class="s1__cases" href={localePath(lang, '/cases/')}>
+        <span class="t-micro">02</span>
+        <span class="s1__cases-line" aria-hidden="true"></span>
+        <span class="t-micro t-micro--fg">{s1.casesRow}</span>
+        <span class="s1__cases-plus" aria-hidden="true">+</span>
+      </a>
+      <div class="s1__ticker" aria-label={s1.tickerTitle}>
         <div class="ticker" aria-hidden="true">
           <div class="ticker__track">
-            {tickerItems.map((t) => <span class="ticker__item t-micro t-micro--fg">{t}</span>)}
+            {tickerItems.map((t) => <span class="ticker__item t-micro">{t}</span>)}
           </div>
         </div>
         <ul class="visually-hidden">{TICKER.map((t) => <li>{t}</li>)}</ul>
@@ -51,43 +69,74 @@ const tickerItems = [...TICKER, ...TICKER];
     position: relative;
     height: 100%;
     display: grid;
-    align-content: end;
-    padding-top: var(--header-h);
-    padding-bottom: calc(var(--space-12) + 56px);
+    align-content: center;
+    padding-top: calc(var(--header-h) + var(--space-8));
+    padding-bottom: calc(100px + 72px);
   }
   .s1__corner {
     position: absolute;
     margin: 0;
     color: var(--fg-3);
+    display: grid;
+    gap: 0.35em;
   }
   .s1__corner--tl {
     left: var(--gutter);
-    top: calc(var(--header-h) + var(--space-6));
+    top: calc(var(--header-h) + var(--space-8));
+    grid-template-columns: auto auto;
+    align-items: baseline;
+    column-gap: 1.6em;
+  }
+  .s1__idx {
+    position: relative;
+    color: var(--fg);
+    padding-bottom: 0.8em;
+  }
+  .s1__idx::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 2.4em;
+    height: 1px;
+    background: var(--fg);
   }
   .s1__corner--tr {
     right: var(--gutter);
-    top: calc(var(--header-h) + var(--space-6));
+    top: calc(var(--header-h) + var(--space-8));
     text-align: right;
+  }
+  .s1__corner--bl {
+    left: var(--gutter);
+    bottom: calc(100px + var(--space-4));
+    padding-left: 1.6em;
+    border-left: 1px solid var(--hair-strong);
   }
   .s1__corner--br {
     right: var(--gutter);
-    bottom: calc(var(--space-12) + 56px);
+    bottom: calc(100px + var(--space-4));
+    text-align: right;
+    color: var(--fg);
+    letter-spacing: 0.18em;
+    line-height: 1.5;
   }
-  .s1__cross--a {
-    left: calc(var(--gutter) - 5px);
-    top: calc(var(--header-h) + var(--space-6) + 40px);
-  }
-  .s1__cross--b {
-    right: calc(var(--gutter) - 5px);
-    top: 50%;
+  .s1__dash {
+    display: block;
+    width: 2.6em;
+    height: 1px;
+    background: var(--fg);
+    margin: 0 0 0.6em auto;
   }
   .s1__text {
     display: grid;
     gap: var(--space-6);
-    max-width: 58%;
+    max-width: 56%;
+    position: relative;
+    z-index: 1;
   }
   .s1__h1 {
-    font-size: min(var(--fs-display), 10.5vh); /* на низких окнах заголовок не залезает под шапку */
+    font-size: min(var(--fs-display), 9vh); /* на низких окнах заголовок не залезает под шапку */
+    max-width: 14ch;
     visibility: hidden; /* снимает GSAP (SplitText из-под маски); без JS — виден */
   }
   :global(html.no-js) .s1__h1 {
@@ -103,39 +152,66 @@ const tickerItems = [...TICKER, ...TICKER];
     gap: var(--space-4);
     margin-top: var(--space-2);
   }
-  .s1__ticker {
+
+  /* низ S1: строка «02 — Наши кейсы +» и бегущая строка брендов */
+  .s1__foot {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 56px;
+    height: 100px;
+    display: grid;
+    grid-template-rows: 56px 44px;
+    grid-template-columns: minmax(0, 1fr);
     border-top: 1px solid var(--hair);
   }
-  .s1__ticker-inner {
-    height: 100%;
+  .s1__cases {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto auto;
     align-items: center;
     gap: var(--space-8);
     padding-inline: var(--gutter);
     padding-left: calc(var(--gutter) + var(--rail-offset, 0px));
+    border-bottom: 1px solid var(--hair);
+    color: var(--fg);
   }
-  .s1__ticker-title {
-    white-space: nowrap;
+  .s1__cases-line {
+    height: 1px;
+    background: var(--hair-strong);
+    max-width: 640px;
+  }
+  .s1__cases-plus {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform var(--dur) var(--ease-out);
+  }
+  .s1__cases:hover .s1__cases-plus {
+    transform: rotate(90deg);
+  }
+  .s1__ticker {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding-inline: var(--gutter);
+    padding-left: calc(var(--gutter) + var(--rail-offset, 0px));
+    background: rgba(27, 26, 24, 0.03);
   }
   .ticker {
     overflow: hidden;
-    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    width: 100%;
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
   }
   .ticker__track {
     display: flex;
-    gap: var(--space-12);
+    gap: var(--space-16);
     width: max-content;
-    animation: ticker 48s linear infinite;
+    animation: ticker 56s linear infinite;
   }
   .ticker__item {
     white-space: nowrap;
+    color: var(--fg-2);
   }
   @keyframes ticker {
     to {
@@ -150,24 +226,34 @@ const tickerItems = [...TICKER, ...TICKER];
   @media (max-width: 899px) {
     .s1 {
       align-content: end;
-      padding-bottom: calc(var(--space-8) + 48px);
+      padding-bottom: calc(var(--space-6) + 84px);
     }
     .s1__text {
       max-width: 100%;
     }
-    .s1__corner--br,
+    .s1__h1 {
+      max-width: none;
+    }
     .s1__corner--tr,
-    .s1__cross--b {
+    .s1__corner--bl,
+    .s1__corner--br {
       display: none;
     }
-    .s1__ticker {
-      height: 48px;
+    .s1__corner--tl {
+      top: calc(var(--header-h) + var(--space-4));
     }
-    .s1__ticker-title {
+    .s1__foot {
+      height: 84px;
+      grid-template-rows: 44px 40px;
+    }
+    .s1__cases {
+      gap: var(--space-4);
+    }
+  }
+  @media (max-height: 640px) and (min-width: 900px) {
+    .s1__corner--bl,
+    .s1__corner--br {
       display: none;
-    }
-    .s1__ticker-inner {
-      grid-template-columns: 1fr;
     }
   }
 </style>

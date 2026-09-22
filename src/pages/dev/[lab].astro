@@ -20,7 +20,7 @@ const { lab } = Astro.params;
 const titles: Record<string, string> = { type: 'Типографика', logo: 'Логотип', scenes: 'Сцены' };
 ---
 
-<Base lang="ru" path={`/dev/${lab}/`} title={`Lab · ${titles[lab!]}`} description="Лаборатория" noindex bare theme="black">
+<Base lang="ru" path={`/dev/${lab}/`} title={`Lab · ${titles[lab!]}`} description="Лаборатория" noindex bare theme="ivory">
   {lab === 'type' && <TypeLab />}
   {lab === 'logo' && <LogoLab />}
   {lab === 'scenes' && <ScenesLab />}

@@ -37,7 +37,7 @@ const jsonLd = [
 ---
 
 <Base lang={lang} path={path} title={title} description={description} theme={d.theme as never} jsonLd={jsonLd} ogImage={`/posters/og-${d.id}.jpg`}>
-  <PageHero theme={d.theme as never} label={`${d.index} · ${d.stage} · ${d.name}`} title={d.h2} accent={d.h2Accent} lead={d.phrase} micro={d.micro} render={`/posters/dir-${d.id}.webp`} beam={d.id === 'brand-content' ? 0.6 : 0} />
+  <PageHero theme={d.theme as never} label={`${d.index} · ${d.stage} · ${d.name}`} title={d.h2} accent={d.h2Accent} lead={d.phrase} micro={d.micro} photo={`dir-${d.id}`} beam={d.id === 'brand-content' ? 0.6 : 0} />
 
   <nav class="subnav container" aria-label={c.ui.services}>
     <ol class="subnav__list">

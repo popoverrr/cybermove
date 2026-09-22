@@ -20,7 +20,7 @@ const tickerItems = [...TICKER, ...TICKER];
 
 <section class="screen screen--s7" data-screen="growth" data-dur="220" data-dur-mobile="180" id="growth" data-theme="ivory" aria-labelledby="h-growth">
   <div class="screen__pin">
-    <div class="g container">
+    <div class="g container" data-growth>
       <p class="g__corner g__corner--tr t-micro" data-tw>GROWTH · RINGS · {c.home.s7.counters[0].value}+</p>
       <div class="g__head" data-tw>
         <p class="t-micro g__label">{s7.label}</p>
@@ -74,6 +74,7 @@ const tickerItems = [...TICKER, ...TICKER];
   .g {
     position: relative;
     height: 100%;
+    overflow: hidden;
     display: grid;
     grid-template-rows: auto auto 1fr auto;
     align-content: start;
@@ -99,11 +100,12 @@ const tickerItems = [...TICKER, ...TICKER];
   .g__h2 {
     font-size: min(var(--fs-h1), 7.5vh);
   }
+  /* BRIEF-4 §1.2: счётчики уже — сфера с кольцами живёт в правой трети и не ложится на цифры */
   .counters {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-6);
-    max-width: 64%;
+    gap: var(--space-5);
+    max-width: 56%;
     border-top: 1px solid var(--hair);
     padding-top: var(--space-3);
   }
@@ -192,12 +194,28 @@ const tickerItems = [...TICKER, ...TICKER];
       display: none;
     }
   }
+  /*
+   * Короткий экран (в том числе десктоп 1280×720): треки по содержимому, лента сверху своего трека.
+   * Трек 1fr при `overflow: hidden` у ленты схлопывался, и `align-self: end` клал карточки на счётчики.
+   */
+  @media (max-height: 820px) {
+    .g {
+      grid-template-rows: auto auto auto auto;
+    }
+    .ribbon-wrap {
+      align-self: start;
+      min-height: 0;
+    }
+  }
+  /* тикер поверх ленты: своя бумага, чтобы карточки не просвечивали под ним (BRIEF-4 §1.1) */
   .g__ticker {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
+    z-index: 2;
     height: 48px;
+    background: var(--paper);
     border-top: 1px solid var(--hair);
     padding-inline: var(--gutter);
     padding-left: calc(var(--gutter) + var(--rail-offset, 0px));
@@ -234,11 +252,22 @@ const tickerItems = [...TICKER, ...TICKER];
     }
   }
   @media (max-width: 899px) {
+    /*
+     * BRIEF-4 §1.1: четыре ряда по содержимому. Раньше третий трек был 1fr, а `.ribbon-wrap` с overflow: hidden
+     * имеет нулевой минимальный размер — на короткой высоте (iPhone с панелями ≈ 660 px) трек схлопывался,
+     * `align-self: end` поднимал ленту на счётчики. Переполнение решает сдвиг `.g` по прогрессу (home-extra.ts).
+     */
     .g {
-      padding-top: calc(var(--header-h) + 26vh);
+      grid-template-rows: auto auto auto auto;
+      padding-top: calc(var(--header-h) + 10vh);
       row-gap: var(--space-3);
       padding-bottom: calc(var(--space-4) + 40px);
       overflow: hidden;
+      will-change: transform;
+    }
+    .ribbon-wrap {
+      align-self: start;
+      min-height: 0;
     }
     .g__corner {
       display: none;
@@ -249,23 +278,30 @@ const tickerItems = [...TICKER, ...TICKER];
     .g__h2 {
       font-size: clamp(1.6rem, 6.6vw, 2.2rem);
     }
+    /*
+     * На телефоне сцена (шар и кольца) проходит за счётчиками: полоса бумаги во всю ширину не даёт
+     * шару лечь на цифры, как на скриншоте заказчика (docs/review/01), и держит ритм карточек.
+     */
     .counters {
       max-width: 100%;
       grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-3);
-      padding-top: var(--space-3);
+      gap: var(--space-2);
+      background: var(--paper);
+      margin-inline: calc(var(--gutter) * -1);
+      padding: var(--space-3) var(--gutter);
+      border-top: 1px solid var(--hair);
+      border-bottom: 1px solid var(--hair);
     }
     .counter__value {
-      font-size: clamp(1.8rem, 7.5vw, 2.4rem);
+      font-size: clamp(1.6rem, 6.4vw, 2rem);
     }
     .card {
-    contain: paint;
       width: 58vw;
       padding: var(--space-3);
       gap: 0.3rem;
     }
     .card :global(.card__photo) {
-      height: min(16vh, 140px);
+      height: min(14vh, 120px);
     }
     .card__name {
       font-size: 0.95rem;
@@ -281,6 +317,12 @@ const tickerItems = [...TICKER, ...TICKER];
     }
     .g__ticker {
       height: 40px;
+    }
+  }
+  /* на высоких телефонах место под лентой есть — карточка крупнее, пустоты внизу нет */
+  @media (max-width: 899px) and (min-height: 780px) {
+    .card :global(.card__photo) {
+      height: min(22vh, 190px);
     }
   }
 </style>

@@ -35,24 +35,45 @@ export function runCounters(duration: number) {
   }
 }
 
-/* ---------- S7: лента кейсов сдвигается по сглаженному прогрессу; ширина меряется в layoutScreens ---------- */
+/* ---------- S7: лента кейсов и сдвиг блока; размеры меряются только в layoutScreens (BRIEF-3 §7.4) ---------- */
 let ribbonEl: HTMLElement | null = null;
 let ribbonMax = 0;
 let ribbonX = 1e9;
+let growthEl: HTMLElement | null = null;
+/** на сколько содержимое S7 выше пина (телефон с короткой высотой) и максимум сдвига */
+let growthOverflow = 0;
+let growthY = 1e9;
 export function measureRibbon() {
   ribbonEl = document.querySelector<HTMLElement>('[data-ribbon]');
+  growthEl = document.querySelector<HTMLElement>('[data-growth]');
+  if (growthEl) {
+    growthEl.style.transform = '';
+    // BRIEF-4 §1.1: если содержимое выше пина — во второй половине экрана блок уезжает вверх, но не больше 40 vh
+    growthOverflow = Math.min(Math.max(0, growthEl.scrollHeight - growthEl.clientHeight), window.innerHeight * 0.4);
+    growthY = 1e9;
+  }
   if (!ribbonEl) return;
   const wrap = ribbonEl.parentElement as HTMLElement;
   ribbonMax = Math.max(0, ribbonEl.scrollWidth - wrap.clientWidth + 48);
   ribbonX = 1e9;
 }
 export function updateRibbon(local: number, reduced: boolean) {
-  if (!ribbonEl) return;
-  const t = reduced ? 0 : smooth((local - 0.3) / 0.55);
-  const x = -ribbonMax * t;
-  if (Math.abs(x - ribbonX) < 0.5) return;
-  ribbonX = x;
-  ribbonEl.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0)`;
+  if (ribbonEl) {
+    // на входе лента стоит на нуле: первая карточка видна целиком (BRIEF-4 §1.1)
+    const t = reduced ? 0 : smooth((local - 0.45) / 0.45);
+    const x = -ribbonMax * t;
+    if (Math.abs(x - ribbonX) >= 0.5) {
+      ribbonX = x;
+      ribbonEl.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0)`;
+    }
+  }
+  if (growthEl && growthOverflow > 1) {
+    const y = -growthOverflow * (reduced ? 1 : smooth((local - 0.45) / 0.35));
+    if (Math.abs(y - growthY) >= 0.5) {
+      growthY = y;
+      growthEl.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)`;
+    }
+  }
 }
 
 /* ---------- Rail ---------- */

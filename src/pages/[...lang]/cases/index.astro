@@ -104,7 +104,8 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: k.t
   .filter {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    /* BRIEF-4 §1.7: на телефоне чипы переносятся в три строки — между строками 6 px воздуха */
+    gap: 6px 0.5rem;
   }
   .filter__btn {
     display: inline-flex;

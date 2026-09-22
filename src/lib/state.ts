@@ -67,6 +67,12 @@ export interface SceneState {
   status: string;
   /** S4: индекс текущей фигуры (для подписи) */
   figureIndex: number;
+  /**
+   * Экранная геометрия (px от верха вьюпорта), которую DOM считает без layout-чтений в кадре:
+   * header — высота шапки, contactTop/contactH — секция #contact, footerTop — верх футера, vh — высота вьюпорта.
+   * Сцена S8 следует своей секции, линии не заходят в полосы шапки и футера (BRIEF-4 §1.2, §1.3).
+   */
+  layout: { header: number; contactTop: number; contactH: number; footerTop: number; vh: number };
   /** произвольные HTML-лейблы, привязанные к 3D-точкам: id → экранная позиция */
   anchors: Record<string, { x: number; y: number; visible: number; hot: number }>;
   events: Emitter<SceneEvents>;
@@ -92,6 +98,7 @@ export const state: SceneState = {
   status: '',
   figureIndex: 0,
   anchors: {},
+  layout: { header: 72, contactTop: 1e6, contactH: 0, footerTop: 1e6, vh: 800 },
   events: new Emitter<SceneEvents>(),
 };
 

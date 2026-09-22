@@ -34,6 +34,8 @@ await mkdir(opt.out, { recursive: true });
 
 const MIN_TRANSITION = 1.4;
 const MAX_DELTA60 = 0.008;
+/** BRIEF-4 §1.5: отставание сглаженного положения от цели при флике через пять экранов */
+const MAX_LAG = 1.6;
 
 const browser = await chromium.launch({ headless: true, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-webgl'] });
 
@@ -201,6 +203,32 @@ for (const size of opt.sizes) {
     summary.flick2 = { px: 3600, transitions: transitions(fr), flips: analyze(fr, 4.5).screenFlips };
   }
 
+  // ---------- BRIEF-4 §1.5: флик через пять экранов — отставание сглаженного положения от целевого ≤ 1.6 с
+  await page.evaluate((y) => window.scrollTo(0, y), Math.round(scr[0].start + scr[0].dur * 0.45));
+  await waitSettled(page);
+  await settle(600);
+  const fiveTarget = Math.round(scr[5].start + scr[5].dur * 0.45);
+  const lag = await page.evaluate(
+    async ([target, n]) => {
+      const s = window.__cm;
+      const t0 = performance.now();
+      window.scrollTo(0, target);
+      // ждём, пока сглаженный прогресс догонит цель по всем экранам
+      await new Promise((res) => {
+        const tick = () => {
+          let gap = 0;
+          for (let i = 0; i < s.screens.length; i++) gap = Math.max(gap, Math.abs(s.screens[i] - s.targets[i]));
+          if (gap < 0.01 || performance.now() - t0 > 20000) res();
+          else requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+      return { seconds: Number(((performance.now() - t0) / 1000).toFixed(2)), screens: n };
+    },
+    [fiveTarget, 5],
+  );
+  summary.flick5 = lag;
+
   // ---------- (c)/(d): равномерная прокрутка всей страницы сверху вниз
   await page.evaluate(() => window.scrollTo(0, 0));
   await waitSettled(page);
@@ -251,11 +279,13 @@ for (const [size, s] of Object.entries(results)) {
   const transOk = trans.length > 0 && trans.every((t) => t.seconds >= MIN_TRANSITION && t.sequential);
   const flipsOk = s.flick.flips === 0 && (!s.flick2 || s.flick2.flips === 0) && s.uniform.screenFlips === 0;
   const deltaOk = s.uniform.maxDelta60 <= MAX_DELTA60;
-  const pass = transOk && flipsOk && deltaOk;
+  const lagOk = !s.flick5 || s.flick5.seconds <= MAX_LAG;
+  const pass = transOk && flipsOk && deltaOk && lagOk;
   if (!pass) ok = false;
   console.log(
     `${size}: ${pass ? 'PASS' : 'FAIL'} — переходы ${trans.map((t) => `${t.from + 1}→${t.to + 1} ${t.seconds}s${t.sequential ? '' : ' (не последовательно)'}`).join(', ') || 'нет'} (≥ ${MIN_TRANSITION} s); ` +
-      `Δ60 ${s.uniform.maxDelta60} ≤ ${MAX_DELTA60} [raw ${s.uniform.maxDelta}]; flips ${s.flick.flips}/${s.flick2 ? s.flick2.flips : 0}/${s.uniform.screenFlips} = 0; кадр p95 ${s.uniform.frameP95Ms} мс`,
+      `Δ60 ${s.uniform.maxDelta60} ≤ ${MAX_DELTA60} [raw ${s.uniform.maxDelta}]; flips ${s.flick.flips}/${s.flick2 ? s.flick2.flips : 0}/${s.uniform.screenFlips} = 0; ` +
+      `флик через 5 экранов ${s.flick5 ? s.flick5.seconds : '—'} с ≤ ${MAX_LAG}; кадр p95 ${s.uniform.frameP95Ms} мс`,
   );
 }
 process.exit(ok ? 0 : 1);

@@ -72,6 +72,8 @@ export class Engine {
   private onFirstFrame?: () => void;
   /** униформы цвета туши всех линий/точек (см. Story: тушь → paper в night) */
   readonly inkUniforms: THREE.IUniform<THREE.Color>[] = [];
+  /** экранная полоса видимости линий в device px (низ, верх): ниже шапки и выше футера (BRIEF-4 §1.2, §1.3) */
+  readonly fade = new THREE.Vector2(-1e4, 1e4);
   readonly stats = { fps: 0, frameMs: 0, tier: 'high' as Tier, particles: 0, verts: 0, renders: 0, calls: 0 };
 
   constructor(opts: EngineOptions) {
@@ -122,11 +124,20 @@ export class Engine {
 
     this.atom.add(this.core.mesh, this.orbits.group, this.grid.group, this.satellites.group, this.figures.group, this.ribbons.group, this.sheets.group, this.rings.group, this.pulse.group);
     if (this.dust) this.atom.add(this.dust.points);
-    // все «чернильные» униформы цвета: линии, точки, пыль — Story смешивает тушь с paper в теме night
+    // все «чернильные» униформы цвета: линии, точки, пыль — Story смешивает тушь с paper в теме night;
+    // экранная полоса видимости (шапка и футер) общая для всех — один вектор на сцену (BRIEF-4 §1.2, §1.3)
     for (const obj of [this.orbits, this.grid, this.satellites, this.figures, this.ribbons, this.sheets, this.rings, this.pulse] as object[]) {
-      for (const v of Object.values(obj)) if (v instanceof LineSet || v instanceof Dots) this.inkUniforms.push(v.uniforms.uColor);
+      for (const v of Object.values(obj)) {
+        if (v instanceof LineSet || v instanceof Dots) {
+          this.inkUniforms.push(v.uniforms.uColor);
+          v.uniforms.uFade.value = this.fade;
+        }
+      }
     }
-    if (this.dust) this.inkUniforms.push(this.dust.uniforms.uColor);
+    if (this.dust) {
+      this.inkUniforms.push(this.dust.uniforms.uColor);
+      this.dust.uniforms.uFade.value = this.fade;
+    }
     this.scene.add(this.atom);
 
     this.setupPost();

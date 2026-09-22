@@ -262,6 +262,8 @@ export class Story {
     core.material.transparent = rig.sphereOpacity < 0.999;
     core.uniforms.uEnvMix.value = rig.envMix;
     core.uniforms.uLift.value = rig.lift;
+    // BRIEF-4 §2: музыка чуть «дышит» в сфере — вклад не больше 2 % масштаба
+    core.mesh.scale.multiplyScalar(1 + state.bass * 0.02);
     core.mesh.rotation.y = Math.sin(time * 0.07) * 0.12;
     core.mesh.rotation.x = Math.sin(time * 0.11) * 0.06;
     if (rig.pointerBulge > 0 && state.pointer.active && !state.reduced) {
@@ -290,6 +292,13 @@ export class Story {
     this.tmp2.copy(e.atom.position).add(this.tmp.set(e.atom.scale.x * sScale, 0, 0)).project(e.camera);
     e.background.uniforms.uSpherePos.value.set(sx, sy);
     e.background.uniforms.uSphereR.value = core.mesh.visible ? Math.abs(this.tmp2.x * e.camera.aspect - sx) * rig.sphereOpacity : 0;
+
+    // ---------- полоса видимости линий: ниже шапки и выше футера (BRIEF-4 §1.2, §1.3), в device px снизу вверх
+    const dpr = e.renderer.getPixelRatio();
+    const hPx = e.renderer.domElement.height;
+    const vh = state.layout.vh || window.innerHeight;
+    const bottomCut = Math.min(vh, Math.max(0, state.layout.footerTop));
+    e.fade.set(hPx - bottomCut * dpr, hPx - state.layout.header * dpr);
 
     // ---------- тушь: в теме night линии и точки светлые (по envMix)
     if (Math.abs(rig.envMix - this.inkMix) > 0.002 || this.inkMix < 0) {

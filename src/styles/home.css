@@ -183,6 +183,18 @@ body.gl-fallback .gl-poster {
 body.gl-ready .status {
   opacity: 1;
 }
+/* на потоковых секциях («О компании», контакт, футер) технический слой не показываем (BRIEF-4 §1.3) */
+body.past-stage .status {
+  opacity: 0;
+}
+.anchor-labels--contact {
+  clip-path: inset(0 0 100% 0);
+}
+@media (max-width: 899px) {
+  .anchor-labels--contact {
+    display: none;
+  }
+}
 [data-theme-now='night'] .status {
   color: var(--taupe);
 }

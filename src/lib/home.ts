@@ -88,6 +88,9 @@ let themeNow = '';
 let railKey = '';
 let scrollYNow = 0;
 let countersRan = false;
+let pastStage = false;
+let rushFwd = false;
+let rushBack = false;
 
 function layoutScreens(force = false) {
   const w = window.innerWidth;
@@ -107,7 +110,8 @@ function layoutScreens(force = false) {
     s.dur = (durVh / 100) * vh;
     acc += s.dur;
   }
-  if (stageWrap) stageWrap.style.height = `${acc + vh}px`;
+  // BRIEF-4 §1.4: хвост стейджа 0.4 vh (сфера доигрывает состояние S7), дальше сразу «О компании»
+  if (stageWrap) stageWrap.style.height = `${acc + vh * 0.4}px`;
   for (const s of screens) {
     if (!s.inFlow) continue;
     s.start = s.el.offsetTop - vh;
@@ -120,15 +124,35 @@ function layoutScreens(force = false) {
     flowBands.push({ top: el.offsetTop, theme: el.dataset.themeBand || el.dataset.theme || 'ivory' });
   }
   flowBands.sort((a, b) => a.top - b.top);
+  // геометрия для сцены S8 и масок шапки/футера: меряем только здесь, в кадре — арифметика (BRIEF-3 §7.4)
+  // абсолютные координаты в документе: offsetTop у футера считается от пина, поэтому берём rect + scrollY
+  const y0 = window.scrollY;
+  const contact = document.querySelector<HTMLElement>('[data-screen="contact"]');
+  const footer = document.querySelector<HTMLElement>('.footer');
+  const cRect = contact?.getBoundingClientRect();
+  const fRect = footer?.getBoundingClientRect();
+  contactTop = cRect ? cRect.top + y0 : 1e6;
+  contactH = cRect ? cRect.height : 0;
+  footerTop = fRect ? fRect.top + y0 : 1e6;
+  stageEnd = acc + vh * 0.4;
+  state.layout.header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 72;
+  state.layout.vh = vh;
   measureRibbon();
   totalScroll = document.documentElement.scrollHeight - vh;
 }
+let contactTop = 1e6;
+let contactH = 0;
+let footerTop = 1e6;
+let stageEnd = 0;
 let totalScroll = 1;
 
 /** Скролл пишет только цели */
 function measureTargets() {
   const y = window.scrollY;
   scrollYNow = y;
+  state.layout.contactTop = contactTop - y;
+  state.layout.contactH = contactH;
+  state.layout.footerTop = footerTop - y;
   state.targetProgress = totalScroll > 0 ? Math.min(1, Math.max(0, y / totalScroll)) : 0;
   for (let i = 0; i < screens.length; i++) {
     const s = screens[i];
@@ -166,6 +190,21 @@ function smoothStep(dt: number): boolean {
   const s = state.screens;
   const t = state.targets;
   let moving = false;
+  // BRIEF-4 §1.5: при прыжке дальше соседнего экрана промежуточные пролистываются почти мгновенно, а последний
+  // доезжает с обычным лимитом на последних 0.3 прогресса — суммарное отставание от скролла ≤ 1.6 с.
+  // (В брифе предложено ×3, но при пяти экранах это 4+ с — держим измеримое требование, а не множитель.)
+  let far = 0;
+  for (let i = 0; i < screens.length; i++) if (t[i] > 0.001 && i > far) far = i;
+  let near = screens.length - 1;
+  for (let i = screens.length - 1; i >= 0; i--) if (t[i] < 0.999 && i < near) near = i;
+  // прыжок через два экрана и больше: режим догона включается и держится, пока промежуточные не пролистаются
+  // (флик через два экрана остаётся двумя честными переходами — BRIEF-3 §6.5)
+  if (far > active + 2) rushFwd = true;
+  if (near < active - 2) rushBack = true;
+  if (rushFwd && s[far] >= t[far] - 0.3) rushFwd = false;
+  if (rushBack && s[near] <= t[near] + 0.3) rushBack = false;
+  const forward = rushFwd;
+  const backward = rushBack;
   for (let i = 0; i < screens.length; i++) {
     const cur = s[i];
     let target = t[i];
@@ -185,15 +224,35 @@ function smoothStep(dt: number): boolean {
         }
       }
     }
-    if (Math.abs(target - cur) < 0.0004) {
+    // в режиме догона летят все экраны до целевого включительно, пока до цели больше 0.3; последние 0.3 — обычный ход
+    const rush = (forward && i <= far && cur < target - 0.3) || (forward && i < far) || (backward && i >= near && cur > target + 0.3) || (backward && i > near);
+    if (Math.abs(target - cur) < (rush ? 0.02 : 0.0004)) {
       if (cur !== target) s[i] = target;
       continue;
     }
     let step = (target - cur) * (1 - Math.exp(-LAMBDA * dt));
-    const limit = autoScrolling ? Infinity : VMAX * dt;
+    const limit = autoScrolling ? Infinity : VMAX * (rush ? 16 : 1) * dt;
+    if (rush) step = target - cur;
     if (Math.abs(step) > limit) step = Math.sign(step) * limit;
     s[i] = cur + step;
     moving = true;
+  }
+  // за пределами стейджа прогресс экранов не «доигрывает» под потоковыми секциями (BRIEF-4 §1.5)
+  const past = scrollYNow > stageEnd - layoutVh * 0.2;
+  const before = scrollYNow < screens[0].start;
+  if (past !== pastStage) {
+    pastStage = past;
+    document.body.classList.toggle('past-stage', past);
+  }
+  if (past || before) {
+    const v = past ? 1 : 0;
+    for (let i = 0; i < screens.length; i++) {
+      if (screens[i].inFlow) continue;
+      if (s[i] !== v) {
+        s[i] = v;
+        moving = true;
+      }
+    }
   }
   if (Math.abs(state.targetProgress - state.progress) < 0.0004) state.progress = state.targetProgress;
   else state.progress += (state.targetProgress - state.progress) * (1 - Math.exp(-LAMBDA * dt));
@@ -284,7 +343,8 @@ function applyFrame(dt: number, instant: boolean) {
   if (growthIdx >= 0) updateRibbon(state.screens[growthIdx], state.reduced);
   // тема по порогу (§6.4): за серединой выхода — тема следующего экрана; после стейджа — тема секции под шапкой;
   // CSS transition 900 мс делает переход
-  let nextTheme = localA > 0.85 && screens[active + 1] ? screens[active + 1].theme : screens[active].theme;
+  const nextScreen = screens[active + 1];
+  let nextTheme = localA > 0.85 && nextScreen && !nextScreen.inFlow ? nextScreen.theme : screens[active].theme;
   const headY = scrollYNow + 64;
   for (const b of flowBands) if (headY >= b.top) nextTheme = b.theme;
   if (nextTheme !== themeNow) {

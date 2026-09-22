@@ -10,7 +10,7 @@ import type { Rig } from '../Story';
 import type { SceneModule, Phase } from './types';
 import { range, smooth, lerp, damp } from '../math';
 import { state } from '../../lib/state';
-import { applyLayout, contactLayout } from './layout';
+import { applyLayout, contactLayout, fitBelowHeader, fitBand } from './layout';
 import { ORBITS } from '../objects/Orbits';
 
 export class ContactScene implements SceneModule {
@@ -79,23 +79,48 @@ export class ContactScene implements SceneModule {
   update(rig: Rig, local: number, dt: number, time: number, e: Engine) {
     const enter = smooth(range(local, 0, 0.6));
     this.focus = dt === 0 ? (state.formFocus ? 1 : 0) : damp(this.focus, state.formFocus ? 1 : 0, 4, dt);
-    rig.bg.a = this.night ? 'night' : 'sand';
-    rig.bg.b = rig.bg.a;
-    rig.bg.mix = 0;
+    // BRIEF-4 §1.4: одна смена темы — фон темнеет ровно тогда, когда верхняя кромка секции подходит к шапке
+    // (тот же порог, что у темы DOM): от «секция на 70 % высоты» до «секция под шапкой».
+    const vhNow = state.layout.vh || window.innerHeight;
+    const arrive = state.layout.contactH > 0 ? smooth(range(state.layout.contactTop, vhNow * 0.7, state.layout.header)) : smooth(range(local, 0.05, 0.5));
+    rig.bg.a = 'ivory';
+    rig.bg.b = this.night ? 'night' : 'sand';
+    rig.bg.mix = arrive;
     rig.bg.mask = 'uniform';
     rig.beam = 0;
-    rig.envMix = this.night ? 1 : 0;
+    rig.envMix = this.night ? arrive : 0;
     // фокус в поле формы — свет поворачивается к форме (влево)
     rig.envRot = 4.6 - this.focus * 0.9;
     rig.cam.set(0, 0, 8.4);
     rig.look.set(0, 0, 0);
     rig.fov = 30;
-    // сфера выезжает из центра в правую часть по мере входа
-    applyLayout(rig, contactLayout(), enter, { x: 0.5, y: contactLayout().y, r: contactLayout().r });
+    // сфера выезжает из центра в правую часть по мере входа и следует своей секции: на телефоне — верхние 38 %
+    // секции, на десктопе — её середина; вниз не заходит на футер (BRIEF-4 §1.3)
+    const base = contactLayout();
+    applyLayout(rig, base, enter, { x: 0.5, y: base.y, r: base.r });
+    rig.sphereVisible = true;
+    const vh = vhNow;
+    const top = state.layout.contactTop;
+    const h = state.layout.contactH;
+    if (h > 0) {
+      // сцена следует своей секции: на телефоне — полоса между шапкой и текстом (padding-top 34 vh),
+      // на десктопе — середина секции. Низ сцены не заходит на футер; пока секция приходит, верх не лезет
+      // в шапку, а когда секция уходит вверх — сфера уезжает вместе с ней (BRIEF-4 §1.3).
+      const rPx = rig.layout.r * window.innerWidth;
+      const bandTop = state.layout.header + 8 + rPx;
+      const textTop = top + state.layout.header + vh * 0.34;
+      const bandBottom = Math.min(vh, state.layout.footerTop) - 8 - rPx;
+      const want = state.mobile ? top + state.layout.header + vh * 0.17 : top + h * 0.46;
+      let centerPx = Math.min(want, state.mobile ? Math.min(bandBottom, textTop - 8 - rPx) : bandBottom);
+      if (top > 0) centerPx = Math.max(centerPx, bandTop);
+      rig.layout.y = centerPx / vh;
+      rig.sphereVisible = centerPx + rPx > state.layout.header;
+    } else {
+      fitBelowHeader(rig, 1.0);
+    }
     rig.parallax = 0.6;
     rig.pointerBulge = 0.4;
     rig.sphereScale = 1;
-    rig.sphereVisible = true;
     rig.atomPos.set(0, 0, 0);
     rig.lift = 0;
 

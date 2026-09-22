@@ -32,10 +32,16 @@ void main() {
 const FRAG = /* glsl */ `
 precision highp float;
 uniform vec3 uColor;
+uniform vec2 uFade;      // экранная полоса видимости в device px (низ, верх): ниже и выше линии гаснут (BRIEF-4 §1.2, §1.3)
+
 uniform float uOpacity;
 varying float vAlpha;
 void main() {
   float a = vAlpha * uOpacity;
+  if (a < 0.003) discard;
+  // шапка и футер: сцена в их полосы не заходит
+  float fade = smoothstep(uFade.x - 24.0, uFade.x, gl_FragCoord.y) * smoothstep(uFade.y + 24.0, uFade.y, gl_FragCoord.y);
+  a *= fade;
   if (a < 0.003) discard;
   gl_FragColor = vec4(uColor * a, a);
 }
@@ -46,7 +52,7 @@ const CYCLE = ['1s', '2p', '3d'] as const;
 export class Dust {
   readonly points: THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial>;
   readonly count: number;
-  readonly uniforms: { uTime: THREE.IUniform<number>; uMix: THREE.IUniform<number>; uDpr: THREE.IUniform<number>; uDrift: THREE.IUniform<number>; uColor: THREE.IUniform<THREE.Color>; uOpacity: THREE.IUniform<number> };
+  readonly uniforms: { uTime: THREE.IUniform<number>; uMix: THREE.IUniform<number>; uDpr: THREE.IUniform<number>; uDrift: THREE.IUniform<number>; uColor: THREE.IUniform<THREE.Color>; uOpacity: THREE.IUniform<number>; uFade: THREE.IUniform<THREE.Vector2> };
   private fields: Float32Array[];
   private targetA: THREE.BufferAttribute;
   private targetB: THREE.BufferAttribute;
@@ -67,7 +73,7 @@ export class Dust {
     g.setAttribute('aTargetB', this.targetB);
     g.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 4));
     g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 10);
-    this.uniforms = { uTime: { value: 0 }, uMix: { value: 0 }, uDpr: { value: 1 }, uDrift: { value: 0.05 }, uColor: { value: INK.clone() }, uOpacity: { value: 0 } };
+    this.uniforms = { uTime: { value: 0 }, uMix: { value: 0 }, uDpr: { value: 1 }, uDrift: { value: 0.05 }, uColor: { value: INK.clone() }, uOpacity: { value: 0 }, uFade: { value: new THREE.Vector2(-1e4, 1e4) } };
     const m = new THREE.ShaderMaterial({
       vertexShader: VERT,
       fragmentShader: FRAG,

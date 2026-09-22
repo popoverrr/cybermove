@@ -126,24 +126,36 @@ const html = title;
     right: calc(var(--gutter) - 5px);
     bottom: var(--space-8);
   }
+  /* BRIEF-4 §1.6: на телефоне картинка стоит над заголовком (40 vh), а не за ним */
   @media (max-width: 899px) {
     .phero__slot {
       position: relative;
       top: 0;
       width: 100%;
+      height: 40vh;
       mask-image: none;
       -webkit-mask-image: none;
       padding-inline: var(--gutter);
-      margin-top: var(--space-6);
+      margin-top: var(--space-4);
+    }
+    .phero__slot :global(.slot) {
+      aspect-ratio: auto;
+      height: 100%;
     }
     .phero__render {
+      position: relative;
       width: 100%;
-      opacity: 0.55;
-      mask-image: linear-gradient(180deg, transparent, #000 40%);
-      -webkit-mask-image: linear-gradient(180deg, transparent, #000 40%);
+      height: 40vh;
+      margin-top: var(--space-4);
+      opacity: 1;
+      background-size: cover;
+      background-position: 50% 45%;
+      mask-image: none;
+      -webkit-mask-image: none;
     }
     .phero__inner {
-      min-height: 44vh;
+      min-height: 0;
+      padding-top: var(--space-6);
     }
   }
 </style>

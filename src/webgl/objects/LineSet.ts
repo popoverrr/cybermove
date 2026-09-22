@@ -66,6 +66,8 @@ uniform float uTime;
 uniform float uGlobal;
 uniform float uClipY;   // срез по локальному y (скан S2): uClipDir 1 — скрыто выше, -1 — скрыто ниже
 uniform float uClipDir;
+uniform vec2 uFade;      // экранная полоса видимости в device px (низ, верх): ниже и выше линии гаснут (BRIEF-4 §1.2, §1.3)
+
 varying vec3 vLocal;
 varying float vT;
 varying float vSide;
@@ -87,7 +89,9 @@ void main() {
     float dot_ = smoothstep(0.09, 0.0, min(d, 1.0 - d));
     a = mix(a, vDots.z, dot_);
   }
-  a *= cov * uGlobal;
+  // шапка и футер: сцена в их полосы не заходит
+  float fade = smoothstep(uFade.x - 24.0, uFade.x, gl_FragCoord.y) * smoothstep(uFade.y + 24.0, uFade.y, gl_FragCoord.y);
+  a *= cov * uGlobal * fade;
   if (a < 0.003) discard;
   gl_FragColor = vec4(uColor * a, a);
 }
@@ -113,10 +117,16 @@ interface PathState {
   dotOpacity: number;
 }
 
+export interface LineSetOptions {
+  color?: THREE.ColorRepresentation;
+  /** общая для сцены экранная полоса видимости (Engine.fade) */
+  fade?: THREE.IUniform<THREE.Vector2>;
+}
+
 export class LineSet {
   readonly mesh: THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>;
   readonly paths: PathState[] = [];
-  readonly uniforms: { uResolution: THREE.IUniform<THREE.Vector2>; uPathTex: THREE.IUniform<THREE.DataTexture>; uPathTexW: THREE.IUniform<number>; uColor: THREE.IUniform<THREE.Color>; uTime: THREE.IUniform<number>; uGlobal: THREE.IUniform<number>; uClipY: THREE.IUniform<number>; uClipDir: THREE.IUniform<number> };
+  readonly uniforms: { uResolution: THREE.IUniform<THREE.Vector2>; uPathTex: THREE.IUniform<THREE.DataTexture>; uPathTexW: THREE.IUniform<number>; uColor: THREE.IUniform<THREE.Color>; uTime: THREE.IUniform<number>; uGlobal: THREE.IUniform<number>; uClipY: THREE.IUniform<number>; uClipDir: THREE.IUniform<number>; uFade: THREE.IUniform<THREE.Vector2> };
   private posAttr: THREE.BufferAttribute;
   private prevAttr: THREE.BufferAttribute;
   private nextAttr: THREE.BufferAttribute;
@@ -124,7 +134,7 @@ export class LineSet {
   private texData: Float32Array;
   private dirty = true;
 
-  constructor(specs: PathSpec[], resolution: THREE.Vector2, opts: { color?: THREE.ColorRepresentation } = {}) {
+  constructor(specs: PathSpec[], resolution: THREE.Vector2, opts: LineSetOptions = {}) {
     let total = 0;
     for (const s of specs) total += s.points.length / 3 + (s.closed ? 1 : 0);
     const pos = new Float32Array(total * 2 * 3);
@@ -179,6 +189,7 @@ export class LineSet {
       uGlobal: { value: 1 },
       uClipY: { value: 1e9 },
       uClipDir: { value: 1 },
+      uFade: opts.fade ?? { value: new THREE.Vector2(-1e4, 1e4) },
     };
     const m = new THREE.ShaderMaterial({
       vertexShader: VERT,

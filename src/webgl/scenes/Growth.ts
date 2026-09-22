@@ -9,7 +9,7 @@ import type { Rig } from '../Story';
 import type { SceneModule, Phase } from './types';
 import { range, smooth, lerp } from '../math';
 import { state } from '../../lib/state';
-import { applyLayout, growthLayout } from './layout';
+import { applyLayout, growthLayout, fitBelowHeader, GROWTH_OUTER, GROWTH_CORE_MOBILE } from './layout';
 
 export class GrowthScene implements SceneModule {
   readonly id = 'growth';
@@ -72,7 +72,8 @@ export class GrowthScene implements SceneModule {
   update(rig: Rig, local: number, dt: number, time: number, e: Engine) {
     const enter = smooth(range(local, 0, 0.3));
     // фон темнеет к night за последние 25 % экрана (BRIEF-3 §8.1)
-    const night = this.toNight ? smooth(range(local, 0.75, 1.0)) : 0;
+    // BRIEF-4 §1.4: хвост стейджа остаётся ivory; в night переводит сцена S8, когда её секция приходит
+    const night = 0;
     rig.bg.a = 'ivory';
     rig.bg.b = 'night';
     rig.bg.mix = night;
@@ -84,9 +85,11 @@ export class GrowthScene implements SceneModule {
     rig.look.set(0, 0, 0);
     rig.fov = 30;
     applyLayout(rig, growthLayout());
+    rig.sphereScale = state.mobile ? GROWTH_CORE_MOBILE : 1;
+    // на телефоне центр остаётся на 31 % высоты (BRIEF-4 §1.2): при нехватке места уменьшается фигура, не сдвигается центр
+    fitBelowHeader(rig, GROWTH_OUTER / rig.sphereScale, state.mobile ? growthLayout().y : 0.5);
     rig.parallax = 0.8;
     rig.pointerBulge = 0.5;
-    rig.sphereScale = 1;
     rig.sphereVisible = true;
     rig.atomPos.set(0, 0, 0);
     rig.lift = 0;

@@ -139,17 +139,34 @@ export function initDrawer() {
 
 /* ---------- HTML-лейблы, привязанные к 3D-точкам; вызывается из единого кадра (home.ts) ---------- */
 let anchorEls: HTMLElement[] = [];
+let contactLayer: HTMLElement | null = null;
+let contactClip = '';
 let statusEl: HTMLElement | null = null;
 let statusText = '';
 let figureNow = -1;
 export function initAnchors() {
   anchorEls = Array.from(document.querySelectorAll<HTMLElement>('[data-anchor]'));
+  contactLayer = document.querySelector<HTMLElement>('[data-anchor-layer="contact"]');
   statusEl = document.querySelector<HTMLElement>('[data-status]');
 }
 export function updateAnchors() {
+  const vh = state.layout.vh || window.innerHeight;
+  // слой S8: виден, только когда секция #contact занимает больше 40 % вьюпорта; клип — по прямоугольнику секции;
+  // на телефоне анкоров S8 нет вовсе (BRIEF-4 §1.3)
+  if (contactLayer) {
+    const cTop = state.layout.contactTop;
+    const cBottom = cTop + state.layout.contactH;
+    const covered = Math.min(vh, cBottom) - Math.max(0, cTop);
+    const on = !state.mobile && covered > vh * 0.4;
+    const clip = on ? `inset(${Math.max(0, cTop).toFixed(0)}px 0px ${Math.max(0, vh - cBottom).toFixed(0)}px 0px)` : 'inset(0 0 100% 0)';
+    if (clip !== contactClip) {
+      contactClip = clip;
+      contactLayer.style.clipPath = clip;
+    }
+  }
   // подписи не заходят под шапку и нижнюю строку (кейсы/тикер), на мобильном — только в зоне сферы над текстом
-  const top = 88;
-  const bottom = state.mobile ? window.innerHeight * 0.4 : window.innerHeight - 72;
+  const top = state.layout.header + 16;
+  const bottom = state.mobile ? vh * 0.4 : vh - 72;
   for (const el of anchorEls) {
     const a = state.anchors[el.dataset.anchor!];
     if (!a) continue;

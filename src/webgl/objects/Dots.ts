@@ -25,6 +25,7 @@ const FRAG = /* glsl */ `
 precision highp float;
 uniform vec3 uColor;
 uniform float uGlobal;
+uniform vec2 uFade;      // экранная полоса видимости в device px (низ, верх): ниже и выше линии гаснут (BRIEF-4 §1.2, §1.3)
 varying float vOpacity;
 varying float vSize;
 void main() {
@@ -32,7 +33,9 @@ void main() {
   // расстояние до центра в px относительно радиуса точки, переход 1px
   float dpx = length(c) * (vSize + 2.0);
   float cov = clamp(vSize * 0.5 - dpx + 0.5, 0.0, 1.0);
-  float a = cov * vOpacity * uGlobal;
+  // шапка и футер: сцена в их полосы не заходит
+  float fade = smoothstep(uFade.x - 24.0, uFade.x, gl_FragCoord.y) * smoothstep(uFade.y + 24.0, uFade.y, gl_FragCoord.y);
+  float a = cov * vOpacity * uGlobal * fade;
   if (a < 0.003) discard;
   gl_FragColor = vec4(uColor * a, a);
 }
@@ -41,12 +44,12 @@ void main() {
 export class Dots {
   readonly points: THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial>;
   readonly count: number;
-  readonly uniforms: { uDpr: THREE.IUniform<number>; uColor: THREE.IUniform<THREE.Color>; uGlobal: THREE.IUniform<number> };
+  readonly uniforms: { uDpr: THREE.IUniform<number>; uColor: THREE.IUniform<THREE.Color>; uGlobal: THREE.IUniform<number>; uFade: THREE.IUniform<THREE.Vector2> };
   private pos: THREE.BufferAttribute;
   private size: THREE.BufferAttribute;
   private opacity: THREE.BufferAttribute;
 
-  constructor(count: number, opts: { size?: number; opacity?: number; color?: THREE.ColorRepresentation } = {}) {
+  constructor(count: number, opts: { size?: number; opacity?: number; color?: THREE.ColorRepresentation; fade?: THREE.IUniform<THREE.Vector2> } = {}) {
     this.count = count;
     const g = new THREE.BufferGeometry();
     this.pos = new THREE.BufferAttribute(new Float32Array(count * 3), 3).setUsage(THREE.DynamicDrawUsage);
@@ -56,7 +59,7 @@ export class Dots {
     g.setAttribute('aSize', this.size);
     g.setAttribute('aOpacity', this.opacity);
     g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 60);
-    this.uniforms = { uDpr: { value: 1 }, uColor: { value: new THREE.Color(opts.color ?? INK) }, uGlobal: { value: 1 } };
+    this.uniforms = { uDpr: { value: 1 }, uColor: { value: new THREE.Color(opts.color ?? INK) }, uGlobal: { value: 1 }, uFade: opts.fade ?? { value: new THREE.Vector2(-1e4, 1e4) } };
     const m = new THREE.ShaderMaterial({
       vertexShader: VERT,
       fragmentShader: FRAG,

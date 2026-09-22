@@ -48,6 +48,10 @@ const s1 = c.home.s1;
     {c.home.s7.counters.slice(0, 3).map((k, i) => (
       <span class="anchor t-micro" data-anchor={`ring-${i}`}><span class="anchor__tick"></span>{k.value}{k.suffix} {k.label}</span>
     ))}
+  </div>
+
+  <!-- анкоры S8: отдельный слой, клипируется прямоугольником секции #contact (BRIEF-4 §1.3) -->
+  <div class="anchor-labels anchor-labels--contact" data-anchor-layer="contact" aria-hidden="true">
     {c.contact.form.formatOptions.slice(0, 3).map((f, i) => (
       <span class="anchor t-micro" data-anchor={`contact-${i}`}><span class="anchor__tick"></span>{f.label}</span>
     ))}

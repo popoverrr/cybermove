@@ -1,16 +1,24 @@
+import type gsap from 'gsap';
 import type { Engine } from '../Engine';
 import type { Rig } from '../Story';
 
+/** Фаза экрана по сглаженному прогрессу: вход [0, 0.3), удержание [0.3, 0.7), выход [0.7, 1] (BRIEF-3 §6) */
+export type Phase = 'enter' | 'hold' | 'exit';
+
 export interface SceneModule {
   readonly id: string;
-  /**
-   * Как авторились переходы сцены в долях local: enter — конец входа, exit — начало выхода.
-   * Story растягивает вход на первые 20 % прокрутки экрана и выход на последние 30 % (BRIEF-2 §8.2),
-   * середина — линейно; при остановке скролла всё живёт только по времени.
-   */
-  readonly range: { enter: number; exit: number };
   init(engine: Engine, rig: Rig): void;
-  /** local — прогресс экрана 0..1; функция должна быть детерминированной по local (для ?progress) */
+  /** показать/спрятать объекты сцены (visible, а не opacity — BRIEF-3 §7.3) */
+  setActive(on: boolean, engine: Engine): void;
+  /**
+   * Таймлайн фазы: дискретные события идут по времени, скролл только переключает фазы (BRIEF-3 §6.1).
+   * Story запускает его, ускоряет незавершённый до timeScale 1.6 при смене фазы и убивает циклы удержания.
+   */
+  timeline(phase: Phase, engine: Engine, rig: Rig): gsap.core.Timeline | null;
+  /**
+   * Непрерывные величины (камера, положение атома, фон, окружение) по сглаженному local с лимитом скорости
+   * и hover-реакции. Вызывается каждый кадр, пока сцена активна или доигрывает выход.
+   */
   update(rig: Rig, local: number, dt: number, time: number, engine: Engine): void;
   onResize?(w: number, h: number, mobile: boolean): void;
 }

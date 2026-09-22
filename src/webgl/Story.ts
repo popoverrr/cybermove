@@ -1,12 +1,15 @@
 /**
- * Story — единое состояние сюжета (BRIEF §8.7): прогресс экранов (из DOM через state) → параметры
- * камеры, ядра, частиц, орбит, фона и пост-эффектов. Сцены не знают о DOM: каждая — функция
- * от локального прогресса и времени, пишущая в Rig. Story применяет Rig к объектам.
+ * Story — единое состояние сюжета (BRIEF-3 §5–6): «время решает, скролл выбирает».
+ * Сглаженный прогресс экранов (из home.ts) выбирает активную сцену и её фазу (вход / удержание / выход);
+ * смена фазы запускает GSAP-таймлайн сцены (дискретные события по времени), а непрерывные величины
+ * (камера, положение и масштаб атома, фон, окружение) сцена считает от прогресса каждый кадр.
+ * Объекты неактивных сцен скрыты (visible = false).
  */
 import * as THREE from 'three';
+import gsap from 'gsap';
 import type { Engine } from './Engine';
 import { state } from '../lib/state';
-import { POST_PAPER, lerpPost, type PostParams } from './Post';
+import { PARAMS } from './params';
 import type { BgMode, MASK } from './backgrounds/Background';
 import { damp, clamp01 } from './math';
 import { CoreScene } from './scenes/Core';
@@ -17,55 +20,75 @@ import { TrafficScene } from './scenes/Traffic';
 import { LegalScene } from './scenes/Legal';
 import { GrowthScene } from './scenes/Growth';
 import { ContactScene } from './scenes/Contact';
-import type { SceneModule } from './scenes/types';
-import './objects/fields';
-import { ORBIT_LINE } from './objects/Orbits';
+import type { SceneModule, Phase } from './scenes/types';
+import { baseLayout, type Layout } from './scenes/layout';
+import { INK, INK_NIGHT } from './objects/LineSet';
 
 export interface Rig {
   cam: THREE.Vector3;
   look: THREE.Vector3;
   fov: number;
-  /** смещение атома относительно раскладки (десктоп — вправо, мобильный — вверх) */
-  layoutOffset: number; // 0..1 — сила смещения
+  /** раскладка сферы в долях вьюпорта (см. scenes/layout.ts); Story сбрасывает на base перед каждой сценой */
+  layout: Layout;
+  /** базовая раскладка устройства (десктоп / мобильный) */
+  base: Layout;
+  /** смещение атома в радиусах сферы */
   atomPos: THREE.Vector3;
-  /** общий масштаб атома (ядро + орбиты + облако) */
-  atomScale: number;
-  coreScale: number;
-  coreStretch: THREE.Vector3;
-  coreVisible: boolean;
-  /** свечение ядра 0..1 (S5 «раскалено добела», импульс отправки формы) */
-  coreEmissive: number;
-  /** 1 — ядро стоит вертикально без покачивания (монолит) */
-  coreUpright: number;
+  /** масштаб сферы внутри атома (S3 — меньше, чтобы спутникам было место); атом масштабируется так, чтобы сфера заняла layout.r */
+  sphereScale: number;
+  /** анимируемый таймлайнами масштаб (интро 0.94 → 1) и непрозрачность сферы */
+  sphereScaleAnim: number;
+  sphereOpacity: number;
+  sphereVisible: boolean;
+  /** осветление к paper 0..1 (S5) */
+  lift: number;
+  /** смешение окружения warm → night */
   envMix: number;
+  /** поворот окружения по сцене и анимируемая добавка таймлайнов */
   envRot: number;
+  envRotAnim: number;
   bg: { a: BgMode; b: BgMode; mix: number; mask: keyof typeof MASK };
   beam: number;
-  post: PostParams;
-  orbits: { visible: number; spread: number; speedMul: number; width: number; opacity: number; color: THREE.Color; count: number };
-  particles: { opacity: number; size: number };
+  /** непрозрачность пыли 0..1 */
+  dust: number;
   parallax: number;
   pointerBulge: number;
+  /** технический слой: моно-строка состояния в углу канваса */
+  status: string;
+}
+
+export const PHASE_ENTER_END = 0.3;
+export const PHASE_EXIT_START = 0.7;
+
+export function phaseOf(local: number): Phase {
+  return local < PHASE_ENTER_END ? 'enter' : local < PHASE_EXIT_START ? 'hold' : 'exit';
+}
+
+interface Running {
+  scene: number;
+  phase: Phase;
+  tl: gsap.core.Timeline;
 }
 
 export class Story {
   readonly engine: Engine;
   readonly rig: Rig;
   readonly scenes: SceneModule[] = [];
-  private active = 0;
-  private layoutX = 1.5;
-  private layoutY = 0;
-  private layoutScale = 1;
-  private camMul = 1;
+  private active = -1;
+  private phase: Phase | null = null;
+  private running: Running[] = [];
+  /** фаза, отложенная до конца таймлайна входа (удержание/выход не спорят с входом за одни и те же свойства) */
+  private pending = new Map<number, Phase>();
+  /** сцена, доигрывающая выход после смены экрана (её объекты ещё видны) */
+  private leaving = -1;
+  private inkMix = -1;
+  private inkColor = new THREE.Color();
   private smoothPointer = new THREE.Vector2();
   private atomRot = new THREE.Vector2();
   private tmp = new THREE.Vector3();
   private tmp2 = new THREE.Vector3();
-  private lastPointer = new THREE.Vector2(-1, -1);
-  private hoverDist = Infinity;
-  readonly postNow: PostParams = { ...POST_PAPER };
-  /** шлейфы электронов только с мышью (BRIEF-2 §8.6) */
   private trails = !matchMedia('(pointer: coarse)').matches;
+  private still = PARAMS.still;
 
   constructor(engine: Engine) {
     this.engine = engine;
@@ -73,230 +96,231 @@ export class Story {
       cam: new THREE.Vector3(0, 0, 7.6),
       look: new THREE.Vector3(0, 0, 0),
       fov: 30,
-      layoutOffset: 1,
+      layout: { x: 0.63, y: 0.45, r: 0.18 },
+      base: { x: 0.63, y: 0.45, r: 0.18 },
       atomPos: new THREE.Vector3(),
-      atomScale: 0.86,
-      coreScale: 1,
-      coreStretch: new THREE.Vector3(1, 1, 1),
-      coreVisible: true,
-      coreEmissive: 0,
-      coreUpright: 0,
+      sphereScale: 1,
+      sphereScaleAnim: 1,
+      sphereOpacity: 1,
+      sphereVisible: true,
+      lift: 0,
       envMix: 0,
       envRot: 0,
+      envRotAnim: 0,
       bg: { a: 'ivory', b: 'ivory', mix: 0, mask: 'uniform' },
       beam: 0,
-      post: { ...POST_PAPER },
-      orbits: { visible: 1, spread: 1, speedMul: 1, width: 1, opacity: 0.7, color: ORBIT_LINE.clone(), count: 5 },
-      particles: { opacity: 0.35, size: 1.2 },
+      dust: 0,
       parallax: 1,
       pointerBulge: 1,
+      status: '',
     };
     this.scenes = [new CoreScene(), new AuditScene(), new SystemsScene(), new BrandScene(), new TrafficScene(), new LegalScene(), new GrowthScene(), new ContactScene()];
     for (const s of this.scenes) s.init(engine, this.rig);
+    for (const s of this.scenes) s.setActive(false, engine);
     this.onResize(window.innerWidth, window.innerHeight);
   }
 
   onResize(w: number, h: number) {
     const mobile = state.mobile;
-    // BRIEF-3 §3.7: на десктопе центр сферы на 63 % ширины, радиус 18 % ширины (слегка заходит на текст);
-    // на мобильном радиус 30 % ширины, центр в верхней трети. Считаем от камеры S1 (z 7.6, fov 30).
-    const aspect = w / h;
-    const halfH = Math.tan((30 * Math.PI) / 360) * 7.6;
-    const halfW = halfH * aspect;
-    const baseAtom = 0.86; // rig.atomScale в удержании S1
-    if (mobile) {
-      this.layoutX = 0;
-      this.layoutY = halfH * (1 - 2 * 0.3); // центр на 30 % высоты сверху
-      this.layoutScale = (0.3 * 2 * halfW) / baseAtom;
-      this.camMul = 1;
-    } else {
-      this.layoutX = (0.63 * 2 - 1) * halfW;
-      this.layoutY = 0;
-      this.layoutScale = (0.18 * 2 * halfW) / baseAtom;
-      this.camMul = 1;
-    }
+    // BRIEF-3 §3.7: базовая раскладка устройства; сцены отталкиваются от неё (scenes/layout.ts)
+    const b = baseLayout();
+    this.rig.base.x = b.x;
+    this.rig.base.y = b.y;
+    this.rig.base.r = b.r;
     this.scenes.forEach((s) => s.onResize?.(w, h, mobile));
   }
 
-  /** Активный экран выбирает DOM (home.ts, с гистерезисом по сглаженному прогрессу) */
-  private pickActive(): number {
-    return Math.min(Math.max(0, state.screen), this.scenes.length - 1);
+  /** Запуск таймлайна фазы; в still-режиме — сразу в конец (вход/выход) или пауза на времени t (удержание) */
+  private start(scene: number, phase: Phase, instant: boolean) {
+    const s = this.scenes[scene];
+    if (phase !== 'enter' && !instant) {
+      // вход ещё играет (timeScale ≤ 1.6) — удержание/выход стартуют по его завершении (BRIEF-3 §6.1)
+      const enter = this.running.find((r) => r.scene === scene && r.phase === 'enter' && r.tl.isActive());
+      if (enter) {
+        this.pending.set(scene, phase);
+        enter.tl.eventCallback('onComplete', () => {
+          const p = this.pending.get(scene);
+          this.pending.delete(scene);
+          if (p && ((scene === this.active && this.phase === p) || (p === 'exit' && scene === this.leaving))) this.start(scene, p, false);
+        });
+        return;
+      }
+    }
+    const tl = s.timeline(phase, this.engine, this.rig);
+    if (!tl) return;
+    if (instant) {
+      tl.progress(1);
+      tl.kill();
+      return;
+    }
+    if (this.still) {
+      // still-кадр: таймлайн текущей фазы стоит на времени t (удержание — по циклу), скриншоты входа/выхода по ?t
+      const d = tl.duration();
+      const t = phase === 'exit' && PARAMS.timeExit !== null ? PARAMS.timeExit : (PARAMS.time ?? 4);
+      // seek(…, false): pause(t) подавляет onUpdate (suppressEvents), а прогресс рисования орбит идёт через onUpdate
+      tl.pause();
+      tl.seek(phase === 'hold' ? (d > 0 ? t % d : 0) : Math.min(t, d), false);
+    }
+    this.running.push({ scene, phase, tl });
   }
 
-  /**
-   * Прокрутка экрана → local сцены (BRIEF-2 §8.2): вход занимает первые 20 % (power2.inOut → range.enter),
-   * выход — последние 30 % (range.exit → 1), середина линейная. Сглаженный прогресс уже без рывков,
-   * easing на краях делает старт и финиш переходов мягкими.
-   */
-  private sceneLocal(local: number, range: { enter: number; exit: number }): number {
-    const ENTER = 0.2;
-    const EXIT = 0.7;
-    const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
-    if (local <= ENTER) return ease(local / ENTER) * range.enter;
-    if (local < EXIT) return range.enter + ((local - ENTER) / (EXIT - ENTER)) * (range.exit - range.enter);
-    return range.exit + ease((local - EXIT) / (1 - EXIT)) * (1 - range.exit);
+  /** незавершённые таймлайны фазы ускоряются до 1.6; циклы удержания и отменённый выход (скролл назад) убиваются */
+  private finishPhase(scene: number, phase: Phase, kill = false) {
+    if (this.pending.get(scene) === phase) this.pending.delete(scene);
+    for (const r of this.running) {
+      if (r.scene !== scene || r.phase !== phase) continue;
+      if (phase === 'hold' || kill) r.tl.kill();
+      else if (r.tl.isActive()) r.tl.timeScale(1.6);
+    }
+    this.running = this.running.filter((r) => !(r.scene === scene && r.phase === phase && (phase === 'hold' || kill || !r.tl.isActive())));
+  }
+
+  private pruneRunning() {
+    this.running = this.running.filter((r) => r.tl.isActive() || (r.phase === 'hold' && !this.still));
   }
 
   update(dt: number, time: number) {
     const e = this.engine;
     const rig = this.rig;
-    this.active = this.pickActive();
-    const scene = this.scenes[this.active];
-    const local = this.sceneLocal(clamp01(state.screens[this.active]), scene.range);
-    rig.coreEmissive = 0;
-    rig.coreUpright = 0;
-    scene.update(rig, local, dt, time, e);
-    this.applyObjectDefaults(dt, time);
+    const next = Math.min(Math.max(0, state.screen), this.scenes.length - 1);
+    const local = clamp01(state.screens[next]);
+    const phase = phaseOf(local);
 
-    // --- камера + параллакс от курсора (инерционный)
+    if (next !== this.active) {
+      const prev = this.active;
+      if (prev >= 0) {
+        // предыдущая сцена доигрывает выход (в том числе отложенный до конца входа), потом прячется
+        this.finishPhase(prev, 'hold');
+        const exiting = this.running.some((r) => r.scene === prev && r.phase === 'exit' && r.tl.isActive()) || this.pending.get(prev) === 'exit';
+        if (exiting && next === prev + 1) this.leaving = prev;
+        else {
+          this.scenes[prev].setActive(false, e);
+          this.pending.delete(prev);
+          for (const r of this.running) if (r.scene === prev) r.tl.kill();
+        }
+        for (const r of this.running) if (r.scene === prev && r.phase === 'hold') r.tl.kill();
+        this.running = this.running.filter((r) => r.tl.isActive());
+      }
+      this.active = next;
+      this.phase = null;
+      this.scenes[next].setActive(true, e);
+      // естественный вход только с предыдущего экрана вниз (и в still-кадре при старте на экране); иначе — сразу состояние удержания
+      const natural = (prev === next - 1 || (this.still && prev < 0)) && phase === 'enter';
+      this.start(next, 'enter', !natural);
+      if (phase !== 'enter') this.start(next, phase, false);
+      this.phase = phase;
+    } else if (phase !== this.phase) {
+      const prevPhase = this.phase;
+      this.phase = phase;
+      // назад (выход → удержание): выход убивается, удержание восстанавливает состояние; вперёд — вход доигрывает
+      if (prevPhase) this.finishPhase(next, prevPhase, prevPhase === 'exit');
+      if (phase === 'hold' || phase === 'exit') this.start(next, phase, false);
+    }
+    if (this.leaving >= 0 && this.pending.get(this.leaving) !== 'exit' && !this.running.some((r) => r.scene === this.leaving && r.phase === 'exit' && r.tl.isActive())) {
+      this.scenes[this.leaving].setActive(false, e);
+      this.leaving = -1;
+    }
+    this.pruneRunning();
+
+    // ---------- сцены: доигрывающая выход обновляет свои объекты, активная задаёт rig
+    rig.layout.x = rig.base.x;
+    rig.layout.y = rig.base.y;
+    rig.layout.r = rig.base.r;
+    if (this.leaving >= 0 && this.leaving !== next) this.scenes[this.leaving].update(rig, 1, dt, time, e);
+    this.scenes[next].update(rig, local, dt, time, e);
+
+    // ---------- камера + параллакс от курсора (инерционный)
     const px = state.pointer.active ? state.pointer.nx : 0;
     const py = state.pointer.active ? state.pointer.ny : 0;
-    this.smoothPointer.x = damp(this.smoothPointer.x, px, 3.2, dt);
-    this.smoothPointer.y = damp(this.smoothPointer.y, py, 3.2, dt);
+    this.smoothPointer.x = damp(this.smoothPointer.x, px, 2.5, dt);
+    this.smoothPointer.y = damp(this.smoothPointer.y, py, 2.5, dt);
     const par = rig.parallax * (state.reduced ? 0 : 1);
-    e.camera.position.set(
-      rig.cam.x + this.smoothPointer.x * 0.22 * par,
-      rig.cam.y + this.smoothPointer.y * 0.14 * par,
-      rig.cam.z * (1 + (this.camMul - 1) * rig.layoutOffset),
-    );
+    e.camera.position.set(rig.cam.x + this.smoothPointer.x * 0.18 * par, rig.cam.y + this.smoothPointer.y * 0.12 * par, rig.cam.z);
     e.camera.lookAt(rig.look);
     if (Math.abs(e.camera.fov - rig.fov) > 0.01) {
       e.camera.fov = rig.fov;
       e.camera.updateProjectionMatrix();
     }
 
-    // --- атом: раскладка + поворот к курсору
-    const lx = this.layoutX * rig.layoutOffset;
-    const ly = this.layoutY * rig.layoutOffset;
-    e.atom.position.set(rig.atomPos.x + lx, rig.atomPos.y + ly, rig.atomPos.z);
-    e.atom.scale.setScalar(rig.atomScale * (1 + (this.layoutScale - 1) * rig.layoutOffset));
-    this.atomRot.x = damp(this.atomRot.x, -this.smoothPointer.y * 0.12 * par, 2.5, dt);
-    this.atomRot.y = damp(this.atomRot.y, this.smoothPointer.x * 0.16 * par, 2.5, dt);
-    e.atom.rotation.set(this.atomRot.x, this.atomRot.y + time * 0.02, 0);
+    // ---------- атом: доли вьюпорта → мир под текущую камеру (сфера радиуса layout.r·ширины в точке layout.x/y)
+    const halfH = Math.tan((rig.fov * Math.PI) / 360) * rig.cam.z;
+    const halfW = halfH * e.camera.aspect;
+    const R = rig.layout.r * 2 * halfW;
+    e.atom.position.set((rig.layout.x * 2 - 1) * halfW + rig.atomPos.x * R, (1 - rig.layout.y * 2) * halfH + rig.atomPos.y * R, rig.atomPos.z * R);
+    e.atom.scale.setScalar(R / Math.max(rig.sphereScale, 0.05));
+    this.atomRot.x = damp(this.atomRot.x, -this.smoothPointer.y * 0.08 * par, 2.5, dt);
+    this.atomRot.y = damp(this.atomRot.y, this.smoothPointer.x * 0.1 * par, 2.5, dt);
+    e.atom.rotation.set(this.atomRot.x, this.atomRot.y, 0);
+    e.atom.updateMatrixWorld();
 
-    if (state.debugNight) {
-      rig.envMix = 1;
-      rig.bg.a = 'night';
-      rig.bg.b = 'night';
-      rig.bg.mix = 0;
-    }
-
-    // --- ядро (шов UV сзади: вокруг y не вращаем, только лёгкое покачивание)
+    // ---------- сфера (шов UV сзади: вокруг y не вращаем, только покачивание)
     const core = e.core;
-    core.mesh.visible = rig.coreVisible && rig.coreScale > 0.001;
-    core.mesh.scale.setScalar(Math.max(rig.coreScale, 0.0001));
+    const sScale = rig.sphereScale * rig.sphereScaleAnim;
+    core.mesh.visible = rig.sphereVisible && sScale > 0.001 && rig.sphereOpacity > 0.003;
+    core.mesh.scale.setScalar(Math.max(sScale, 0.0001));
+    core.material.opacity = rig.sphereOpacity;
+    core.material.transparent = rig.sphereOpacity < 0.999;
     core.uniforms.uEnvMix.value = rig.envMix;
+    core.uniforms.uLift.value = rig.lift;
     core.mesh.rotation.y = Math.sin(time * 0.07) * 0.12;
-    core.mesh.rotation.x = Math.sin(time * 0.11) * 0.06 * (1 - rig.coreUpright);
-    // светлеет к бумаге, а не раскаляется (S5, импульс формы)
-    core.uniforms.uLift.value = rig.coreEmissive;
-    // прогиб к курсору: направление в объектных координатах
+    core.mesh.rotation.x = Math.sin(time * 0.11) * 0.06;
     if (rig.pointerBulge > 0 && state.pointer.active && !state.reduced) {
-      this.tmp.set(this.smoothPointer.x * 3.5, this.smoothPointer.y * 2.2, 2.5).sub(this.tmp2.copy(e.atom.position));
-      this.tmp.normalize();
-      core.mesh.getWorldQuaternion(new THREE.Quaternion());
+      this.tmp.set(this.smoothPointer.x * 3.5, this.smoothPointer.y * 2.2, 2.5).sub(this.tmp2.copy(e.atom.position)).normalize();
       const q = core.mesh.getWorldQuaternion(new THREE.Quaternion()).invert();
       this.tmp.applyQuaternion(q);
       core.uniforms.uPointerDir.value.lerp(this.tmp, 1 - Math.exp(-4 * dt));
-      core.uniforms.uPointerAmt.value = damp(core.uniforms.uPointerAmt.value, 0.09 * rig.pointerBulge, 3, dt);
+      core.uniforms.uPointerAmt.value = damp(core.uniforms.uPointerAmt.value, 0.04 * rig.pointerBulge, 3, dt);
     } else {
       core.uniforms.uPointerAmt.value = damp(core.uniforms.uPointerAmt.value, 0, 3, dt);
     }
 
-    // --- окружение: блик медленно дрейфует, курсор поворачивает свет на ±6° (BRIEF-3 §8.3)
-    e.scene.environmentRotation.set(this.smoothPointer.y * -0.05, rig.envRot + time * 0.02 + this.smoothPointer.x * 0.105, 0);
-    e.scene.environment = e.env.warm;
+    // ---------- окружение: блик дрейфует, курсор поворачивает свет на ±6° и сдвигает ключевой свет (BRIEF-3 §8.3)
+    e.scene.environmentRotation.set(this.smoothPointer.y * -0.05, rig.envRot + rig.envRotAnim + time * 0.02 + this.smoothPointer.x * 0.105, 0);
+    e.lights.key.position.set(-4.0 + this.smoothPointer.x * 1.4, 6.0 + this.smoothPointer.y * 1.0, 5.0);
 
-    // --- фон
+    // ---------- фон: режимы, тень под сферой
     e.background.set(rig.bg.a, rig.bg.b, rig.bg.mix, rig.bg.mask);
     e.background.uniforms.uMouse.value.set(this.smoothPointer.x, this.smoothPointer.y);
     e.background.uniforms.uScroll.value = state.progress;
     e.background.uniforms.uBeam.value = rig.beam;
-    // луч — под атомом: экранная x-координата атома в координатах фона; тень под сферой (§3.5)
     this.tmp.copy(e.atom.position).project(e.camera);
-    e.background.uniforms.uBeamPos.value.set(this.tmp.x * (e.camera.aspect), -1.0);
+    e.background.uniforms.uBeamPos.value.set(this.tmp.x * e.camera.aspect, -1.0);
     const sx = this.tmp.x * e.camera.aspect;
     const sy = this.tmp.y;
-    // радиус: проекция точки на краю сферы вдоль экранной оси x
-    this.tmp2.copy(e.atom.position).add(this.tmp.set(e.atom.scale.x * rig.coreScale, 0, 0)).project(e.camera);
+    this.tmp2.copy(e.atom.position).add(this.tmp.set(e.atom.scale.x * sScale, 0, 0)).project(e.camera);
     e.background.uniforms.uSpherePos.value.set(sx, sy);
-    e.background.uniforms.uSphereR.value = core.mesh.visible ? Math.abs(this.tmp2.x * e.camera.aspect - sx) : 0;
+    e.background.uniforms.uSphereR.value = core.mesh.visible ? Math.abs(this.tmp2.x * e.camera.aspect - sx) * rig.sphereOpacity : 0;
 
-    // --- орбиты
-    const ob = rig.orbits;
-    // NDC на device-px для спрайтов-электронов: 2·tan(fov/2) / высота / масштаб атома
-    const ndcPerPx = (2 * Math.tan((e.camera.fov * Math.PI) / 360)) / Math.max(1, e.resolution.y) / Math.max(1e-3, e.atom.scale.x);
-    const dpr = e.renderer.getPixelRatio();
-    for (let i = 0; i < e.orbits.length; i++) {
-      const o = e.orbits[i];
-      const inCount = i < ob.count ? 1 : 0;
-      o.visible = damp(o.visible, ob.visible * inCount, 6, dt);
-      if (dt === 0) o.visible = ob.visible * inCount;
-      o.spread = ob.spread;
-      o.highlight = damp(o.highlight, state.orbitHover === i ? 1 : 0, 8, dt);
-      o.update(dt, time, { speedMul: ob.speedMul, baseColor: ob.color, baseOpacity: ob.opacity, width: ob.width, trails: this.trails, dpr, ndcPerPx });
+    // ---------- тушь: в теме night линии и точки светлые (по envMix)
+    if (Math.abs(rig.envMix - this.inkMix) > 0.002 || this.inkMix < 0) {
+      this.inkMix = rig.envMix;
+      this.inkColor.lerpColors(INK, INK_NIGHT, clamp01(rig.envMix));
+      for (const u of e.inkUniforms) u.value.copy(this.inkColor);
     }
 
-    // --- частицы: тёмная пыль, цвет по глубине задан в шейдере
-    const pu = e.particles.uniforms;
-    pu.uOpacity.value = rig.particles.opacity;
-    pu.uSize.value = rig.particles.size;
+    // ---------- пыль
+    if (e.dust) e.dust.update(time, rig.dust * 0.22, e.renderer.getPixelRatio());
 
-    // --- пост-эффекты
-    lerpPost(this.postNow, rig.post, dt === 0 ? 1 : 1 - Math.exp(-5 * dt), this.postNow);
-    e.post?.apply(this.postNow);
-
-    this.updateOrbitHover();
+    // ---------- hover орбит (только S1, только с мышью)
+    this.updateOrbitHover(next);
+    state.status = rig.status;
   }
 
-  /** Объекты, не тронутые активной сценой в этом кадре, получают состояние «выключено» */
-  private applyObjectDefaults(dt: number, time: number) {
+  /** Hover орбит: проекция орбит в экран, расстояние до курсора; на тач не считается (BRIEF-3 §7.2) */
+  private updateOrbitHover(active: number) {
     const e = this.engine;
-    if (!e.scan.touched) {
-      e.scan.updateClipping(e.core, e.atom, false);
-      e.scan.update({ time, scan: 1, on: 0, layers: 0, hist: 0, split: 0, traj: 0, pointsSpread: 4 });
-      for (let i = 0; i < 6; i++) {
-        const a = state.anchors[`dp-${i}`];
-        if (a) a.visible = 0;
-      }
-    }
-    if (!e.nodes.touched) e.nodes.update({ time, dt, assemble: 1, collapse: 1, hovered: -1, on: 0 });
-    if (!e.streams.touched) {
-      e.streams.update({ time, dt, draw: 1, on: 0, hovered: -1, freeze: 1 });
-      for (const k of Object.keys(state.anchors)) if (k.startsWith('metric-')) state.anchors[k].visible = 0;
-    }
-    if (!e.plates.touched) e.plates.update({ time, dt, assemble: 0, contour: 0, seal: 0, open: 0, fan: 0, close: 0, on: 0 });
-    e.scan.touched = e.nodes.touched = e.streams.touched = e.plates.touched = false;
-  }
-
-  /** Hover/подписи орбит: проекция орбит в экран, расстояние до курсора (только на первом экране, только с мышью) */
-  private updateOrbitHover() {
-    const e = this.engine;
-    const labels = state.orbitLabels;
     const p = state.pointer;
-    if (!this.trails) {
-      // тач: без hover орбит (BRIEF-2 §8.6) — подписи прячем, проекции не считаем
-      for (const lab of labels) if (lab) lab.visible = 0;
+    // на тач и на LOW hover орбит не считается (BRIEF-3 §7.2)
+    if (!this.trails || this.engine.tier.name === 'low' || active !== 0 || !p.active || state.screens[0] > 0.6) {
       state.orbitHover = -1;
       return;
     }
-    const onCore = this.active === 0 && state.screens[0] < 0.55;
     let best = -1;
-    let bestD = 28;
-    e.atom.updateMatrixWorld();
-    for (let i = 0; i < e.orbits.length; i++) {
-      const o = e.orbits[i];
-      const lab = labels[i];
-      if (!lab) continue;
-      // подпись у электрона
-      this.tmp.copy(o.electron.position).applyMatrix4(e.atom.matrixWorld);
-      const s = e.project(this.tmp, { x: 0, y: 0, z: 0 });
-      lab.x = s.x;
-      lab.y = s.y;
-      lab.visible = onCore ? o.visible : 0;
-      if (!onCore || !p.active || o.visible < 0.5) continue;
-      for (let k = 0; k < 48; k++) {
-        o.pointAt(k / 48, this.tmp).applyMatrix4(e.atom.matrixWorld);
+    let bestD = 26;
+    for (let i = 0; i < 5; i++) {
+      if (e.orbits.electron[i] < 0.5) continue;
+      for (let k = 0; k < 40; k++) {
+        e.orbits.pointAt(i, k / 40, this.tmp).applyMatrix4(e.atom.matrixWorld);
         const q = e.project(this.tmp, { x: 0, y: 0, z: 0 });
         const d = Math.hypot(q.x - p.x, q.y - p.y);
         if (d < bestD) {
@@ -306,6 +330,5 @@ export class Story {
       }
     }
     state.orbitHover = best;
-    this.hoverDist = bestD;
   }
 }

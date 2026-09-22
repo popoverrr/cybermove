@@ -1,289 +1,147 @@
 /**
- * Орбиты и электроны (BRIEF-2 §4.3). Орбита — эллипс, вычисляемый в вершинном шейдере по параметрам,
- * тонкая тёмная линия постоянной экранной толщины (1px, taupe, непрозрачность 0.7).
- * Электрон — плотная точка цвета ink постоянного экранного размера (4–5px), без свечения и bloom.
- * Шлейф по умолчанию выключен; при hover орбиты — короткий тёмный шлейф (0.25).
+ * Орбиты S1/S8 (BRIEF-3 §4): пять эллипсов с иерархией — две основные (0.72, наклоны 12° и 68°), одна почти
+ * горизонтальная вторичная (0.4), две фоновые (0.18) с большим эксцентриситетом. У каждой электрон (5.5px);
+ * у основных диаметрально — точка-спутник 3px. Периоды 26 / 34 / 41 / 55 / 70 с. Линии рисуются
+ * (окно draw), прячутся за сферой; шлейф 6 % орбиты, 0.25 — только на hover (S1) или всегда (S8).
  */
 import * as THREE from 'three';
-
-const LINE_VERT = /* glsl */ `
-attribute float aT;
-attribute float aSide;
-uniform mat3 uOrient;
-uniform vec2 uAB;
-uniform float uWidth;
-uniform vec2 uResolution;
-uniform float uPhase;
-uniform float uTrail;      // 0 — замкнутая орбита, >0 — длина шлейфа в долях оборота
-uniform float uSpin;       // текущий угол электрона (обороты)
-uniform float uSpread;     // множитель радиуса (кольца роста)
-uniform float uWobble;     // амплитуда дрожания
-uniform float uTime;
-varying float vT;
-varying float vDepth;
-varying float vSide;
-varying float vPx;
-
-vec3 ell(float t) {
-  float ang = (t + uPhase) * 6.2831853;
-  vec3 p = vec3(uAB.x * cos(ang), uAB.y * sin(ang), 0.0) * uSpread;
-  p.z += uWobble * sin(ang * 3.0 + uTime * 0.8);
-  return uOrient * p;
-}
-
-void main() {
-  float t = uTrail > 0.0 ? uSpin - aT * uTrail : aT;
-  vT = aT;
-  vec3 p = ell(t);
-  vec3 pn = ell(t + 0.003);
-  vec3 pp = ell(t - 0.003);
-  vec4 cur = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-  vec4 nxt = projectionMatrix * modelViewMatrix * vec4(pn, 1.0);
-  vec4 prv = projectionMatrix * modelViewMatrix * vec4(pp, 1.0);
-  vec2 aspect = vec2(uResolution.x / uResolution.y, 1.0);
-  vec2 sn = nxt.xy / nxt.w * aspect;
-  vec2 sp = prv.xy / prv.w * aspect;
-  vec2 dir = normalize(sn - sp);
-  vec2 nrm = vec2(-dir.y, dir.x);
-  float w = uWidth;
-  if (uTrail > 0.0) w *= (1.0 - aT) * (1.0 - aT) * 1.6 + 0.3;
-  vec2 off = nrm * aSide * (w + 2.0) / uResolution.y;
-  off /= aspect;
-  cur.xy += off * cur.w;
-  gl_Position = cur;
-  vDepth = -(modelViewMatrix * vec4(p, 1.0)).z;
-  vSide = aSide;
-  vPx = w;
-}
-`;
-
-const LINE_FRAG = /* glsl */ `
-precision highp float;
-uniform vec3 uColor;
-uniform float uOpacity;
-uniform float uTrail;
-uniform float uDepthNear;
-uniform float uDepthFar;
-varying float vT;
-varying float vDepth;
-varying float vSide;
-varying float vPx;
-void main() {
-  float dpx = abs(vSide) * (vPx * 0.5 + 1.0);
-  float a = uOpacity * clamp(vPx * 0.5 - dpx + 0.5, 0.0, 1.0);
-  if (uTrail > 0.0) {
-    float f = 1.0 - vT;
-    a *= f * f;
-  }
-  // дальняя часть орбиты чуть светлее — глубина без тумана
-  a *= mix(0.6, 1.0, smoothstep(uDepthFar, uDepthNear, vDepth));
-  if (a < 0.003) discard;
-  gl_FragColor = vec4(uColor * a, a);
-  #include <tonemapping_fragment>
-  #include <colorspace_fragment>
-}
-`;
-
-function makeStrip(segments: number, closed: boolean) {
-  const n = segments + (closed ? 1 : 0);
-  const t = new Float32Array(n * 2);
-  const side = new Float32Array(n * 2);
-  const pos = new Float32Array(n * 2 * 3);
-  const idx: number[] = [];
-  for (let i = 0; i < n; i++) {
-    t[i * 2] = closed ? i / segments : i / (n - 1);
-    t[i * 2 + 1] = t[i * 2];
-    side[i * 2] = 1;
-    side[i * 2 + 1] = -1;
-    if (i < n - 1) {
-      const a = i * 2;
-      idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
-    }
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  g.setAttribute('aT', new THREE.BufferAttribute(t, 1));
-  g.setAttribute('aSide', new THREE.BufferAttribute(side, 1));
-  g.setIndex(idx);
-  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 40);
-  return g;
-}
-
-let orbitGeo: THREE.BufferGeometry | null = null;
-let trailGeo: THREE.BufferGeometry | null = null;
+import { LineSet, LEVEL, WIDTH, ellipse, ellipsePoint } from './LineSet';
+import { Dots } from './Dots';
 
 export interface OrbitParams {
   a: number;
   b: number;
-  /** углы наклона (Euler XYZ) */
-  tilt: [number, number, number];
+  /** наклон к плоскости экрана (град.) и поворот в плоскости экрана (град.) */
+  tilt: number;
+  roll: number;
+  /** фаза электрона (обороты) */
   phase: number;
-  /** скорость электрона, оборотов/с */
-  speed: number;
+  /** период оборота, с */
+  period: number;
+  level: number;
+  width: number;
+  satellite: boolean;
 }
 
-export const ORBIT_LINE = new THREE.Color(0xb9afa2); // --taupe
-export const ORBIT_INK = new THREE.Color(0x1b1a18); // --ink
-/** размер электрона в px (экранный, без перспективы) */
-export const ELECTRON_PX = 4.5;
+/** Композиция референса: основная орбита O1 проходит перед сферой, её электрон при t=4 с — справа сверху */
+export const ORBITS: OrbitParams[] = [
+  { a: 1.55, b: 1.22, tilt: 68, roll: -22, phase: 0.095, period: 26, level: LEVEL.main, width: WIDTH.main, satellite: true },
+  { a: 1.7, b: 0.95, tilt: 12, roll: 28, phase: 0.62, period: 34, level: LEVEL.main, width: WIDTH.main, satellite: true },
+  { a: 1.85, b: 0.32, tilt: 4, roll: -6, phase: 0.3, period: 41, level: LEVEL.mid, width: WIDTH.thin, satellite: false },
+  { a: 2.0, b: 0.7, tilt: 42, roll: -58, phase: 0.8, period: 55, level: LEVEL.faint, width: WIDTH.thin, satellite: false },
+  { a: 2.15, b: 0.78, tilt: 56, roll: 66, phase: 0.45, period: 70, level: LEVEL.faint, width: WIDTH.thin, satellite: false },
+];
 
-export class Orbit {
+const TRAIL_POINTS = 18;
+const TRAIL_LEN = 0.06;
+
+export class OrbitSystem {
   readonly group = new THREE.Group();
-  readonly line: THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>;
-  readonly trail: THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>;
-  /** электрон — спрайт постоянного экранного размера */
-  readonly electron: THREE.Sprite;
-  readonly orient = new THREE.Matrix3();
-  readonly params: OrbitParams;
-  spin = 0;
-  /** подсветка 0..1 (hover) */
-  highlight = 0;
-  /** видимость 0..1 */
-  visible = 1;
-  /** множитель радиуса */
-  spread = 1;
-  private lineU: Record<string, THREE.IUniform>;
-  private trailU: Record<string, THREE.IUniform>;
-  private tmpV = new THREE.Vector3();
+  readonly lines: LineSet;
+  readonly dots: Dots;
+  readonly orients: THREE.Matrix3[] = [];
+  readonly spin: number[] = [];
+  /** видимость электронов 0..1 (появляются, когда орбита дорисована) */
+  readonly electron: number[] = [];
+  /** подсветка hover 0..1 */
+  readonly highlight: number[] = [];
+  /** множитель уровня линий (0..1) на орбиту */
+  readonly level: number[] = [];
+  /** общий множитель (растворение на выходе) */
+  global = 1;
+  private tmp = new THREE.Vector3();
+  private trailBuf = new Float32Array(TRAIL_POINTS * 3);
+  private satIndex: number[] = [];
 
-  constructor(params: OrbitParams, resolution: THREE.Vector2, trailSegments: number) {
-    this.params = params;
-    if (!orbitGeo) orbitGeo = makeStrip(180, true);
-    if (!trailGeo) trailGeo = makeStrip(trailSegments, false);
-    const e = new THREE.Euler(params.tilt[0], params.tilt[1], params.tilt[2]);
-    this.orient.setFromMatrix4(new THREE.Matrix4().makeRotationFromEuler(e));
-
-    const baseU = () => ({
-      uOrient: { value: this.orient },
-      uAB: { value: new THREE.Vector2(params.a, params.b) },
-      uWidth: { value: 1.0 },
-      uResolution: { value: resolution },
-      uPhase: { value: params.phase },
-      uTrail: { value: 0 },
-      uSpin: { value: 0 },
-      uSpread: { value: 1 },
-      uWobble: { value: 0 },
-      uTime: { value: 0 },
-      uColor: { value: ORBIT_LINE.clone() },
-      uOpacity: { value: 0.7 },
-      uDepthNear: { value: 4 },
-      uDepthFar: { value: 14 },
+  constructor(resolution: THREE.Vector2) {
+    const specs = ORBITS.map((o) => {
+      const e = new THREE.Euler(THREE.MathUtils.degToRad(o.tilt), 0, THREE.MathUtils.degToRad(o.roll), 'ZXY');
+      const m = new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().makeRotationFromEuler(e));
+      this.orients.push(m);
+      this.spin.push(0);
+      this.electron.push(0);
+      this.highlight.push(0);
+      this.level.push(1);
+      return { points: ellipse(180, o.a, o.b, m), closed: true, opacity: o.level, width: o.width };
     });
-    this.lineU = baseU();
-    this.trailU = baseU();
-    this.trailU.uTrail.value = 0.12;
-    this.trailU.uWidth.value = 1.6;
-    this.trailU.uColor.value = ORBIT_INK.clone();
-    this.trailU.uOpacity.value = 0;
-
-    const mk = (geo: THREE.BufferGeometry, u: Record<string, THREE.IUniform>) => {
-      const m = new THREE.ShaderMaterial({
-        vertexShader: LINE_VERT,
-        fragmentShader: LINE_FRAG,
-        uniforms: u,
-        transparent: true,
-        depthWrite: false,
-        depthTest: true,
-        blending: THREE.NormalBlending,
-        premultipliedAlpha: true,
-        side: THREE.DoubleSide,
-      });
-      const mesh = new THREE.Mesh(geo, m);
-      mesh.frustumCulled = false;
-      return mesh;
-    };
-    this.line = mk(orbitGeo, this.lineU);
-    this.trail = mk(trailGeo, this.trailU);
-    this.trail.visible = false;
-
-    const sm = new THREE.SpriteMaterial({ map: Orbit.dotTexture(), color: ORBIT_INK, transparent: true, depthWrite: false, depthTest: true, sizeAttenuation: false, toneMapped: false });
-    this.electron = new THREE.Sprite(sm);
-    this.electron.renderOrder = 4;
-
-    this.group.add(this.line, this.trail, this.electron);
+    // шлейфы — открытые пути, обновляются каждый кадр
+    for (let i = 0; i < ORBITS.length; i++) specs.push({ points: new Float32Array(TRAIL_POINTS * 3), closed: false, opacity: 0, width: WIDTH.main });
+    this.lines = new LineSet(specs, resolution);
+    this.lines.drawAll(0, 0);
+    let nSat = 0;
+    ORBITS.forEach((o) => {
+      if (o.satellite) nSat++;
+    });
+    this.dots = new Dots(ORBITS.length + nSat);
+    let k = ORBITS.length;
+    ORBITS.forEach((o) => {
+      this.satIndex.push(o.satellite ? k++ : -1);
+    });
+    for (let i = 0; i < ORBITS.length; i++) {
+      this.dots.setSize(i, 5.5);
+      if (this.satIndex[i] >= 0) this.dots.setSize(this.satIndex[i], 3);
+    }
+    this.group.add(this.lines.mesh, this.dots.points);
   }
 
-  private static _dot: THREE.Texture | null = null;
-  /** плотный диск с мягкой кромкой в 1px (без свечения) */
-  static dotTexture() {
-    if (Orbit._dot) return Orbit._dot;
-    const size = 64;
-    const c = document.createElement('canvas');
-    c.width = c.height = size;
-    const ctx = c.getContext('2d')!;
-    const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    g.addColorStop(0, 'rgba(255,255,255,1)');
-    g.addColorStop(0.72, 'rgba(255,255,255,1)');
-    g.addColorStop(0.92, 'rgba(255,255,255,0)');
-    g.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, size, size);
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    Orbit._dot = t;
-    return t;
+  /** прогресс рисования орбиты i (0..1) */
+  draw(i: number, t: number) {
+    this.lines.draw(i, 0, t);
+  }
+  /** стирание с начала (t → 1) */
+  erase(i: number, t: number) {
+    this.lines.draw(i, t, 1);
   }
 
-  /** Точка орбиты в локальных координатах группы для параметра t (обороты) */
-  pointAt(t: number, out: THREE.Vector3) {
-    const ang = (t + this.params.phase) * Math.PI * 2;
-    out.set(this.params.a * Math.cos(ang), this.params.b * Math.sin(ang), 0).multiplyScalar(this.spread);
-    return out.applyMatrix3(this.orient);
+  pointAt(i: number, t: number, out: THREE.Vector3) {
+    const o = ORBITS[i];
+    return ellipsePoint(t, o.a, o.b, this.orients[i], o.phase, out);
   }
 
-  /**
-   * ndcPerPx — сколько NDC приходится на 1 device-px с учётом fov и масштаба родителя (считает Story):
-   * 2·tan(fov/2)/высота_в_px/масштаб_атома. Так электрон всегда ELECTRON_PX·dpr на экране.
-   */
-  update(dt: number, time: number, opts: { speedMul: number; baseColor: THREE.Color; baseOpacity: number; width: number; trails: boolean; dpr: number; ndcPerPx: number }) {
-    this.spin += dt * this.params.speed * opts.speedMul;
-    const h = this.highlight;
-    const v = this.visible;
-    this.lineU.uTime.value = time;
-    this.trailU.uTime.value = time;
-    this.lineU.uSpread.value = this.spread;
-    this.trailU.uSpread.value = this.spread;
-    this.lineU.uWidth.value = opts.width * (1 + h * 0.5);
-    this.lineU.uOpacity.value = opts.baseOpacity * v * (1 + h * 0.4);
-    // hover: линия темнеет к ink
-    this.lineU.uColor.value.copy(opts.baseColor).lerp(ORBIT_INK, h * 0.8);
-    this.trailU.uSpin.value = this.spin;
-    this.trailU.uOpacity.value = 0.25 * h * v;
-    this.pointAt(this.spin, this.tmpV);
-    this.electron.position.copy(this.tmpV);
-    // размер спрайта без перспективы (sizeAttenuation=false): scale·tan(fov/2) = NDC-размер
-    const s = ELECTRON_PX * (1 + h * 0.35) * opts.dpr * opts.ndcPerPx;
-    this.electron.scale.set(s, s, 1);
-    (this.electron.material as THREE.SpriteMaterial).opacity = v;
-    this.electron.visible = v > 0.02;
-    this.line.visible = v > 0.01;
-    this.trail.visible = opts.trails && h > 0.02 && v > 0.02;
+  update(dt: number, time: number, opts: { speedMul: number; trails: boolean; dpr: number }) {
+    this.dots.setDpr(opts.dpr);
+    this.dots.uniforms.uGlobal.value = this.global;
+    this.lines.uniforms.uGlobal.value = this.global;
+    for (let i = 0; i < ORBITS.length; i++) {
+      const o = ORBITS[i];
+      this.spin[i] += (dt * opts.speedMul) / o.period;
+      const h = this.highlight[i];
+      this.lines.opacity(i, o.level * this.level[i] * (1 + h * (1 / o.level - 1) * 0.8));
+      this.lines.width(i, o.width + h * 0.35);
+      const t = this.spin[i];
+      this.pointAt(i, t, this.tmp);
+      this.dots.setV(i, this.tmp);
+      this.dots.setOpacity(i, this.electron[i]);
+      this.dots.setSize(i, 5.5 + h * 1.5);
+      const si = this.satIndex[i];
+      if (si >= 0) {
+        this.pointAt(i, t + 0.5, this.tmp);
+        this.dots.setV(si, this.tmp);
+        this.dots.setOpacity(si, this.electron[i] * 0.85);
+      }
+      // шлейф: 6 % орбиты позади электрона
+      const trailOn = (opts.trails || h > 0.02) && this.electron[i] > 0.02;
+      const ti = ORBITS.length + i;
+      if (trailOn) {
+        for (let k = 0; k < TRAIL_POINTS; k++) {
+          const tt = t - TRAIL_LEN * (1 - k / (TRAIL_POINTS - 1));
+          this.pointAt(i, tt, this.tmp);
+          this.trailBuf[k * 3] = this.tmp.x;
+          this.trailBuf[k * 3 + 1] = this.tmp.y;
+          this.trailBuf[k * 3 + 2] = this.tmp.z;
+        }
+        this.lines.setPoints(ti, this.trailBuf);
+        this.lines.draw(ti, 0, 1);
+        this.lines.opacity(ti, 0.25 * this.electron[i] * (opts.trails ? 1 : h));
+      } else {
+        this.lines.opacity(ti, 0);
+      }
+    }
+    this.lines.update(time);
   }
 
   dispose() {
-    this.line.material.dispose();
-    this.trail.material.dispose();
-    (this.electron.material as THREE.SpriteMaterial).dispose();
+    this.lines.dispose();
+    this.dots.dispose();
   }
 }
-
-/** Пять орбит первого экрана: разные наклоны, эксцентриситеты, скорости */
-export const CORE_ORBITS: OrbitParams[] = [
-  { a: 2.35, b: 1.55, tilt: [1.05, 0.25, 0.35], phase: 0.05, speed: 0.11 },
-  { a: 2.75, b: 2.05, tilt: [0.55, -0.9, -0.2], phase: 0.42, speed: 0.085 },
-  { a: 3.05, b: 1.75, tilt: [1.5, 0.75, 0.9], phase: 0.71, speed: 0.07 },
-  { a: 2.55, b: 2.4, tilt: [-0.75, 0.35, 1.25], phase: 0.2, speed: 0.095 },
-  { a: 3.3, b: 2.15, tilt: [0.25, 1.35, -0.55], phase: 0.88, speed: 0.06 },
-];
-
-/** Дополнительные орбиты для экрана «Рост» (кольца роста): всего с CORE_ORBITS — 13 */
-export const GROWTH_ORBITS: OrbitParams[] = [
-  { a: 3.6, b: 2.5, tilt: [0.9, 0.5, -0.8], phase: 0.12, speed: 0.05 },
-  { a: 3.9, b: 3.1, tilt: [-0.4, 1.1, 0.3], phase: 0.6, speed: 0.045 },
-  { a: 4.2, b: 2.7, tilt: [1.3, -0.6, 1.0], phase: 0.33, speed: 0.04 },
-  { a: 4.5, b: 3.6, tilt: [0.2, 0.9, -1.2], phase: 0.8, speed: 0.038 },
-  { a: 4.8, b: 3.0, tilt: [-1.1, 0.2, 0.6], phase: 0.47, speed: 0.035 },
-  { a: 5.1, b: 4.1, tilt: [0.7, -1.3, 0.1], phase: 0.05, speed: 0.032 },
-  { a: 5.4, b: 3.4, tilt: [1.6, 0.4, -0.4], phase: 0.66, speed: 0.03 },
-  { a: 5.8, b: 4.6, tilt: [-0.6, -0.8, 1.4], phase: 0.27, speed: 0.028 },
-];

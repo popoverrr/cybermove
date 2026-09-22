@@ -1,98 +1,117 @@
 /**
- * S6 · ТЕНДЕРЫ И ПРАВО — SYSTEM (BRIEF §7 S6). Тема sand.
- * Матовые карточки-документы собираются в гранёную оболочку вокруг ядра, тёмный волосяной контур обводит грани,
- * финал — тонкое кольцо-печать. Hover: тендерные строки — веер, одна пластина вперёд; правовые — оболочка смыкается.
- * Выход: оболочка раскрывается, ядро выходит наружу и разрастается, фон светлеет до ivory.
+ * S6 · ТЕНДЕРЫ И ПРАВО (BRIEF-3 §5). Восемь листов бумаги слетаются по одному (2.4 с, stagger 0.2) и встают в кольцо
+ * вокруг сферы; хайрлайны соединяют их углы в многогранник (1.6 с); финал — кольцо-печать (1.2 с).
+ * Hover тендерные: листы веером, один вперёд. Hover правовые: многогранник сжимается на 6 %, линии 0.72.
  */
+import gsap from 'gsap';
+import * as THREE from 'three';
 import type { Engine } from '../Engine';
 import type { Rig } from '../Story';
-import type { SceneModule } from './types';
-import { getTarget } from '../objects/targets';
-import { POST_PAPER } from '../Post';
-import { SURFACE } from '../objects/Sphere';
-import { range, smooth, easeInOutCubic, lerp } from '../math';
+import type { SceneModule, Phase } from './types';
+import { range, smooth, lerp } from '../math';
 import { HoverMix } from './hover';
+import { SHEET_COUNT } from '../objects/Sheets';
 import { state } from '../../lib/state';
+import { applyLayout, serviceLayout, growthLayout } from './layout';
 
 const KEYS = ['tender-monitoring', 'tender-application', 'contracts', 'corporate'] as const;
+/** листы с подписями TENDER / BID / CONTRACT / CORP */
+const LABEL_SHEETS = [0, 2, 4, 6];
 
 export class LegalScene implements SceneModule {
   readonly id = 'legal';
-  readonly range = { enter: 0.1, exit: 0.8 };
   private hover = new HoverMix(KEYS, 6);
+  private tmp = new THREE.Vector3();
+  private anim = { on: 0, labels: [0, 0, 0, 0] };
 
   init() {}
 
+  setActive(on: boolean, e: Engine) {
+    e.sheets.group.visible = on;
+    if (!on) {
+      for (let i = 0; i < 4; i++) {
+        const a = state.anchors[`sheet-${i}`];
+        if (a) a.visible = 0;
+      }
+    }
+  }
+
+  timeline(phase: Phase, e: Engine) {
+    const sh = e.sheets;
+    if (phase === 'enter') {
+      const tl = gsap.timeline();
+      this.anim.on = 0;
+      sh.edges = 0;
+      sh.seal = 0;
+      tl.to(this.anim, { on: 1, duration: 0.3 }, 0);
+      for (let i = 0; i < SHEET_COUNT; i++) {
+        sh.arrive[i] = 0;
+        tl.to(sh.arrive, { [i]: 1, duration: 2.4, ease: 'none' }, 0.1 + i * 0.2);
+      }
+      for (let i = 0; i < 4; i++) {
+        this.anim.labels[i] = 0;
+        tl.to(this.anim.labels, { [i]: 1, duration: 0.4 }, 1.4 + LABEL_SHEETS[i] * 0.2 + 1.2 + i * 0.1);
+      }
+      tl.to(sh, { edges: 1, duration: 1.6, ease: 'power2.inOut' }, 3.2);
+      tl.to(sh, { seal: 1, duration: 1.2, ease: 'power2.inOut' }, 4.6);
+      return tl;
+    }
+    if (phase === 'hold') {
+      if (sh.seal > 0.999 && this.anim.on > 0.999) return null;
+      const tl = gsap.timeline();
+      tl.to(this.anim, { on: 1, duration: 0.4 }, 0);
+      tl.to(sh, { edges: 1, seal: 1, duration: 0.9, ease: 'power2.inOut' }, 0);
+      tl.to(this.anim.labels, { 0: 1, 1: 1, 2: 1, 3: 1, duration: 0.4 }, 0.3);
+      return tl;
+    }
+    const tl = gsap.timeline();
+    tl.to(sh, { seal: 0, edges: 0, duration: 0.6, ease: 'power2.inOut' }, 0);
+    tl.to(this.anim, { on: 0, duration: 0.6 }, 0.2);
+    tl.to(this.anim.labels, { 0: 0, 1: 0, 2: 0, 3: 0, duration: 0.3 }, 0);
+    return tl;
+  }
+
   update(rig: Rig, local: number, dt: number, time: number, e: Engine) {
-    const cu = e.core.uniforms;
-    const pu = e.particles.uniforms;
     this.hover.update(dt, state.screen === 5);
     const fan = Math.max(this.hover.get('tender-monitoring'), this.hover.get('tender-application'));
     const close = Math.max(this.hover.get('contracts'), this.hover.get('corporate'));
-
-    const exitX = range(local, 0.8, 1.0);
-    const ex = easeInOutCubic(exitX);
-
-    // ---------- фон: sand; выход — ivory
+    const exit = smooth(range(local, 0.7, 1.0));
     rig.bg.a = 'sand';
     rig.bg.b = 'ivory';
-    rig.bg.mix = ex;
+    rig.bg.mix = exit;
     rig.bg.mask = 'uniform';
     rig.beam = 0;
     rig.envMix = 0;
-    Object.assign(rig.post, POST_PAPER);
-
-    // ---------- камера, ядро
-    rig.cam.set(0, 0, 7.4);
+    rig.envRot = 3.8 + local * 0.4;
+    rig.cam.set(0, 0, 7.6);
     rig.look.set(0, 0, 0);
     rig.fov = 30;
-    rig.layoutOffset = 1 - smooth(range(exitX, 0.2, 1.0)) * 0.5;
+    // на выходе — к раскладке S7 (сфера в правый верхний угол)
+    applyLayout(rig, growthLayout(), exit, serviceLayout());
     rig.parallax = 0.6;
-    rig.pointerBulge = 0;
-    rig.atomScale = 0.86;
-    rig.coreVisible = true;
-    rig.coreScale = lerp(0.8, 1.3, smooth(range(exitX, 0.3, 1.0)));
-    rig.coreStretch.set(1, 1, 1);
-    rig.coreEmissive = 0;
-    e.core.setShapes(0, 0);
-    cu.uMorph.value = 0;
-    cu.uNoiseAmp.value = SURFACE.noiseAmp;
-    cu.uNoiseSpeed.value = SURFACE.noiseSpeed;
-    cu.uWorleyAmp.value = SURFACE.worleyAmp;
-    rig.orbits.visible = 0;
-    rig.orbits.count = 0;
-    rig.envRot = 3.8 + local * 0.4;
-
-    // ---------- пластины: слетаются 0..0.45, контур 0.35..0.7, печать 0.68..0.8, раскрытие на выходе
-    const assemble = 0.35 + 0.65 * smooth(range(local, 0.0, 0.42));
-    e.plates.update({
-      time,
-      dt,
-      assemble,
-      contour: smooth(range(local, 0.34, 0.68)),
-      seal: smooth(range(local, 0.66, 0.8)),
-      open: smooth(range(exitX, 0.0, 0.85)),
-      fan,
-      close,
-      on: 1,
-    });
-
-    // ---------- частицы: оболочка; выход — спокойный атом
-    if (exitX <= 0) {
-      e.particles.setTarget('A', getTarget('shell'), 'shell');
-      e.particles.setTarget('B', getTarget('shell'), 'shell');
-      pu.uMix.value = 0;
-      pu.uCurlAmp.value = 0.02;
-      rig.particles.opacity = 0.3;
-      rig.particles.size = 1.2;
-    } else {
-      e.particles.setTarget('A', getTarget('shell'), 'shell');
-      e.particles.setTarget('B', getTarget('calm'), 'calm');
-      pu.uMix.value = ex;
-      pu.uCurlAmp.value = 0.02 + 0.1 * Math.sin(ex * Math.PI);
-      rig.particles.opacity = lerp(0.3, 0.35, ex);
-      rig.particles.size = 1.2;
-    }
+    rig.pointerBulge = 0.2;
+    rig.sphereScale = 0.86;
+    rig.sphereVisible = true;
     rig.atomPos.set(0, 0, 0);
+    rig.lift = 0;
+
+    const sh = e.sheets;
+    sh.fan = fan;
+    sh.close = close;
+    sh.lines.uniforms.uGlobal.value = this.anim.on;
+    sh.meshes.forEach((m) => ((m.material as THREE.MeshPhysicalMaterial).opacity = this.anim.on));
+    sh.update(time, { hoveredSheet: fan > 0.3 ? 2 : -1 });
+    for (let i = 0; i < 4; i++) {
+      const m = sh.meshes[LABEL_SHEETS[i]];
+      this.tmp.copy(m.position).add(new THREE.Vector3(0, 0.36, 0)).applyMatrix4(e.atom.matrixWorld);
+      const p = e.project(this.tmp, { x: 0, y: 0, z: 0 });
+      const a = state.anchors[`sheet-${i}`] || (state.anchors[`sheet-${i}`] = { x: 0, y: 0, visible: 0, hot: 0 });
+      a.x = p.x;
+      a.y = p.y;
+      a.visible = this.anim.labels[i] * this.anim.on;
+      a.hot = i < 2 ? fan : close;
+    }
+    const n = Math.round(sh.arrive.reduce((acc, v) => acc + (v > 0.95 ? 1 : 0), 0));
+    rig.status = `SHEETS ${n}/8 · ${sh.seal > 0.99 ? 'SEALED' : sh.edges > 0.01 ? 'EDGES' : 'ARRIVING'}`;
   }
 }

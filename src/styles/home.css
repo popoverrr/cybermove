@@ -79,6 +79,7 @@ body.gl-fallback .gl-poster {
   height: 100vh;
   height: 100svh;
   overflow: hidden;
+  contain: paint;
 }
 .screen {
   position: absolute;
@@ -116,53 +117,7 @@ body.gl-fallback .gl-poster {
   transform: none;
 }
 
-/* Подписи орбит: HTML-лейблы, привязанные к 3D-точкам (позиция из state) */
-.orbit-labels {
-  position: fixed;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-.orbit-label {
-  position: absolute;
-  left: 0;
-  top: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px 6px 6px;
-  margin: -14px 0 0 12px;
-  color: var(--ink);
-  background: rgba(250, 248, 244, 0.78);
-  border: 1px solid var(--hair-strong);
-  backdrop-filter: blur(6px);
-  opacity: 0;
-  transform: translate3d(-100px, -100px, 0);
-  transition: opacity 0.25s var(--ease-out);
-  white-space: nowrap;
-  pointer-events: none;
-  will-change: transform;
-}
-.orbit-label.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-.orbit-label__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ink);
-}
-body.orbit-hover {
-  cursor: pointer;
-}
-body.orbit-hover .cursor__ring {
-  width: 48px;
-  height: 48px;
-  margin: -24px 0 0 -24px;
-}
-
-/* Лейблы к 3D-точкам (точки данных S2, метрики S5) */
+/* Подписи-анкоры к 3D-точкам (BRIEF-3 §4): выноска 24px, моно 10–11px umber; hot — ink */
 .anchor-labels {
   position: fixed;
   inset: 0;
@@ -176,34 +131,131 @@ body.orbit-hover .cursor__ring {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin: -0.6em 0 0 10px;
-  color: var(--fg);
+  margin: -0.6em 0 0 8px;
+  font-size: 0.625rem;
+  color: var(--umber);
   opacity: 0;
   white-space: nowrap;
   will-change: transform, opacity;
+  transition: color var(--dur-fast);
 }
 .anchor__tick {
-  width: 14px;
+  width: 24px;
   height: 1px;
-  background: var(--hair-strong);
+  background: currentColor;
+  opacity: 0.6;
 }
 .anchor.is-hot {
-  color: var(--accent);
+  color: var(--ink);
 }
-.anchor--metric {
-  margin: -0.6em 0 0 14px;
-  padding: 4px 8px;
-  border: 1px solid var(--hair-strong);
-  background: rgba(250, 248, 244, 0.7);
-  backdrop-filter: blur(4px);
+.anchor.is-visible[data-orbit-link] {
+  pointer-events: auto;
+  cursor: pointer;
+}
+.anchor[data-anchor='figure'] > span[data-figure] {
+  display: none;
+}
+.anchor[data-anchor='figure'] > span[data-figure].is-on {
+  display: inline;
+}
+[data-theme-now='night'] .anchor {
+  color: var(--taupe);
+}
+[data-theme-now='night'] .anchor.is-hot {
+  color: var(--paper);
+}
+
+/* технический слой: строка состояния у правого края канваса, под списком направлений S1 (низ занят строкой кейсов) */
+.status {
+  position: fixed;
+  right: var(--gutter);
+  top: calc(var(--header-h) + 8.25rem);
+  z-index: 2;
+  margin: 0;
+  color: var(--umber);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out), color 0.9s;
+}
+body.gl-ready .status {
+  opacity: 1;
+}
+[data-theme-now='night'] .status {
+  color: var(--taupe);
+}
+@media (max-width: 899px) {
+  /* на телефоне — под шапкой справа (низ занят кнопками и строкой кейсов) */
+  .status {
+    top: calc(var(--header-h) + 4px);
+    right: var(--gutter);
+    font-size: 0.5rem;
+  }
+  .anchor {
+    font-size: 0.5625rem;
+  }
+}
+/* оверлей ?stats (BRIEF-3 §7.1): fps, мс, тир, DPR, draw calls — заказчик присылает скриншот с телефона */
+.stats {
+  position: fixed;
+  left: var(--gutter);
+  bottom: var(--space-4);
+  z-index: 900;
+  margin: 0;
+  padding: 4px 6px;
+  font-size: 0.625rem;
+  color: var(--paper);
+  background: rgba(27, 26, 24, 0.82);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/*
+ * Тема по порогу (BRIEF-3 §6.4): JS переключает data-theme на <html> один раз за переход,
+ * цвет глобальных элементов (шапка, rail, аудио) доезжает CSS-переходом 900 мс.
+ */
+body.is-home .header {
+  transition: transform var(--dur) var(--ease-out), color 900ms, background-color 900ms;
+}
+body.is-home .header__link,
+body.is-home .lang__link,
+body.is-home .rail__stage,
+body.is-home .audio {
+  transition: color 900ms, border-color 900ms;
+}
+body.is-home .rail__name {
+  transition: opacity var(--dur-fast), transform var(--dur-fast), color 900ms;
+}
+body.is-home .rail__dot {
+  background: var(--accent);
+  transition: transform var(--dur-fast), background-color 900ms;
+}
+body.is-home .rail__line {
+  transition: background-color 900ms;
+}
+body.is-home .rail__progress {
+  transition: height 0.15s linear, background-color 900ms;
+}
+body.is-home .header::after {
+  transition: opacity var(--dur), background-color 900ms;
+}
+
+body.orbit-hover {
+  cursor: pointer;
+}
+body.orbit-hover .cursor__ring,
+body.row-hover .cursor__ring {
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
 }
 
 /* Режим постера (?poster): виден только канвас */
 body.is-poster .stage,
 body.is-poster .screen--s8,
+body.is-poster .habout,
 body.is-poster .header,
 body.is-poster .rail,
-body.is-poster .orbit-labels,
+body.is-poster .status,
 body.is-poster .anchor-labels,
 body.is-poster .audio,
 body.is-poster .cursor,

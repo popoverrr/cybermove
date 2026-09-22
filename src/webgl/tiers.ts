@@ -21,7 +21,6 @@ export interface TierSpec {
   /** размер карт нормалей/шероховатости */
   mapSize: number;
   envSize: number;
-  trailSegments: number;
   /** 1 — полный шум фона, 0 — одна октава */
   bgDetail: number;
   /** максимум точек-импульсов на экран */
@@ -29,9 +28,9 @@ export interface TierSpec {
 }
 
 export const TIERS: Record<Tier, TierSpec> = {
-  high: { name: 'high', particles: 12000, maxDpr: 1.75, post: true, smaa: true, noise: true, sphereDetail: 63, displace: true, mapSize: 1024, envSize: 256, trailSegments: 40, bgDetail: 1, maxImpulses: 24 },
-  mid: { name: 'mid', particles: 8000, maxDpr: 1.5, post: false, smaa: false, noise: false, sphereDetail: 63, displace: true, mapSize: 1024, envSize: 256, trailSegments: 32, bgDetail: 1, maxImpulses: 16 },
-  low: { name: 'low', particles: 0, maxDpr: 1.25, post: false, smaa: false, noise: false, sphereDetail: 31, displace: false, mapSize: 512, envSize: 128, trailSegments: 24, bgDetail: 0, maxImpulses: 8 },
+  high: { name: 'high', particles: 12000, maxDpr: 1.75, post: true, smaa: true, noise: true, sphereDetail: 63, displace: true, mapSize: 1024, envSize: 256, bgDetail: 1, maxImpulses: 24 },
+  mid: { name: 'mid', particles: 8000, maxDpr: 1.5, post: false, smaa: false, noise: false, sphereDetail: 63, displace: true, mapSize: 1024, envSize: 256, bgDetail: 1, maxImpulses: 16 },
+  low: { name: 'low', particles: 0, maxDpr: 1.25, post: false, smaa: false, noise: false, sphereDetail: 31, displace: false, mapSize: 512, envSize: 128, bgDetail: 0, maxImpulses: 8 },
 };
 
 export function lowerTier(t: Tier): Tier | null {

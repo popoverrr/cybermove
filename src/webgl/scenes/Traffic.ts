@@ -1,104 +1,130 @@
 /**
- * S5 · ТРАФИК — SYSTEM (BRIEF §7 S5). Тема clay (тёплая стена), текст тёмный.
- * Четыре потока-вихря (таргет, Google Ads, TikTok Ads, SEO) — тонкие тёмные линии с точками — сходятся в ядро,
- * которое медленно светлеет до paper. Hover: поток утолщается и ускоряется, рядом микрометка CPL/CAC/ROMI.
- * Выход: потоки застывают и нарезаются в пластины, фон становится sand.
+ * S5 · ТРАФИК (BRIEF-3 §5). Четыре ленты по 9 линий приходят из четырёх углов экрана и сворачиваются в вихрь
+ * к сфере; рисуются 2.4 с со stagger 0.3; по линиям бегут точки (12 с на путь). Сфера не раскаляется:
+ * за удержание её цвет и блик светлеют на 8 %, окружение поворачивается так, что блик оказывается сверху.
+ * Подписи CPL / CAC / ROMI / CTR у входов лент.
  */
+import gsap from 'gsap';
 import * as THREE from 'three';
 import type { Engine } from '../Engine';
 import type { Rig } from '../Story';
-import type { SceneModule } from './types';
-import { getTarget } from '../objects/targets';
-import { POST_PAPER } from '../Post';
-import { SURFACE } from '../objects/Sphere';
-import { range, smooth, easeInOutCubic, easeOutCubic, lerp } from '../math';
+import type { SceneModule, Phase } from './types';
+import { range, smooth, lerp } from '../math';
 import { HoverMix } from './hover';
-import { STREAM_IDS } from '../objects/Streams';
+import { STREAM_IDS } from '../objects/Ribbons';
 import { state } from '../../lib/state';
+import { applyLayout, serviceLayout } from './layout';
 
 export class TrafficScene implements SceneModule {
   readonly id = 'traffic';
-  readonly range = { enter: 0.2, exit: 0.8 };
   private hover = new HoverMix(STREAM_IDS);
   private tmp = new THREE.Vector3();
+  private anim = { on: 0, lift: 0, light: 0, labels: [0, 0, 0, 0], freeze: 0 };
+  private corners = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
 
   init() {}
 
+  setActive(on: boolean, e: Engine) {
+    e.ribbons.group.visible = on;
+    if (!on) {
+      for (const id of STREAM_IDS) {
+        const a = state.anchors[`metric-${id}`];
+        if (a) a.visible = 0;
+      }
+    }
+  }
+
+  timeline(phase: Phase, e: Engine) {
+    const r = e.ribbons;
+    if (phase === 'enter') {
+      const tl = gsap.timeline();
+      this.anim.on = 0;
+      this.anim.freeze = 0;
+      for (let s = 0; s < 4; s++) {
+        r.draw[s] = 0;
+        this.anim.labels[s] = 0;
+        tl.to(r.draw, { [s]: 1, duration: 2.4, ease: 'power2.inOut' }, 0.2 + s * 0.3);
+        tl.to(this.anim.labels, { [s]: 1, duration: 0.4 }, 0.4 + s * 0.3);
+      }
+      tl.to(this.anim, { on: 1, duration: 0.3 }, 0);
+      return tl;
+    }
+    if (phase === 'hold') {
+      const tl = gsap.timeline();
+      if (this.anim.on < 0.999 || this.anim.freeze > 0.001) {
+        tl.to(this.anim, { on: 1, freeze: 0, duration: 0.6 }, 0);
+        tl.to(this.anim.labels, { 0: 1, 1: 1, 2: 1, 3: 1, duration: 0.4 }, 0.2);
+      }
+      tl.to(this.anim, { lift: 1, light: 1, duration: 4.0, ease: 'power1.inOut' }, 0);
+      return tl;
+    }
+    const tl = gsap.timeline();
+    tl.to(this.anim, { freeze: 1, duration: 0.8 }, 0);
+    tl.to(this.anim, { on: 0, lift: 0, light: 0, duration: 0.7, ease: 'power2.inOut' }, 0.2);
+    tl.to(this.anim.labels, { 0: 0, 1: 0, 2: 0, 3: 0, duration: 0.3 }, 0);
+    return tl;
+  }
+
   update(rig: Rig, local: number, dt: number, time: number, e: Engine) {
-    const cu = e.core.uniforms;
-    const pu = e.particles.uniforms;
     this.hover.update(dt, state.screen === 4);
     const hovered = this.hover.active;
-
-    const enter = easeOutCubic(range(local, 0, 0.2));
-    const exitX = range(local, 0.8, 1.0);
-    const ex = easeInOutCubic(exitX);
-
-    // ---------- фон: clay; выход — sand снизу
+    const exit = smooth(range(local, 0.7, 1.0));
     rig.bg.a = 'clay';
     rig.bg.b = 'sand';
-    rig.bg.mix = ex;
+    rig.bg.mix = exit;
     rig.bg.mask = 'bottom';
     rig.beam = 0;
-    rig.envMix = 1 - ex;
-    Object.assign(rig.post, POST_PAPER);
-
-    // ---------- камера, ядро: возникает из точки схождения струй, медленно светлеет до paper
+    rig.envMix = 0;
+    // блик уходит наверх за удержание
+    rig.envRot = 3.1 + this.anim.light * 0.9;
     rig.cam.set(0, 0, 7.4);
     rig.look.set(0, 0, 0);
     rig.fov = 30;
-    rig.layoutOffset = 1;
+    applyLayout(rig, serviceLayout());
     rig.parallax = 0.6;
-    rig.pointerBulge = 0;
-    rig.atomScale = 0.86;
-    rig.coreVisible = true;
-    rig.coreScale = lerp(0.001, 0.7, enter) * (1 + ex * 0.15);
-    rig.coreStretch.set(1, 1, 1);
-    e.core.setShapes(0, 0);
-    cu.uMorph.value = 0;
-    cu.uNoiseAmp.value = SURFACE.noiseAmp * 1.3;
-    cu.uNoiseSpeed.value = SURFACE.noiseSpeed * 1.8;
-    cu.uWorleyAmp.value = SURFACE.worleyAmp * 0.6;
-    rig.coreEmissive = smooth(range(local, 0.1, 0.6)) * (1 - ex);
-    rig.orbits.visible = 0;
-    rig.orbits.count = 0;
-    rig.envRot = 3.3 + local * 0.5;
+    rig.pointerBulge = 0.2;
+    rig.sphereScale = 0.9;
+    rig.sphereVisible = true;
+    rig.atomPos.set(0, 0, 0);
+    rig.lift = this.anim.lift * 0.16; // ≈ +8 % светлее
 
-    // ---------- потоки
-    const draw = smooth(range(local, 0.04, 0.55));
-    const freeze = smooth(range(exitX, 0.0, 0.6));
-    e.streams.update({ time, dt, draw, on: 1 - smooth(range(exitX, 0.5, 1.0)), hovered, freeze });
-    // микрометки CPL/CAC/ROMI у потоков
-    for (let s = 0; s < STREAM_IDS.length; s++) {
-      const id = `metric-${STREAM_IDS[s]}`;
-      const a = state.anchors[id] || (state.anchors[id] = { x: 0, y: 0, visible: 0, hot: 0 });
-      this.tmp.copy(e.streams.midPoints[s]).applyMatrix4(e.atom.matrixWorld);
+    // углы экрана в локальных координатах атома (z = 0 плоскость атома)
+    const cam = e.camera;
+    const dist = Math.abs(cam.position.z - e.atom.position.z);
+    const halfH = Math.tan((cam.fov * Math.PI) / 360) * dist;
+    const halfW = halfH * cam.aspect;
+    const s = Math.max(1e-3, e.atom.scale.x);
+    const ax = e.atom.position.x - cam.position.x;
+    const ay = e.atom.position.y - cam.position.y;
+    // десктоп: левая половина занята текстом — левые ленты входят с верхней и нижней кромки у середины экрана;
+    // мобильный: текст ниже сферы — ленты входят с верхних углов и с боковых кромок на высоте сферы
+    if (state.mobile) {
+      this.corners[0].set((-halfW * 1.08 - ax) / s, (halfH * 1.08 - ay) / s, 0);
+      this.corners[1].set((halfW * 1.08 - ax) / s, (halfH * 1.08 - ay) / s, 0);
+      this.corners[2].set((halfW * 1.08 - ax) / s, (ay * 0.2) / s, 0);
+      this.corners[3].set((-halfW * 1.08 - ax) / s, (ay * 0.2) / s, 0);
+    } else {
+      this.corners[0].set((0.02 * halfW - ax) / s, (halfH * 1.08 - ay) / s, 0);
+      this.corners[1].set((halfW * 1.08 - ax) / s, (halfH * 1.08 - ay) / s, 0);
+      this.corners[2].set((halfW * 1.08 - ax) / s, (-halfH * 1.08 - ay) / s, 0);
+      this.corners[3].set((0.02 * halfW - ax) / s, (-halfH * 1.08 - ay) / s, 0);
+    }
+    const r = e.ribbons;
+    r.layout(this.corners);
+    for (let i = 0; i < 4; i++) r.hover[i] = this.hover.get(STREAM_IDS[i]);
+    r.lines.uniforms.uGlobal.value = this.anim.on;
+    r.update(time, { hovered, dots: this.anim.on > 0.5, freeze: this.anim.freeze, maxDots: e.tier.maxImpulses });
+    // подписи у входов лент (чуть внутрь от угла)
+    for (let i = 0; i < 4; i++) {
+      this.tmp.copy(r.entries[i]).multiplyScalar(0.76).applyMatrix4(e.atom.matrixWorld);
       const p = e.project(this.tmp, { x: 0, y: 0, z: 0 });
+      const a = state.anchors[`metric-${STREAM_IDS[i]}`] || (state.anchors[`metric-${STREAM_IDS[i]}`] = { x: 0, y: 0, visible: 0, hot: 0 });
       a.x = p.x;
       a.y = p.y;
-      a.visible = e.streams.hover[s] * (1 - ex);
-      a.hot = 1;
+      a.visible = this.anim.labels[i] * this.anim.on * (hovered >= 0 && hovered !== i ? 0.4 : 1);
+      a.hot = r.hover[i];
     }
-
-    // ---------- частицы: струи → потоки; выход — оболочка
-    if (exitX <= 0) {
-      e.particles.setTarget('A', getTarget('jets'), 'jets');
-      e.particles.setTarget('B', getTarget('flows'), 'flows');
-      pu.uMix.value = smooth(range(local, 0.0, 0.35));
-      pu.uCurlAmp.value = 0.05;
-      pu.uCurlSpeed.value = 0.4;
-      rig.particles.opacity = 0.45;
-      rig.particles.size = 1.4;
-    } else {
-      e.particles.setTarget('A', getTarget('flows'), 'flows');
-      e.particles.setTarget('B', getTarget('shell'), 'shell');
-      pu.uMix.value = ex;
-      pu.uCurlAmp.value = lerp(0.05, 0.02, ex);
-      rig.particles.opacity = lerp(0.45, 0.3, ex);
-      rig.particles.size = lerp(1.4, 1.2, ex);
-    }
-    // пластины начинают слетаться ещё на выходе (непрерывность с S6)
-    e.plates.update({ time, dt, assemble: smooth(range(exitX, 0.35, 1.0)) * 0.35, contour: 0, seal: 0, open: 0, fan: 0, close: 0, on: smooth(range(exitX, 0.3, 0.8)) });
-    rig.atomPos.set(0, 0, 0);
+    const k = Math.floor(time / 3) % 4;
+    rig.status = `FLOW 0${k + 1} · 12 S · ${['CPL', 'CAC', 'ROMI', 'CTR'][k]}`;
   }
 }

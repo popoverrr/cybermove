@@ -21,8 +21,12 @@ export function initRows() {
   rows.forEach((row) => {
     const btn = row.querySelector<HTMLButtonElement>('[data-service]')!;
     if (!coarse) {
-      row.addEventListener('pointerenter', () => activate(row));
+      row.addEventListener('pointerenter', () => {
+        activate(row);
+        document.body.classList.add('row-hover');
+      });
       row.addEventListener('pointerleave', () => {
+        document.body.classList.remove('row-hover');
         if (!state.open) activate(null);
       });
       btn.addEventListener('focus', () => activate(row));
@@ -133,22 +137,40 @@ export function initDrawer() {
   if (q) setTimeout(() => openDrawer(q), 800);
 }
 
-/* ---------- HTML-лейблы, привязанные к 3D-точкам ---------- */
+/* ---------- HTML-лейблы, привязанные к 3D-точкам; вызывается из единого кадра (home.ts) ---------- */
+let anchorEls: HTMLElement[] = [];
+let statusEl: HTMLElement | null = null;
+let statusText = '';
+let figureNow = -1;
 export function initAnchors() {
-  const els = Array.from(document.querySelectorAll<HTMLElement>('[data-anchor]'));
-  if (!els.length) return;
-  const loop = () => {
-    for (const el of els) {
-      const a = state.anchors[el.dataset.anchor!];
-      if (!a) continue;
-      el.style.transform = `translate3d(${a.x.toFixed(1)}px, ${a.y.toFixed(1)}px, 0)`;
-      el.style.opacity = a.visible.toFixed(3);
-      el.classList.toggle('is-visible', a.visible > 0.05);
-      el.classList.toggle('is-hot', a.hot > 0.5);
-    }
-    requestAnimationFrame(loop);
-  };
-  requestAnimationFrame(loop);
+  anchorEls = Array.from(document.querySelectorAll<HTMLElement>('[data-anchor]'));
+  statusEl = document.querySelector<HTMLElement>('[data-status]');
+}
+export function updateAnchors() {
+  // подписи не заходят под шапку и нижнюю строку (кейсы/тикер), на мобильном — только в зоне сферы над текстом
+  const top = 88;
+  const bottom = state.mobile ? window.innerHeight * 0.4 : window.innerHeight - 72;
+  for (const el of anchorEls) {
+    const a = state.anchors[el.dataset.anchor!];
+    if (!a) continue;
+    const edge = Math.min(1, Math.max(0, (a.y - top) / 24)) * Math.min(1, Math.max(0, (bottom - a.y) / 24)) * Math.min(1, Math.max(0, (window.innerWidth - 96 - a.x) / 24)) * Math.min(1, Math.max(0, (a.x - 8) / 16));
+    const v = a.visible * edge;
+    const vis = v > 0.02;
+    if (!vis && el.dataset.hidden === '1') continue;
+    el.dataset.hidden = vis ? '0' : '1';
+    el.style.transform = `translate3d(${a.x.toFixed(1)}px, ${a.y.toFixed(1)}px, 0)`;
+    el.style.opacity = v.toFixed(3);
+    el.classList.toggle('is-visible', vis);
+    el.classList.toggle('is-hot', a.hot > 0.5);
+  }
+  if (statusEl && state.status !== statusText) {
+    statusText = state.status;
+    statusEl.textContent = statusText;
+  }
+  if (state.figureIndex !== figureNow) {
+    figureNow = state.figureIndex;
+    document.querySelectorAll<HTMLElement>('[data-figure]').forEach((el) => el.classList.toggle('is-on', Number(el.dataset.figure) === figureNow));
+  }
 }
 
 /* ---------- синхронная интерполяция темы ---------- */

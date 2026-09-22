@@ -17,7 +17,7 @@ const c = getContent(lang);
 const h2 = d.h2;
 ---
 
-<section class:list={['screen', 'screen--services', `screen--s${index + 1}`]} data-screen={d.id} data-dur={dur} data-dur-mobile="170" id={d.id} data-theme={d.theme} aria-labelledby={`h-${d.id}`}>
+<section class:list={['screen', 'screen--services', `screen--s${index + 1}`]} data-screen={d.id} data-dur={dur} data-dur-mobile="190" id={d.id} data-theme={d.theme} aria-labelledby={`h-${d.id}`}>
   <div class="screen__pin">
     <div class="svc container">
       <p class="svc__corner svc__corner--tl t-micro" data-tw>{d.screenLabel}</p>
@@ -100,6 +100,9 @@ const h2 = d.h2;
   .rows {
     align-self: end;
     max-width: min(46%, 640px);
+  }
+  /* верхняя линия списка — на первой строке, чтобы уходила вместе с текстом (строки твинятся по data-tw) */
+  .row:first-child .row__btn {
     border-top: 1px solid var(--hair);
   }
   .row__btn {

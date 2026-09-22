@@ -1,5 +1,5 @@
 /**
- * GLSL-библиотека шума: simplex 3D (Ashima/McEwan), curl из simplex, worley 3D (F1/F2), хэши.
+ * GLSL-библиотека шума: simplex 3D (Ashima/McEwan) и хэши; curl и worley удалены вместе с морфингом (BRIEF-3).
  * Подключается строкой в шейдеры объектов и фонов.
  */
 
@@ -76,66 +76,3 @@ float fbm3(vec3 p) {
   return f / 0.875;
 }
 `;
-
-export const GLSL_CURL = /* glsl */ `
-// curl-noise: ротор потенциального поля из трёх simplex-полей (конечные разности)
-vec3 curlNoise(vec3 p) {
-  const float e = 0.1;
-  vec3 dx = vec3(e, 0.0, 0.0);
-  vec3 dy = vec3(0.0, e, 0.0);
-  vec3 dz = vec3(0.0, 0.0, e);
-  vec3 p_x0 = vec3(snoise(p - dx), snoise((p - dx) + 31.7), snoise((p - dx) - 17.3));
-  vec3 p_x1 = vec3(snoise(p + dx), snoise((p + dx) + 31.7), snoise((p + dx) - 17.3));
-  vec3 p_y0 = vec3(snoise(p - dy), snoise((p - dy) + 31.7), snoise((p - dy) - 17.3));
-  vec3 p_y1 = vec3(snoise(p + dy), snoise((p + dy) + 31.7), snoise((p + dy) - 17.3));
-  vec3 p_z0 = vec3(snoise(p - dz), snoise((p - dz) + 31.7), snoise((p - dz) - 17.3));
-  vec3 p_z1 = vec3(snoise(p + dz), snoise((p + dz) + 31.7), snoise((p + dz) - 17.3));
-  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;
-  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;
-  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;
-  return normalize(vec3(x, y, z) / (2.0 * e));
-}
-`;
-
-export const GLSL_WORLEY = /* glsl */ `
-// Worley 3D: возвращает (F1, F2). Ячейки с рандомными центрами, поиск 3×3×3.
-vec2 worley3(vec3 p) {
-  vec3 ip = floor(p);
-  vec3 fp = fract(p);
-  float f1 = 8.0;
-  float f2 = 8.0;
-  for (int z = -1; z <= 1; z++)
-  for (int y = -1; y <= 1; y++)
-  for (int x = -1; x <= 1; x++) {
-    vec3 o = vec3(float(x), float(y), float(z));
-    vec3 c = o + hash33(ip + o) - fp;
-    float d = dot(c, c);
-    if (d < f1) { f2 = f1; f1 = d; }
-    else if (d < f2) { f2 = d; }
-  }
-  return sqrt(vec2(f1, f2));
-}
-
-// Сумма гауссовых куполов по центрам ячеек: гладкое поле «сросшихся» шаров (без складок F1)
-float blobField(vec3 p, float k) {
-  vec3 ip = floor(p);
-  vec3 fp = fract(p);
-  float s = 0.0;
-  for (int z = -1; z <= 1; z++)
-  for (int y = -1; y <= 1; y++)
-  for (int x = -1; x <= 1; x++) {
-    vec3 o = vec3(float(x), float(y), float(z));
-    vec3 c = o + hash33(ip + o) - fp;
-    s += exp(-dot(c, c) * k);
-  }
-  return s;
-}
-`;
-
-export const GLSL_EASE = /* glsl */ `
-float easeInOutCubic(float t) { return t < 0.5 ? 4.0 * t * t * t : 1.0 - pow(-2.0 * t + 2.0, 3.0) / 2.0; }
-float easeOutExpo(float t) { return t >= 1.0 ? 1.0 : 1.0 - pow(2.0, -10.0 * t); }
-float sstep(float a, float b, float x) { return smoothstep(a, b, x); }
-`;
-
-export const GLSL_NOISE_ALL = GLSL_HASH + GLSL_SIMPLEX + GLSL_CURL + GLSL_WORLEY + GLSL_EASE;

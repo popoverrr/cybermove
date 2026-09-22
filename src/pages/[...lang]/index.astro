@@ -27,23 +27,34 @@ const s1 = c.home.s1;
     <canvas id="gl" class="gl-canvas"></canvas>
   </div>
 
+  <!-- подписи-анкоры (BRIEF-3 §4): моношрифт, выноска 24px, привязаны к 3D-точкам через state.anchors -->
   <div class="anchor-labels" aria-hidden="true">
+    {s1.orbits.map((label, i) => (
+      <span class="anchor t-micro" data-anchor={`orbit-${i}`} data-orbit-link={i + 1}><span class="anchor__tick"></span>{label}</span>
+    ))}
     {c.services.directions[0].dataPoints.map((label, i) => (
       <span class="anchor t-micro" data-anchor={`dp-${i}`}><span class="anchor__tick"></span>{label}</span>
     ))}
+    {c.services.directions[1].micro.map((label, i) => (
+      <span class="anchor t-micro" data-anchor={`node-${i}`}><span class="anchor__tick"></span>{label}</span>
+    ))}
+    <span class="anchor t-micro" data-anchor="figure"><span class="anchor__tick"></span>{c.services.directions[2].micro.map((label, i) => <span data-figure={i}>{label}</span>)}</span>
     {c.services.directions[3].services.map((s) => (
-      <span class="anchor anchor--metric t-micro" data-anchor={`metric-${s.id}`}>{s.metric}</span>
+      <span class="anchor t-micro" data-anchor={`metric-${s.id}`}><span class="anchor__tick"></span>{s.metric}</span>
+    ))}
+    {c.services.directions[4].micro.map((label, i) => (
+      <span class="anchor t-micro" data-anchor={`sheet-${i}`}><span class="anchor__tick"></span>{label}</span>
+    ))}
+    {c.home.s7.counters.slice(0, 3).map((k, i) => (
+      <span class="anchor t-micro" data-anchor={`ring-${i}`}><span class="anchor__tick"></span>{k.value}{k.suffix} {k.label}</span>
+    ))}
+    {c.contact.form.formatOptions.slice(0, 3).map((f, i) => (
+      <span class="anchor t-micro" data-anchor={`contact-${i}`}><span class="anchor__tick"></span>{f.label}</span>
     ))}
   </div>
 
-  <div class="orbit-labels" aria-hidden="true">
-    {s1.orbits.map((label, i) => (
-      <button class="orbit-label t-micro" type="button" data-orbit-label={i} tabindex="-1">
-        <span class="orbit-label__dot"></span>
-        <span class="orbit-label__text">{label}</span>
-      </button>
-    ))}
-  </div>
+  <!-- технический слой (BRIEF-3 §8.5): «координаты» состояния сцены -->
+  <p class="status t-micro" data-status aria-hidden="true"></p>
 
   <div class="stage-wrap" data-stage-wrap>
     <div class="stage" data-stage>

@@ -1,6 +1,7 @@
 /**
- * Engine — renderer, цикл, ресайз, тиры качества, пауза (BRIEF §8).
- * WebGL2, sRGB, тонмаппинг Khronos Neutral (в Post или в renderer на low), SMAA через пост-обработку.
+ * Engine — renderer, объекты, ресайз, тиры качества (BRIEF-3). Кадр рисуется по вызову `frame(now)` из единого
+ * цикла страницы (gsap.ticker в lib/home.ts); собственный rAF («start») используется только лабораторией.
+ * WebGL2 с MSAA; композер (SMAA + зерно) только на HIGH; тонмаппинг Neutral внутри PBR-материалов.
  */
 import * as THREE from 'three';
 import { PARAMS, type Tier } from './params';
@@ -8,13 +9,16 @@ import { TIERS, detectTier, lowerTier, isSoftwareRenderer, type TierSpec } from 
 import { buildEnvironments, addStudioLights, type EnvironmentMaps } from './Environment';
 import { Background } from './backgrounds/Background';
 import { Sphere, makeSurfaceMaps } from './objects/Sphere';
-import { ParticleField } from './objects/ParticleField';
-import { Orbit, CORE_ORBITS, GROWTH_ORBITS } from './objects/Orbits';
-import { Scan } from './objects/Scan';
-import { Nodes } from './objects/Nodes';
-import { Streams } from './objects/Streams';
-import { Plates } from './objects/Plates';
-import { mulberry32 } from './objects/orbitals';
+import { OrbitSystem } from './objects/Orbits';
+import { Dust } from './objects/Dust';
+import { Grid } from './objects/Grid';
+import { Satellites } from './objects/Satellites';
+import { Figures } from './objects/Figures';
+import { Ribbons } from './objects/Ribbons';
+import { Sheets } from './objects/Sheets';
+import { Rings } from './objects/Rings';
+import { LineSet } from './objects/LineSet';
+import { Dots } from './objects/Dots';
 import { Post, POST_PAPER } from './Post';
 import { Story } from './Story';
 import { state } from '../lib/state';
@@ -32,15 +36,18 @@ export class Engine {
   readonly resolution = new THREE.Vector2(1, 1);
   readonly background: Background;
   readonly env: EnvironmentMaps;
+  readonly lights: { key: THREE.DirectionalLight; fill: THREE.DirectionalLight };
   readonly core: Sphere;
-  private maps: { normalMap: THREE.Texture; roughnessMap: THREE.Texture; dispose(): void };
-  readonly particles: ParticleField;
-  readonly orbits: Orbit[] = [];
+  readonly orbits: OrbitSystem;
+  readonly dust: Dust | null;
+  readonly grid: Grid;
+  readonly satellites: Satellites;
+  readonly figures: Figures;
+  readonly ribbons: Ribbons;
+  readonly sheets: Sheets;
+  readonly rings: Rings;
+  readonly pulse: Rings;
   readonly atom = new THREE.Group();
-  readonly scan: Scan;
-  readonly nodes: Nodes;
-  readonly streams: Streams;
-  readonly plates: Plates;
   readonly story: Story;
   post: Post | null = null;
   tier: TierSpec;
@@ -58,11 +65,14 @@ export class Engine {
   private slowSince = 0;
   private frameTimes: number[] = [];
   private frameIndex = 0;
-  private onFirstFrame?: () => void;
-  readonly stats = { fps: 0, frameMs: 0, tier: 'high' as Tier, particles: 0, verts: 0, renders: 0, calls: 0 };
-  readonly lights: { key: THREE.DirectionalLight; fill: THREE.DirectionalLight };
   private renderCount = 0;
   private renderCountAt = 0;
+  private stillStart = 0;
+  private maps: { normalMap: THREE.Texture; roughnessMap: THREE.Texture; dispose(): void };
+  private onFirstFrame?: () => void;
+  /** униформы цвета туши всех линий/точек (см. Story: тушь → paper в night) */
+  readonly inkUniforms: THREE.IUniform<THREE.Color>[] = [];
+  readonly stats = { fps: 0, frameMs: 0, tier: 'high' as Tier, particles: 0, verts: 0, renders: 0, calls: 0 };
 
   constructor(opts: EngineOptions) {
     this.canvas = opts.canvas;
@@ -79,6 +89,7 @@ export class Engine {
 
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, context: gl, antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: PARAMS.still });
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // тонмаппинг живёт внутри PBR-материалов (Environment.patchNeutralToneMap)
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.renderer.toneMappingExposure = 1.0;
     this.renderer.setClearColor(0xf2efe9, 1);
@@ -96,22 +107,26 @@ export class Engine {
     this.background.uniforms.uDetail.value = this.tier.bgDetail;
     this.scene.add(this.background.mesh);
 
-    const rng = mulberry32(20260921);
     this.maps = makeSurfaceMaps(this.renderer, this.tier.mapSize);
     this.core = new Sphere({ detail: this.tier.sphereDetail, displace: this.tier.displace, envWarm: this.env.warm, envNight: this.env.night, maps: this.maps });
-    this.particles = new ParticleField(TIERS.high.particles, rng, { curl: tierName !== 'low', dpr: 1 });
-    this.particles.setDrawCount(this.tier.particles);
-    for (const p of [...CORE_ORBITS, ...GROWTH_ORBITS]) this.orbits.push(new Orbit(p, this.resolution, this.tier.trailSegments));
-
-    this.renderer.localClippingEnabled = true;
     const envMix = this.core.uniforms.uEnvMix;
-    this.scan = new Scan(this.core, this.resolution, this.env.warm, this.env.night, envMix);
-    this.nodes = new Nodes(this.resolution, this.env.warm, this.env.night, envMix);
-    this.streams = new Streams(this.resolution);
-    this.plates = new Plates(this.resolution, this.env.warm, this.env.night, envMix);
+    this.orbits = new OrbitSystem(this.resolution);
+    this.dust = this.tier.particles > 0 ? new Dust(this.tier.particles) : null;
+    this.grid = new Grid(this.resolution);
+    this.satellites = new Satellites(this.resolution, this.env.warm, this.env.night, envMix);
+    this.figures = new Figures(this.resolution);
+    this.ribbons = new Ribbons(this.resolution);
+    this.sheets = new Sheets(this.resolution, this.env.warm, this.env.night, envMix);
+    this.rings = new Rings(this.resolution, 12, 1.15, 2.6);
+    this.pulse = new Rings(this.resolution, 1, 1.05, 1.05);
 
-    this.atom.add(this.core.mesh, this.particles.points, this.scan.group, this.nodes.group, this.streams.group, this.plates.group);
-    for (const o of this.orbits) this.atom.add(o.group);
+    this.atom.add(this.core.mesh, this.orbits.group, this.grid.group, this.satellites.group, this.figures.group, this.ribbons.group, this.sheets.group, this.rings.group, this.pulse.group);
+    if (this.dust) this.atom.add(this.dust.points);
+    // все «чернильные» униформы цвета: линии, точки, пыль — Story смешивает тушь с paper в теме night
+    for (const obj of [this.orbits, this.grid, this.satellites, this.figures, this.ribbons, this.sheets, this.rings, this.pulse] as object[]) {
+      for (const v of Object.values(obj)) if (v instanceof LineSet || v instanceof Dots) this.inkUniforms.push(v.uniforms.uColor);
+    }
+    if (this.dust) this.inkUniforms.push(this.dust.uniforms.uColor);
     this.scene.add(this.atom);
 
     this.setupPost();
@@ -135,9 +150,6 @@ export class Engine {
       this.post = new Post(this.renderer, this.scene, this.camera, this.tier);
       this.post.apply(POST_PAPER);
     }
-    // тонмаппинг живёт внутри PBR-материалов (Environment.patchNeutralToneMap)
-    this.renderer.toneMapping = THREE.NoToneMapping;
-    // материалы должны перекомпилироваться под смену тонмаппинга
     this.scene.traverse((o) => {
       const m = (o as THREE.Mesh).material as THREE.Material | undefined;
       if (m) m.needsUpdate = true;
@@ -155,7 +167,6 @@ export class Engine {
     this.resolution.set(w * dpr, h * dpr);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
-    this.particles.uniforms.uDpr.value = dpr;
     this.post?.setSize(w, h);
     state.mobile = w < 900 || (w < 1100 && h > w);
     this.story.onResize(w, h);
@@ -165,21 +176,16 @@ export class Engine {
     this.hidden = document.hidden;
     if (!this.hidden && this.running) {
       this.last = performance.now();
-      if (!this.raf) this.raf = requestAnimationFrame(this.frame);
+      if (!this.raf) this.raf = requestAnimationFrame(this.loop);
     }
   };
 
-  private stillStart = 0;
-
+  /** Собственный цикл (лаборатория, фолбэк без единого тикера страницы) */
   start() {
     if (this.running) return;
     this.running = true;
     this.last = performance.now();
-    this.stillStart = performance.now();
-    if (PARAMS.still) {
-      this.time = PARAMS.time ?? 4.0;
-    }
-    this.raf = requestAnimationFrame(this.frame);
+    this.raf = requestAnimationFrame(this.loop);
   }
 
   stop() {
@@ -188,24 +194,35 @@ export class Engine {
     this.raf = 0;
   }
 
-  private frame = (now: number) => {
+  private loop = (now: number) => {
     this.raf = 0;
-    if (!this.running) return;
-    if (this.hidden) return; // пауза, когда вкладка скрыта
+    if (!this.running || this.hidden) return;
+    const keep = this.frame(now);
+    if (keep) this.raf = requestAnimationFrame(this.loop);
+  };
+
+  /** Один кадр: обновление сюжета и рендер. Возвращает false, когда still-кадр отрисован и продолжать не нужно. */
+  frame(now: number): boolean {
+    if (this.hidden) return true;
+    if (!this.stillStart) this.stillStart = now;
+    if (!this.last) this.last = now;
     const t0 = performance.now();
     let dt = (now - this.last) / 1000;
     this.last = now;
     if (dt > 0.1) dt = 0.1;
-    if (PARAMS.still) dt = 0;
+    if (dt < 0) dt = 0;
+    if (PARAMS.still) {
+      dt = 0;
+      if (this.time === 0) this.time = PARAMS.time ?? 4.0;
+    }
     this.dt = dt;
     this.time += dt;
 
     this.story.update(dt, this.time);
     this.background.update(this.time);
     // зерно бумаги живёт: смена seed раз в 3 кадра (BRIEF-3 §8.2)
-    if (dt > 0 && (this.frameIndex++ % 3) === 0) this.background.uniforms.uGrainSeed.value = (this.frameIndex * 7919) % 1000;
+    if (dt > 0 && this.frameIndex++ % 3 === 0) this.background.uniforms.uGrainSeed.value = (this.frameIndex * 7919) % 1000;
     this.core.update(this.time);
-    this.particles.update(this.time);
 
     if (this.post) this.post.render(dt);
     else this.renderer.render(this.scene, this.camera);
@@ -230,20 +247,20 @@ export class Engine {
       state.events.emit('ready', undefined);
     }
     // при ?still рисуем кадры ~2.5 с (DOM успевает выставить прогресс и hover), затем останавливаемся
-    if (PARAMS.still && performance.now() - this.stillStart > 2500 && this.frameTimes.length >= 6) {
+    if (PARAMS.still && now - this.stillStart > 2500 && this.frameTimes.length >= 6) {
       this.canvas.dataset.still = '1';
-      return;
+      return false;
     }
-    this.raf = requestAnimationFrame(this.frame);
-  };
+    return true;
+  }
 
-  /** Если кадр дольше 22 мс на протяжении 2 с — понижаем тир на лету (не под программным рендером). */
+  /** Если кадр дольше 18 мс на протяжении 1.5 с — понижаем тир на лету (не под программным рендером) */
   private watchPerformance(now: number, ms: number) {
     if (this.software || PARAMS.tier || PARAMS.still) return;
-    if (ms > 22) {
+    if (ms > 18) {
       if (!this.slowSince) this.slowSince = now;
       this.slowFrames++;
-      if (now - this.slowSince > 2000 && this.slowFrames > 40) {
+      if (now - this.slowSince > 1500 && this.slowFrames > 30) {
         const next = lowerTier(this.tier.name);
         if (next) this.setTier(next);
         this.slowSince = 0;
@@ -260,8 +277,8 @@ export class Engine {
     this.tier = TIERS[name];
     this.stats.tier = name;
     this.stats.particles = this.tier.particles;
-    this.particles.setDrawCount(this.tier.particles);
     this.background.uniforms.uDetail.value = this.tier.bgDetail;
+    if (this.dust && this.tier.particles === 0) this.dust.points.visible = false;
     this.setupPost();
     this.resize();
     this.canvas.dataset.tier = name;
@@ -283,12 +300,15 @@ export class Engine {
     this.post?.dispose();
     this.core.dispose();
     this.maps.dispose();
-    this.particles.dispose();
-    this.orbits.forEach((o) => o.dispose());
-    this.scan.dispose();
-    this.nodes.dispose();
-    this.streams.dispose();
-    this.plates.dispose();
+    this.orbits.dispose();
+    this.dust?.dispose();
+    this.grid.dispose();
+    this.satellites.dispose();
+    this.figures.dispose();
+    this.ribbons.dispose();
+    this.sheets.dispose();
+    this.rings.dispose();
+    this.pulse.dispose();
     this.background.dispose();
     this.env.dispose();
     this.renderer.dispose();

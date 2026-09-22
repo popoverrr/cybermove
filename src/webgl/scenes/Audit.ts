@@ -1,124 +1,123 @@
 /**
- * S2 · АУДИТ — CORE (BRIEF §7 S2). Тема sand, тёплый студийный свет.
- * Вход: камера отъезжает от заполнившего экран ядра, атом уходит вправо. Сквозь ядро проходит
- * сканирующая плоскость (прогресс по скроллу): с одной стороны жемчуг, с другой тёмный каркас. Проявляются
- * точки данных (CAC, LTV, ROMI, Cash flow, маржа, конверсия). Выход: точки становятся узлами сети,
- * фон переходит в stone.
+ * S2 · АУДИТ (BRIEF-3 §5). Скан-плоскость идёт сверху вниз 2.6 с; под ней — чертёжная сетка широт и долгот
+ * с точками; кромка скана с рисками; шесть подписей данных появляются по мере прохода скана.
+ * Hover: гистограмма, траектория, инвестиции (точки делятся), аудит (слои сетки расходятся).
  */
+import gsap from 'gsap';
+import * as THREE from 'three';
 import type { Engine } from '../Engine';
 import type { Rig } from '../Story';
-import type { SceneModule } from './types';
-import { getTarget } from '../objects/targets';
-import { POST_PAPER } from '../Post';
-import { SURFACE } from '../objects/Sphere';
-import { range, smooth, easeInOutCubic, easeOutCubic, lerp } from '../math';
+import type { SceneModule, Phase } from './types';
+import { range, smooth, lerp } from '../math';
 import { HoverMix } from './hover';
 import { state } from '../../lib/state';
-import { DATA_POINTS } from '../objects/Scan';
-import * as THREE from 'three';
+import { applyLayout, serviceLayout } from './layout';
+import { DATA_NODES } from '../objects/Grid';
 
 const KEYS = ['business-audit', 'financial-audit', 'investment', 'strategy'] as const;
 
 export class AuditScene implements SceneModule {
   readonly id = 'audit';
-  readonly range = { enter: 0.22, exit: 0.8 };
   private hover = new HoverMix(KEYS);
   private tmp = new THREE.Vector3();
+  /** прогресс скана 0..1 (по таймлайну) и общая видимость */
+  private anim = { scan: 0, on: 0 };
+  /** плоскость скана: выше неё (где скан прошёл) сфера срезана (localClipping) и видна чертёжная сетка; ниже — сфера как есть */
+  private plane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e6);
 
-  init() {}
+  init(e: Engine) {
+    e.renderer.localClippingEnabled = true;
+    e.core.material.clippingPlanes = [this.plane];
+  }
+
+  setActive(on: boolean, e: Engine) {
+    e.grid.group.visible = on;
+    if (!on) {
+      this.plane.constant = 1e6;
+      for (let i = 0; i < DATA_NODES.length; i++) {
+        const a = state.anchors[`dp-${i}`];
+        if (a) a.visible = 0;
+      }
+    }
+  }
+
+  timeline(phase: Phase, _e: Engine) {
+    if (phase === 'enter') {
+      const tl = gsap.timeline();
+      this.anim.scan = 0;
+      this.anim.on = 0;
+      tl.to(this.anim, { on: 1, duration: 0.5 }, 0);
+      tl.to(this.anim, { scan: 1, duration: 2.6, ease: 'power2.inOut' }, 0.2);
+      return tl;
+    }
+    if (phase === 'hold') {
+      // удержание: плоскость медленно дышит между низом и серединой сферы (8 с цикл) — сфера то срезана, то почти целая
+      const tl = gsap.timeline({ repeat: -1, yoyo: true });
+      tl.to(this.anim, { scan: 1, on: 1, duration: 0.9, ease: 'power2.inOut' }, 0);
+      tl.to(this.anim, { scan: 0.42, duration: 4.0, ease: 'power1.inOut' }, 1.2);
+      return tl;
+    }
+    // выход: плоскость скана поднимается обратно — сфера «зарастает» снизу вверх, затем сетка гаснет
+    const tl = gsap.timeline();
+    tl.to(this.anim, { scan: 0, duration: 1.4, ease: 'power2.inOut' }, 0);
+    tl.to(this.anim, { on: 0, duration: 0.6, ease: 'power2.inOut' }, 0.9);
+    return tl;
+  }
 
   update(rig: Rig, local: number, dt: number, time: number, e: Engine) {
-    const cu = e.core.uniforms;
-    const pu = e.particles.uniforms;
     this.hover.update(dt, state.screen === 1);
     const hBiz = this.hover.get('business-audit');
     const hFin = this.hover.get('financial-audit');
     const hInv = this.hover.get('investment');
     const hStr = this.hover.get('strategy');
+    const enter = smooth(range(local, 0, 0.3));
+    const exit = smooth(range(local, 0.7, 1.0));
 
-    const enter = easeOutCubic(range(local, 0, 0.22));
-    const exitX = range(local, 0.8, 1.0);
-    const ex = easeInOutCubic(exitX);
-
-    // ---------- фон: ivory → sand на входе, sand → stone на выходе (сверху вниз)
-    if (exitX <= 0) {
-      rig.bg.a = 'ivory';
-      rig.bg.b = 'sand';
-      rig.bg.mix = smooth(range(local, 0, 0.18));
-      rig.bg.mask = 'uniform';
-    } else {
-      rig.bg.a = 'sand';
-      rig.bg.b = 'stone';
-      rig.bg.mix = ex;
-      rig.bg.mask = 'top';
-    }
+    rig.bg.a = 'sand';
+    rig.bg.b = 'stone';
+    rig.bg.mix = exit;
+    rig.bg.mask = 'top';
     rig.beam = 0;
-    rig.envMix = ex;
-    Object.assign(rig.post, POST_PAPER);
-
-    // ---------- камера и раскладка: от 2.35 (ядро во весь экран) к 6.6, атом вправо
-    rig.cam.set(0, 0, lerp(2.35, 6.6, enter));
+    rig.envMix = 0;
+    rig.envRot = 0.35 * enter;
+    rig.cam.set(0, 0, lerp(5.6, 6.8, enter));
     rig.look.set(0, 0, 0);
     rig.fov = 30;
-    rig.layoutOffset = enter;
-    rig.parallax = enter * 0.7;
-    rig.pointerBulge = 0;
-    rig.atomScale = lerp(0.86, 0.72, ex);
-    rig.coreVisible = true;
-    rig.coreScale = lerp(1.15, 1.0, enter) * (1 - ex * 0.42);
-    rig.coreStretch.set(1, 1 + hBiz * 0.22, 1);
-    cu.uNoiseAmp.value = lerp(SURFACE.noiseAmp * 0.5, SURFACE.noiseAmp, enter);
-    cu.uWorleyAmp.value = SURFACE.worleyAmp;
-    e.core.setShapes(0, 0);
-    cu.uMorph.value = 0;
-    rig.orbits.visible = 0;
-    rig.orbits.count = 0;
-    rig.envRot = 0.4 * enter;
+    applyLayout(rig, serviceLayout());
+    rig.parallax = 0.7;
+    rig.pointerBulge = 0.3;
+    rig.sphereScale = 1;
+    rig.sphereVisible = true;
+    rig.atomPos.set(0, 0, 0);
+    rig.lift = 0;
 
-    // ---------- скан по скроллу
-    const scan = smooth(range(local, 0.14, 0.72));
-    const on = smooth(range(local, 0.06, 0.2)) * (1 - smooth(range(local, 0.86, 0.98)));
-    e.scan.update({
-      time,
-      scan: exitX > 0 ? 1 : scan,
-      on,
-      layers: hBiz,
+    const on = this.anim.on;
+    // срез сферы плоскостью скана: видимо y ≤ plane (нормаль вниз); плоскость в мировых координатах по положению атома
+    const scanWorldY = e.atom.position.y + (1.15 - this.anim.scan * 2.3) * e.atom.scale.y * rig.sphereScale;
+    this.plane.constant = on > 0.5 ? scanWorldY : 1e6;
+    e.grid.update(time, e.renderer.getPixelRatio(), {
+      scan: this.anim.scan,
+      scanOn: on,
+      grid: on,
       hist: hFin,
-      split: hInv,
       traj: hStr,
-      pointsSpread: 1 + ex * 3.5,
+      split: hInv,
+      layers: hBiz,
+      dotsOn: on,
     });
-    e.scan.updateClipping(e.core, e.atom, on > 0.01 && scan > 0.001 && scan < 0.999 && exitX <= 0);
-
-    // подписи точек данных → HTML
-    for (let i = 0; i < DATA_POINTS.length; i++) {
-      const p = e.scan.points[i];
-      this.tmp.copy(p.position).applyMatrix4(e.atom.matrixWorld);
+    // подписи данных: появляются, когда скан прошёл их высоту
+    for (let i = 0; i < DATA_NODES.length; i++) {
+      e.grid.dataPoint(i, this.tmp).applyMatrix4(e.atom.matrixWorld);
       const s = e.project(this.tmp, { x: 0, y: 0, z: 0 });
       const a = state.anchors[`dp-${i}`] || (state.anchors[`dp-${i}`] = { x: 0, y: 0, visible: 0, hot: 0 });
       a.x = s.x;
       a.y = s.y;
-      const pu2 = (p.material as THREE.ShaderMaterial).uniforms;
-      a.visible = pu2.uOpacity.value * (1 - ex);
-      a.hot = pu2.uHot.value;
+      const py = Math.sin(THREE.MathUtils.degToRad(DATA_NODES[i][0]));
+      const passed = smooth(range(e.grid.scanY, py + 0.12, py - 0.12));
+      const dim = hInv > 0.01 && i % 2 === 1 ? 1 - hInv * 0.7 : 1;
+      a.visible = passed * on * dim;
+      a.hot = i % 2 === 0 ? hInv : 0;
     }
-
-    // ---------- частицы: штрихи → редкий фон → сеть на выходе
-    if (exitX <= 0) {
-      e.particles.setTarget('A', getTarget('streak'), 'streak');
-      e.particles.setTarget('B', getTarget('calm'), 'calm');
-      pu.uMix.value = smooth(range(local, 0, 0.25));
-      pu.uCurlAmp.value = 0.05;
-      rig.particles.opacity = lerp(0.45, 0.3, enter);
-      rig.particles.size = lerp(1.5, 1.2, enter);
-    } else {
-      e.particles.setTarget('A', getTarget('calm'), 'calm');
-      e.particles.setTarget('B', getTarget('network'), 'network');
-      pu.uMix.value = ex;
-      pu.uCurlAmp.value = 0.04 + 0.2 * Math.sin(ex * Math.PI);
-      rig.particles.opacity = lerp(0.3, 0.45, ex);
-      rig.particles.size = lerp(1.2, 1.4, ex);
-    }
-    rig.atomPos.set(0, 0, 0);
+    rig.status = `SCAN ${Math.round(this.anim.scan * 100)}% · NODES ${Math.round(this.anim.scan * 72)}/72`;
   }
 }

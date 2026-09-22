@@ -18,7 +18,7 @@ const SLOT: Record<string, string> = { usyk: 'case-usyk', 'ukrainian-fashion-wee
 const tickerItems = [...TICKER, ...TICKER];
 ---
 
-<section class="screen screen--s7" data-screen="growth" data-dur="220" data-dur-mobile="160" id="growth" data-theme="ivory" aria-labelledby="h-growth">
+<section class="screen screen--s7" data-screen="growth" data-dur="220" data-dur-mobile="180" id="growth" data-theme="ivory" aria-labelledby="h-growth">
   <div class="screen__pin">
     <div class="g container">
       <p class="g__corner g__corner--tr t-micro" data-tw>GROWTH · RINGS · {c.home.s7.counters[0].value}+</p>
@@ -133,6 +133,7 @@ const tickerItems = [...TICKER, ...TICKER];
     will-change: transform;
   }
   .card {
+    contain: paint;
     display: grid;
     align-content: start;
     gap: var(--space-2);
@@ -258,6 +259,7 @@ const tickerItems = [...TICKER, ...TICKER];
       font-size: clamp(1.8rem, 7.5vw, 2.4rem);
     }
     .card {
+    contain: paint;
       width: 58vw;
       padding: var(--space-3);
       gap: 0.3rem;

@@ -1,21 +1,18 @@
 /**
- * Сценарий главной: скролл (Lenis на десктопе, нативный на тач) → цели прогресса экранов; единый rAF
- * сглаживает их (BRIEF-2 §8: сцены, фон и CSS читают только сглаженные значения), выбирает активный экран
- * с гистерезисом, ведёт пороговые твины текста (вход 0.08, выход 0.78), Rail, постер и фолбэки.
- * Snap убран; автоскролл по Rail и якорям — 1.6 с power2.inOut.
+ * Сценарий главной (BRIEF-3 §6–7): «время решает, скролл выбирает».
+ * Один цикл (gsap.ticker): lenis.raf → цели из скролла → сглаживание с лимитом скорости и очередью экранов →
+ * DOM (только изменившееся) → engine.frame(). Дискретные события (текст, счётчики, сцены) идут по времени
+ * при смене фазы экрана; непрерывные величины читают сглаженный прогресс. Snap нет; автоскролл 1.8 с.
  */
 import gsap from 'gsap';
-import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
-import { state, SCREEN_IDS, setHover } from './state';
-import { initRows, initDrawer, initAnchors, syncTheme } from './home-ui';
-import { updateGrowth, initRail, updateRail, initPreloader } from './home-extra';
+import { state, setHover } from './state';
+import { initRows, initDrawer, initAnchors, updateAnchors } from './home-ui';
+import { runCounters, measureRibbon, updateRibbon, initRail, updateRail, initPreloader } from './home-extra';
 import { initForms } from './form';
 import { initAudio } from './audio';
 import type { Engine } from '../webgl/boot';
-
-gsap.registerPlugin(SplitText);
 
 const q = new URLSearchParams(location.search);
 const STILL = q.has('still');
@@ -26,54 +23,82 @@ const LOCAL = q.get('local');
 const T = q.get('t');
 const HOVER = q.get('hover');
 const POSTER = q.has('poster');
+const STATS = q.has('stats');
 
-/** Пороги (BRIEF-2 §8.2, §8.5): вход/выход экрана в долях его прокрутки, появление/уход текста */
-export const ENTER_END = 0.2;
+/** Фазы экрана (BRIEF-3 §6): вход [0, 0.3), удержание [0.3, 0.7), выход [0.7, 1]; текст: вход 0.08, выход 0.78 */
+export const ENTER_END = 0.3;
 export const EXIT_START = 0.7;
 const TEXT_IN = 0.08;
 const TEXT_OUT = 0.78;
-/** сглаживание: λ ≈ 7 на десктопе (~150 мс отставания), 4.5 на тач (~250 мс) */
 const COARSE = matchMedia('(pointer: coarse)').matches;
+/**
+ * сглаживание λ и лимит скорости (единиц прогресса экрана в секунду) в фазах входа/выхода: переход (выход 0.3 +
+ * вход 0.3) ≥ 1.4 с при любой прокрутке; в удержании (0.3–0.7, по скроллу ничего не меняется) лимит выше,
+ * чтобы флик через два экрана не растягивался на 6 с
+ */
 const LAMBDA = COARSE ? 4.5 : 7;
+const VMAX = COARSE ? 0.35 : 0.42;
+const VHOLD = 1.1;
+const smooth01 = (x: number) => {
+  const t = x < 0 ? 0 : x > 1 ? 1 : x;
+  return t * t * (3 - 2 * t);
+};
+const speedLimit = (cur: number) => VMAX + (VHOLD - VMAX) * smooth01((cur - 0.24) / 0.1) * smooth01((0.76 - cur) / 0.1);
+/** гистерезис смены активного экрана */
+const HYST = COARSE ? 0.06 : 0.03;
+
+type Phase = 'enter' | 'hold' | 'exit';
+const phaseOf = (l: number): Phase => (l < ENTER_END ? 'enter' : l < EXIT_START ? 'hold' : 'exit');
 
 let engine: Engine | null = null;
 let lenis: Lenis | null = null;
+let autoScrolling = false;
+let autoTimer = 0;
+let engineDone = false;
 
 function supportsWebGL2(): boolean {
   try {
     const c = document.createElement('canvas');
-    const gl = c.getContext('webgl2', { failIfMajorPerformanceCaveat: false });
-    return Boolean(gl);
+    return Boolean(c.getContext('webgl2', { failIfMajorPerformanceCaveat: false }));
   } catch {
     return false;
   }
 }
 
-/* ---------- прогресс экранов ---------- */
+/* ---------- экраны ---------- */
 interface ScreenDef {
   el: HTMLElement;
   pin: HTMLElement | null;
-  /** начало и длительность в px (пересчитываются при ресайзе) */
   start: number;
   dur: number;
   inFlow: boolean;
-  /** элементы текста для пороговых твинов (в порядке DOM) */
   tw: HTMLElement[];
   textIn: boolean;
   textOut: boolean;
+  enterVar: number;
+  exitVar: number;
+  active: boolean;
+  theme: string;
 }
 const screens: ScreenDef[] = [];
-const themes: string[] = [];
+/** секции в потоке после стейджа со своей темой (блок «О компании», S8, футер): верх и тема для шапки */
+const flowBands: Array<{ top: number; theme: string }> = [];
 let stageWrap: HTMLElement | null = null;
+let growthIdx = -1;
 let active = 0;
+let activePhase: Phase | null = null;
 let layoutW = 0;
 let layoutPortrait = false;
 let layoutVh = 0;
+let themeNow = '';
+let railKey = '';
+let scrollYNow = 0;
+let countersRan = false;
 
 function layoutScreens(force = false) {
   const w = window.innerWidth;
   const portrait = window.innerHeight > w;
-  // тач: адресная строка меняет только высоту — раскладку не трогаем, иначе прогресс прыгает (§8.7)
+  // тач: адресная строка меняет только высоту — раскладку не трогаем (§7.4: без layout-чтений в кадре)
   if (!force && COARSE && layoutVh && w === layoutW && portrait === layoutPortrait) return;
   layoutW = w;
   layoutPortrait = portrait;
@@ -89,20 +114,28 @@ function layoutScreens(force = false) {
     acc += s.dur;
   }
   if (stageWrap) stageWrap.style.height = `${acc + vh}px`;
-  // экраны в потоке (S8): вход, когда верх секции доходит до низа окна
   for (const s of screens) {
     if (!s.inFlow) continue;
     s.start = s.el.offsetTop - vh;
     s.dur = vh;
   }
+  // секции после стейджа (блок «О компании», S8, футер); шапка, меню и drawer — фиксированные, их не считаем
+  flowBands.length = 0;
+  for (const el of Array.from(document.querySelectorAll<HTMLElement>('section[data-theme], footer[data-theme]'))) {
+    if (el.closest('[data-stage]') || el.offsetTop < acc) continue;
+    flowBands.push({ top: el.offsetTop, theme: el.dataset.theme || 'ivory' });
+  }
+  flowBands.sort((a, b) => a.top - b.top);
+  measureRibbon();
+  totalScroll = document.documentElement.scrollHeight - vh;
 }
+let totalScroll = 1;
 
 /** Скролл пишет только цели */
 function measureTargets() {
-  const vh = layoutVh || window.innerHeight;
   const y = window.scrollY;
-  const total = document.documentElement.scrollHeight - vh;
-  state.targetProgress = total > 0 ? Math.min(1, Math.max(0, y / total)) : 0;
+  scrollYNow = y;
+  state.targetProgress = totalScroll > 0 ? Math.min(1, Math.max(0, y / totalScroll)) : 0;
   for (let i = 0; i < screens.length; i++) {
     const s = screens[i];
     const raw = (y - s.start) / Math.max(s.dur, 1);
@@ -110,15 +143,13 @@ function measureTargets() {
   }
 }
 
-/** Мгновенно поставить сглаженные значения в цели (still, ?progress, reduced) */
 function snapToTargets() {
   state.screens.set(state.targets);
   state.progress = state.targetProgress;
   active = pickActive(true);
-  applyFrame(0);
+  applyFrame(0, true);
 }
 
-/** Активный экран с гистерезисом: вперёд при > 0.03 следующего, назад при < 0.005 текущего */
 function pickActive(instant = false): number {
   const s = state.screens;
   if (instant) {
@@ -127,120 +158,186 @@ function pickActive(instant = false): number {
     return a;
   }
   let a = active;
-  while (a + 1 < screens.length && s[a + 1] > 0.03) a++;
-  while (a > 0 && s[a] < 0.005) a--;
+  while (a + 1 < screens.length && s[a + 1] > HYST) a++;
+  while (a > 0 && s[a] < HYST * 0.15) a--;
   return a;
 }
 
-const damp = (a: number, b: number, l: number, dt: number) => a + (b - a) * (1 - Math.exp(-l * dt));
-
-/** Единый кадр: сглаживание целей, выбор экрана, CSS-переменные, тема, Rail, текст */
-function tick(_time: number, deltaMs: number) {
-  const dt = Math.min(0.1, Math.max(0, deltaMs / 1000));
-  state.frame.dt = dt;
-  state.frame.t = performance.now();
+/**
+ * Сглаживание с лимитом скорости и очередью экранов (BRIEF-3 §6.2, §6.5): двигается активный экран;
+ * следующие ждут, пока он дойдёт до 1, предыдущие — пока он вернётся к 0. Так флик через два экрана
+ * даёт два последовательных перехода, а не один прыжок. Во время автоскролла лимит не действует.
+ */
+function smoothStep(dt: number): boolean {
+  const s = state.screens;
+  const t = state.targets;
   let moving = false;
   for (let i = 0; i < screens.length; i++) {
-    const cur = state.screens[i];
-    const target = state.targets[i];
+    const cur = s[i];
+    let target = t[i];
+    // очередь: экран i входит, только когда все экраны между активным и им дошли до 1; возвращается, когда все после него ушли в 0
+    if (i > active) {
+      for (let j = active; j < i; j++) {
+        if (s[j] < 0.985) {
+          target = Math.min(target, cur);
+          break;
+        }
+      }
+    } else if (i < active) {
+      for (let j = i + 1; j <= active; j++) {
+        if (s[j] > 0.015) {
+          target = Math.max(target, cur);
+          break;
+        }
+      }
+    }
     if (Math.abs(target - cur) < 0.0004) {
-      if (cur !== target) state.screens[i] = target;
+      if (cur !== target) s[i] = target;
       continue;
     }
-    state.screens[i] = damp(cur, target, LAMBDA, dt);
+    let step = (target - cur) * (1 - Math.exp(-LAMBDA * dt));
+    const limit = autoScrolling ? Infinity : speedLimit(cur) * dt;
+    if (Math.abs(step) > limit) step = Math.sign(step) * limit;
+    s[i] = cur + step;
     moving = true;
   }
   if (Math.abs(state.targetProgress - state.progress) < 0.0004) state.progress = state.targetProgress;
-  else state.progress = damp(state.progress, state.targetProgress, LAMBDA, dt);
+  else state.progress += (state.targetProgress - state.progress) * (1 - Math.exp(-LAMBDA * dt));
+  return moving;
+}
+
+/* ---------- единый кадр ---------- */
+let frameDirty = true;
+let fpsCount = 0;
+let fpsAt = 0;
+let fpsNow = 0;
+let statsEl: HTMLElement | null = null;
+
+function tick(_time: number, deltaMs: number) {
+  const now = performance.now();
+  const dt = Math.min(0.1, Math.max(0, deltaMs / 1000));
+  state.frame.dt = dt;
+  state.frame.t = now;
+  if (lenis) lenis.raf(now);
+  const moving = smoothStep(dt);
   const next = pickActive();
   if (next !== active) {
     active = next;
-    moving = true;
+    frameDirty = true;
   }
-  if (moving || frameDirty) applyFrame(dt);
+  if (moving || frameDirty) applyFrame(dt, false);
+  updateAnchors();
+  if (engine && !engineDone) {
+    if (!engine.frame(now)) engineDone = true;
+  }
+  fpsCount++;
+  if (now - fpsAt >= 500) {
+    fpsNow = Math.round((fpsCount * 1000) / (now - fpsAt));
+    fpsCount = 0;
+    fpsAt = now;
+    if (statsEl) {
+      const e = engine;
+      statsEl.textContent = `${fpsNow} FPS · ${e ? e.stats.frameMs.toFixed(1) : '—'} MS · ${e ? e.tier.name.toUpperCase() : 'NO GL'} · DPR ${(e ? e.renderer.getPixelRatio() : window.devicePixelRatio).toFixed(2)} · CALLS ${e ? e.stats.calls : 0} · S${active + 1} ${state.screens[active].toFixed(2)}`;
+    }
+  }
 }
-let frameDirty = true;
 
-function applyFrame(dt: number) {
+function applyFrame(dt: number, instant: boolean) {
   frameDirty = false;
+  const localA = state.screens[active];
+  const phase = phaseOf(localA);
   for (let i = 0; i < screens.length; i++) {
     const s = screens[i];
     const local = state.screens[i];
-    const enter = i === 0 ? 1 : Math.min(1, local / ENTER_END);
-    const exit = Math.max(0, (local - EXIT_START) / (1 - EXIT_START));
-    s.el.style.setProperty('--enter', enter.toFixed(4));
-    s.el.style.setProperty('--exit', exit.toFixed(4));
-    const isActive = i === active || (i === active + 1 && state.screens[active] > EXIT_START && !s.inFlow);
-    s.el.classList.toggle('is-active', isActive);
+    const near = i === active || i === active + 1 || i === active - 1;
+    // --enter/--exit пишем только активному и соседям и только при изменении > 0.004 (§6.4)
+    if (near) {
+      const enter = i === 0 ? 1 : Math.min(1, local / ENTER_END);
+      const exit = Math.max(0, (local - EXIT_START) / (1 - EXIT_START));
+      if (Math.abs(enter - s.enterVar) > 0.004 || instant) {
+        s.enterVar = enter;
+        s.el.style.setProperty('--enter', enter.toFixed(3));
+      }
+      if (Math.abs(exit - s.exitVar) > 0.004 || instant) {
+        s.exitVar = exit;
+        s.el.style.setProperty('--exit', exit.toFixed(3));
+      }
+    }
+    const isActive = i === active || (i === active + 1 && localA > EXIT_START && !s.inFlow);
+    if (isActive !== s.active) {
+      s.active = isActive;
+      s.el.classList.toggle('is-active', isActive);
+    }
     updateText(s, i, local, dt);
   }
+  // смена экрана и фазы активного экрана: дискретные события по времени (счётчики S7, cm:phase)
   const prev = document.body.dataset.screen;
-  document.body.dataset.screen = String(active);
+  const cur = String(active);
+  if (prev !== cur) {
+    document.body.dataset.screen = cur;
+    state.screen = active;
+    document.dispatchEvent(new CustomEvent('cm:screenchange', { detail: active }));
+  }
+  if (phase !== activePhase || prev !== cur) {
+    activePhase = phase;
+    document.dispatchEvent(new CustomEvent('cm:phase', { detail: { screen: active, phase } }));
+    if (active === growthIdx && (phase === 'enter' || !countersRan)) {
+      countersRan = true;
+      runCounters(instant || state.reduced ? 0 : 1.4);
+    }
+  }
   state.screen = active;
-  if (prev !== String(active)) document.dispatchEvent(new CustomEvent('cm:screenchange', { detail: active }));
-  const exitT = Math.max(0, Math.min(1, (state.screens[active] - EXIT_START) / (1 - EXIT_START)));
-  syncTheme(themes, active, exitT);
-  updateRail(active, state.progress);
+  if (growthIdx >= 0) updateRibbon(state.screens[growthIdx], state.reduced);
+  // тема по порогу (§6.4): за серединой выхода — тема следующего экрана; после стейджа — тема секции под шапкой;
+  // CSS transition 900 мс делает переход
+  let nextTheme = localA > 0.85 && screens[active + 1] ? screens[active + 1].theme : screens[active].theme;
+  const headY = scrollYNow + 64;
+  for (const b of flowBands) if (headY >= b.top) nextTheme = b.theme;
+  if (nextTheme !== themeNow) {
+    themeNow = nextTheme;
+    document.documentElement.dataset.theme = nextTheme;
+    document.documentElement.dataset.themeNow = nextTheme;
+  }
+  const rk = `${active}|${state.progress.toFixed(3)}|${localA.toFixed(2)}`;
+  if (rk !== railKey) {
+    railKey = rk;
+    updateRail(active, state.progress);
+  }
   updatePoster();
-  const growthIdx = screens.findIndex((x) => x.el.id === 'growth');
-  if (growthIdx >= 0) updateGrowth(state.screens[growthIdx], state.reduced);
 }
 
-/* ---------- пороговые твины текста (§8.5) ---------- */
+/* ---------- пороговые твины текста ---------- */
 function updateText(s: ScreenDef, i: number, local: number, dt: number) {
-  // первый экран уходит целиком (pin), остальные — по элементам data-tw
   if (!s.tw.length && !(i === 0 && s.pin)) return;
   const mobile = state.mobile || COARSE;
   const instant = dt === 0 || state.reduced;
-  // гистерезис, чтобы не дёргать твины на границе
   const wantIn = i === 0 ? true : s.textIn ? local > TEXT_IN - 0.04 : local >= TEXT_IN;
   const wantOut = s.inFlow ? false : s.textOut ? local > TEXT_OUT - 0.04 : local >= TEXT_OUT;
   if (wantIn !== s.textIn) {
     s.textIn = wantIn;
-    if (i === 0) return; // первый экран появляется по времени (initHeroText)
-    gsap.killTweensOf(s.tw);
-    if (wantIn) {
-      gsap.fromTo(s.tw, { autoAlpha: 0, y: mobile ? 0 : 24 }, { autoAlpha: 1, y: 0, duration: instant ? 0 : 0.9, ease: 'expo.out', stagger: instant ? 0 : 0.06, overwrite: true });
-    } else {
-      gsap.to(s.tw, { autoAlpha: 0, y: mobile ? 0 : 24, duration: instant ? 0 : 0.5, ease: 'power2.out', overwrite: true });
+    if (i !== 0) {
+      gsap.killTweensOf(s.tw);
+      if (wantIn) gsap.fromTo(s.tw, { autoAlpha: 0, y: mobile ? 0 : 24 }, { autoAlpha: 1, y: 0, duration: instant ? 0 : 0.9, ease: 'expo.out', stagger: instant ? 0 : 0.06, overwrite: true });
+      else gsap.to(s.tw, { autoAlpha: 0, y: mobile ? 0 : 24, duration: instant ? 0 : 0.5, ease: 'power2.out', overwrite: true });
     }
   }
   if (wantOut !== s.textOut) {
     s.textOut = wantOut;
     const targets = i === 0 && s.pin ? [s.pin] : s.tw;
     gsap.killTweensOf(targets);
-    if (wantOut) {
-      gsap.to(targets, { autoAlpha: 0, y: mobile ? 0 : -18, duration: instant ? 0 : 0.6, ease: 'power2.inOut', overwrite: true });
-    } else {
-      gsap.to(targets, { autoAlpha: 1, y: 0, duration: instant ? 0 : 0.7, ease: 'expo.out', stagger: instant || i === 0 ? 0 : 0.04, overwrite: true });
-    }
+    if (wantOut) gsap.to(targets, { autoAlpha: 0, y: mobile ? 0 : -18, duration: instant ? 0 : 0.6, ease: 'power2.inOut', overwrite: true });
+    else gsap.to(targets, { autoAlpha: 1, y: 0, duration: instant ? 0 : 0.7, ease: 'expo.out', stagger: instant || i === 0 ? 0 : 0.04, overwrite: true });
   }
-}
-
-function currentScreen() {
-  return active;
 }
 
 /* ---------- скролл ---------- */
 function initScroll() {
   const fine = matchMedia('(pointer: fine)').matches;
   if (fine && !state.reduced && !STILL) {
-    lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.85, smoothWheel: true, syncTouch: false, autoRaf: true });
+    lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.85, smoothWheel: true, syncTouch: false, autoRaf: false });
     lenis.on('scroll', measureTargets);
-    gsap.ticker.lagSmoothing(0);
     (window as unknown as { __cmLenis: Lenis }).__cmLenis = lenis;
-    // Страховка: если первый rAF Lenis не сработал (встроенные/скрытые вкладки), запускаем цикл вручную
-    const kick = () => {
-      const l = lenis as unknown as { time: number; raf: (t: number) => void };
-      if (l.time === 0) l.raf(performance.now());
-    };
-    setTimeout(kick, 800);
-    window.addEventListener('load', () => setTimeout(kick, 200), { once: true });
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) setTimeout(kick, 100);
-    });
   }
-  // нативный скролл (тач, reduced, still) и дубль для Lenis: цели пишутся из любого источника
   window.addEventListener('scroll', measureTargets, { passive: true });
   window.addEventListener(
     'resize',
@@ -252,15 +349,8 @@ function initScroll() {
     { passive: true },
   );
   measureTargets();
-  if (STILL || state.reduced) {
-    snapToTargets();
-  } else {
-    state.screens.set(state.targets);
-    state.progress = state.targetProgress;
-    active = pickActive(true);
-    applyFrame(0);
-  }
-  // единый rAF: сглаживание + DOM (сцена читает state в своём кадре)
+  snapToTargets();
+  gsap.ticker.lagSmoothing(0);
   gsap.ticker.add(tick);
 }
 
@@ -282,92 +372,69 @@ function initPointer() {
   if (COARSE) p.active = false;
 }
 
-/* ---------- подписи орбит (HTML-лейблы, привязанные к 3D-точкам) ---------- */
-function initOrbitLabels() {
-  const labels = Array.from(document.querySelectorAll<HTMLElement>('[data-orbit-label]'));
-  if (!labels.length) return;
-  const targets = labels.map((l) => Number(l.dataset.orbitLabel));
-  const loop = () => {
-    const hov = state.orbitHover;
-    labels.forEach((el, i) => {
-      const info = state.orbitLabels[targets[i]];
-      if (!info) return;
-      const vis = info.visible > 0.5;
-      const show = vis && hov === targets[i];
-      el.style.transform = `translate3d(${info.x.toFixed(1)}px, ${info.y.toFixed(1)}px, 0)`;
-      el.classList.toggle('is-visible', show);
-      el.classList.toggle('is-hover', hov === targets[i]);
-    });
-    document.body.classList.toggle('orbit-hover', hov >= 0 && state.screen === 0);
-    requestAnimationFrame(loop);
-  };
-  requestAnimationFrame(loop);
-
-  // клик по орбите → экран направления
+/* ---------- орбиты-ссылки: hover (курсор) и клик → экран направления ---------- */
+function initOrbitLinks() {
+  let was = false;
+  document.addEventListener('cm:screenchange', () => document.body.classList.toggle('orbit-hover', false));
+  gsap.ticker.add(() => {
+    const on = state.orbitHover >= 0 && state.screen === 0;
+    if (on !== was) {
+      was = on;
+      document.body.classList.toggle('orbit-hover', on);
+    }
+  });
   window.addEventListener('click', (e) => {
-    if (state.orbitHover < 0 || state.screen !== 0) return;
     const target = e.target as HTMLElement;
+    const link = target.closest<HTMLElement>('[data-orbit-link]');
+    if (link) {
+      scrollToScreen(Number(link.dataset.orbitLink));
+      return;
+    }
+    if (state.orbitHover < 0 || state.screen !== 0) return;
     if (target.closest('a, button, input, textarea, select, label')) return;
     scrollToScreen(state.orbitHover + 1);
   });
-  labels.forEach((el, i) => el.addEventListener('click', () => scrollToScreen(targets[i] + 1)));
 }
 
 const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 
-/** Автоскролл к экрану: 1.6 с power2.inOut (Lenis на десктопе, твин window.scrollTo на тач) */
+/** Автоскролл к экрану: 1.8 с power2.inOut, лимит скорости на это время не действует (§6.6) */
 export function scrollToScreen(index: number, hold = true) {
   const s = screens[index];
   if (!s) return;
-  const y = s.inFlow ? s.start + s.dur : s.start + (hold ? s.dur * (index === 0 ? 0.25 : 0.4) : 0);
+  const y = s.inFlow ? s.start + s.dur : s.start + (hold ? s.dur * (index === 0 ? 0.3 : 0.45) : 0);
   if (state.reduced) {
     window.scrollTo(0, y);
     return;
   }
-  if (lenis) {
-    lenis.scrollTo(y, { duration: 1.6, easing: easeInOutQuad });
-  } else {
+  autoScrolling = true;
+  clearTimeout(autoTimer);
+  autoTimer = window.setTimeout(() => (autoScrolling = false), 2000);
+  if (lenis) lenis.scrollTo(y, { duration: 1.8, easing: easeInOutQuad, onComplete: () => (autoScrolling = false) });
+  else {
     const from = { y: window.scrollY };
-    gsap.to(from, { y, duration: 1.6, ease: 'power2.inOut', overwrite: true, onUpdate: () => window.scrollTo(0, from.y) });
+    gsap.to(from, { y, duration: 1.8, ease: 'power2.inOut', overwrite: true, onUpdate: () => window.scrollTo(0, from.y), onComplete: () => (autoScrolling = false) });
   }
 }
 
-/* ---------- текст первого экрана ---------- */
+/* ---------- текст первого экрана: уже на месте (BRIEF-3 §5), короткое проявление ---------- */
 let heroStarted = false;
-function initHeroText(delay: number) {
+function initHeroText() {
   if (heroStarted) return;
   heroStarted = true;
   const h1 = document.querySelector<HTMLElement>('[data-hero-title]');
-  const lead = document.querySelector<HTMLElement>('[data-hero-lead]');
-  const ctas = document.querySelectorAll<HTMLElement>('[data-hero-cta] > *');
-  const micro = document.querySelectorAll<HTMLElement>('[data-hero-micro]');
-  const ticker = document.querySelector<HTMLElement>('[data-hero-ticker]');
+  const rest = document.querySelectorAll<HTMLElement>('[data-hero-lead], [data-hero-cta] > *, [data-hero-micro], [data-hero-ticker]');
   if (!h1) return;
-
-  const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } });
-  if (state.reduced) {
-    gsap.set([h1, lead, ctas, micro, ticker], { autoAlpha: 1, y: 0 });
+  if (state.reduced || STILL) {
+    gsap.set([h1, rest], { autoAlpha: 1, y: 0 });
     return;
   }
-  const split = new SplitText(h1, { type: 'lines', linesClass: 'line', mask: 'lines' });
   gsap.set(h1, { autoAlpha: 1 });
-  tl.from(split.lines, { yPercent: 110, duration: 1.25, stagger: 0.07 }, 0);
-  if (lead) tl.fromTo(lead, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 1.0 }, 0.55);
-  if (ctas.length) tl.fromTo(ctas, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.08 }, 0.8);
-  if (micro.length) tl.fromTo(micro, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8, stagger: 0.05 }, 0.3);
-  if (ticker) tl.fromTo(ticker, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.9 }, 1.1);
-
-  if (STILL) {
-    const t = T !== null ? Number(T) : 4;
-    tl.progress(1).pause();
-    tl.seek(Math.max(0, t - delay));
-    if (t - delay <= 0) tl.progress(0);
-  } else {
-    gsap.delayedCall(delay, () => tl.play());
-  }
+  gsap.fromTo(h1, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7, ease: 'power2.out' });
+  gsap.fromTo(rest, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7, ease: 'power2.out', stagger: 0.04, delay: 0.15 });
 }
 
-/* ---------- постер / фолбэк: статичные постеры экранов с кроссфейдом ---------- */
+/* ---------- постер / фолбэк ---------- */
 let posterLayers: HTMLElement[] = [];
 let posterCurrent = '';
 function showFallback(reason: string) {
@@ -385,9 +452,8 @@ function showFallback(reason: string) {
 }
 function updatePoster(force = false) {
   if (!posterLayers.length) return;
-  const cur = currentScreen();
-  const mobile = window.innerWidth < 900 && window.innerHeight > window.innerWidth;
-  const name = `s${cur + 1}${mobile ? '-m' : ''}`;
+  const mobile = layoutW < 900 && layoutPortrait;
+  const name = `s${active + 1}${mobile ? '-m' : ''}`;
   if (name === posterCurrent && !force) return;
   posterCurrent = name;
   const on = posterLayers.find((l) => !l.classList.contains('is-on')) || posterLayers[0];
@@ -403,9 +469,8 @@ function updatePoster(force = false) {
 async function loadEngine(canvas: HTMLCanvasElement) {
   try {
     const mod = await import('../webgl/boot');
-    engine = mod.boot(canvas, () => {
-      document.body.classList.add('gl-ready');
-    });
+    // кадры рисует единый тикер страницы (tick), собственный rAF движка не запускаем
+    engine = mod.create(canvas, () => document.body.classList.add('gl-ready'));
     canvas.dataset.tier = engine.tier.name;
   } catch (err) {
     console.error('[cybermove] WebGL init failed', err);
@@ -413,19 +478,16 @@ async function loadEngine(canvas: HTMLCanvasElement) {
   }
 }
 
-/* ---------- ?progress: поставить страницу в точку ---------- */
+/* ---------- ?progress / ?screen: поставить страницу в точку ---------- */
 function applyProgressParam() {
   if (PROGRESS === null && SCREEN === null) return;
   let y = 0;
   if (SCREEN !== null) {
-    // ?screen=2&local=0.4 — точка внутри экрана
     const s = screens[Number(SCREEN)];
     if (!s) return;
-    y = Math.round(s.start + s.dur * Math.min(1, Math.max(0, Number(LOCAL ?? 0.4))));
+    y = Math.round(s.start + s.dur * Math.min(1, Math.max(0, Number(LOCAL ?? 0.45))));
   } else {
-    const p = Math.min(1, Math.max(0, Number(PROGRESS)));
-    const total = document.documentElement.scrollHeight - window.innerHeight;
-    y = Math.round(p * total);
+    y = Math.round(Math.min(1, Math.max(0, Number(PROGRESS))) * totalScroll);
   }
   if (lenis) lenis.scrollTo(y, { immediate: true });
   window.scrollTo(0, y);
@@ -435,18 +497,17 @@ function applyProgressParam() {
 
 export function initHome() {
   state.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (POSTER) document.body.classList.add('is-poster'); // только канвас — для генерации постеров
+  if (POSTER) document.body.classList.add('is-poster');
   stageWrap = document.querySelector<HTMLElement>('[data-stage-wrap]');
   for (const el of Array.from(document.querySelectorAll<HTMLElement>('[data-screen]'))) {
     const first = screens.length === 0;
     const inFlow = !el.closest('[data-stage]');
     const tw = Array.from(el.querySelectorAll<HTMLElement>('[data-tw]'));
-    screens.push({ el, pin: el.querySelector('.screen__pin'), start: 0, dur: 1, inFlow, tw, textIn: first || inFlow, textOut: false });
-    // до входа текст скрыт (первый экран и S8 — видимы)
+    screens.push({ el, pin: el.querySelector('.screen__pin'), start: 0, dur: 1, inFlow, tw, textIn: first || inFlow, textOut: false, enterVar: -1, exitVar: -1, active: false, theme: el.dataset.theme || 'ivory' });
     if (!first && !inFlow && tw.length && !state.reduced) gsap.set(tw, { autoAlpha: 0 });
   }
+  growthIdx = screens.findIndex((s) => s.el.id === 'growth');
   layoutScreens(true);
-  themes.push(...screens.map((s) => s.el.dataset.theme || 'ivory'));
   initRows();
   initDrawer();
   initAnchors();
@@ -454,8 +515,12 @@ export function initHome() {
   initPreloader(STILL);
   initForms();
   initAudio();
+  if (STATS) {
+    statsEl = document.createElement('p');
+    statsEl.className = 'stats t-micro';
+    document.body.appendChild(statsEl);
+  }
   const canvas = document.querySelector<HTMLCanvasElement>('#gl');
-  // якоря #audit и т.п. → плавный скролл к экрану
   document.addEventListener('click', (e) => {
     const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
     if (!a) return;
@@ -468,30 +533,25 @@ export function initHome() {
 
   initPointer();
   initScroll();
-  initOrbitLabels();
+  initOrbitLinks();
 
   const canGl = canvas && supportsWebGL2() && !state.reduced && !FORCE_FALLBACK;
   if (!canGl) {
     showFallback(state.reduced ? 'reduced-motion' : 'no-webgl2');
-    initHeroText(0.2);
+    initHeroText();
   } else {
-    // текст появляется синхронно со сборкой ядра (~1.1 с после первого кадра сцены)
-    state.events.on('ready', () => initHeroText(1.05));
+    initHeroText();
     const start = () => loadEngine(canvas!);
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', () => setTimeout(start, 60), { once: true });
-    // LCP — заголовок: не ждём движок дольше 1.4 с
-    setTimeout(() => initHeroText(0), 1400);
   }
 
-  // ?progress — после раскладки
   requestAnimationFrame(() => {
     applyProgressParam();
     setTimeout(applyProgressParam, 300);
   });
 
   if (HOVER) {
-    // отладка: ?hover=<id услуги> — активная строка и реакция сцены
     setTimeout(() => {
       const row = document.querySelector<HTMLElement>(`[data-service="${HOVER}"]`)?.closest<HTMLElement>('[data-row]');
       row?.classList.add('is-active');

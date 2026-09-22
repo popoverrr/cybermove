@@ -1,7 +1,8 @@
 /**
- * Дополнительная логика главной: счётчики и лента кейсов S7 (по прогрессу), Rail (прогресс, клики,
- * клавиатура), прелоадер (≤ 1.5 с), пульс ядра от аудио.
+ * Дополнительная логика главной: счётчики S7 (по времени, BRIEF-3 §5), лента кейсов S7 (по сглаженному
+ * скроллу, размеры меряются только в layout), Rail (прогресс, клики, клавиатура), прелоадер (≤ 1.5 с).
  */
+import gsap from 'gsap';
 import { state, SCREEN_IDS } from './state';
 
 const smooth = (t: number) => {
@@ -9,22 +10,49 @@ const smooth = (t: number) => {
   return x * x * (3 - 2 * x);
 };
 
-/* ---------- S7: счётчики и лента по локальному прогрессу ---------- */
-export function updateGrowth(local: number, reduced: boolean) {
-  const counters = document.querySelectorAll<HTMLElement>('[data-count]');
-  const k = reduced ? 1 : smooth((local - 0.04) / 0.36);
-  counters.forEach((el) => {
+/* ---------- S7: счётчики идут по времени при входе на экран: 1.4 с, power3.out ---------- */
+let counterEls: HTMLElement[] | null = null;
+export function runCounters(duration: number) {
+  if (!counterEls) counterEls = Array.from(document.querySelectorAll<HTMLElement>('[data-count]'));
+  for (const el of counterEls) {
     const target = Number(el.dataset.count || 0);
-    const v = Math.round(target * k);
-    if (el.textContent !== String(v)) el.textContent = String(v);
-  });
-  const ribbon = document.querySelector<HTMLElement>('[data-ribbon]');
-  if (ribbon) {
-    const wrap = ribbon.parentElement as HTMLElement;
-    const max = Math.max(0, ribbon.scrollWidth - wrap.clientWidth + 48);
-    const t = reduced ? 0 : smooth((local - 0.3) / 0.55);
-    ribbon.style.transform = `translate3d(${(-max * t).toFixed(1)}px, 0, 0)`;
+    const obj = { v: 0 };
+    gsap.killTweensOf(obj);
+    if (duration <= 0) {
+      el.textContent = String(target);
+      continue;
+    }
+    el.textContent = '0';
+    gsap.to(obj, {
+      v: target,
+      duration,
+      ease: 'power3.out',
+      onUpdate: () => {
+        const s = String(Math.round(obj.v));
+        if (el.textContent !== s) el.textContent = s;
+      },
+    });
   }
+}
+
+/* ---------- S7: лента кейсов сдвигается по сглаженному прогрессу; ширина меряется в layoutScreens ---------- */
+let ribbonEl: HTMLElement | null = null;
+let ribbonMax = 0;
+let ribbonX = 1e9;
+export function measureRibbon() {
+  ribbonEl = document.querySelector<HTMLElement>('[data-ribbon]');
+  if (!ribbonEl) return;
+  const wrap = ribbonEl.parentElement as HTMLElement;
+  ribbonMax = Math.max(0, ribbonEl.scrollWidth - wrap.clientWidth + 48);
+  ribbonX = 1e9;
+}
+export function updateRibbon(local: number, reduced: boolean) {
+  if (!ribbonEl) return;
+  const t = reduced ? 0 : smooth((local - 0.3) / 0.55);
+  const x = -ribbonMax * t;
+  if (Math.abs(x - ribbonX) < 0.5) return;
+  ribbonX = x;
+  ribbonEl.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0)`;
 }
 
 /* ---------- Rail ---------- */

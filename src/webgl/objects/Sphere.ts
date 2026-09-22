@@ -22,14 +22,6 @@ export interface SphereUniforms {
   uFloorShade: THREE.IUniform<number>;
   /** осветление к paper (S5, импульс формы) 0..1 */
   uLift: THREE.IUniform<number>;
-  /** совместимость со сценами итерации 2 (не используются шейдером; удаляются в фазе B) */
-  uWorleyAmp: THREE.IUniform<number>;
-  uWorleyFreq: THREE.IUniform<number>;
-  uTurb: THREE.IUniform<number>;
-  uMorph: THREE.IUniform<number>;
-  uStretch: THREE.IUniform<THREE.Vector3>;
-  uScanY: THREE.IUniform<number>;
-  uScanOn: THREE.IUniform<number>;
 }
 
 /** Стартовые параметры материала (BRIEF-3 §3.1); доводка — в DECISIONS.md и ?debug */
@@ -79,13 +71,7 @@ void cmSurface(vec3 bp, vec3 bn, out vec3 P, out vec3 N) {
   P = P0;
   N = normalize(cross(P1 - P0, P2 - P0));
 }
-// совместимость со старым сканом (фаза B заменит): поверхность от атрибутов вершины
-void cmSurface(out vec3 P, out vec3 N) { cmSurface(position, normalize(normal), P, N); }
 `;
-/** @deprecated амплитуды итерации 2; сцены переписываются в фазе B */
-export const SURFACE = { noiseAmp: 0.01, noiseSpeed: 0.06, worleyAmp: 0 } as const;
-/** @deprecated имя из итерации 1–2; удалить вместе со старым Scan.ts в фазе B */
-export const CHROME_VERTEX_PARS = SPHERE_VERTEX_PARS;
 
 const SPHERE_BEGINNORMAL = /* glsl */ `
 vec3 cmP; vec3 cmN;
@@ -218,13 +204,6 @@ export class Sphere {
       uEnvMix: { value: 0 },
       uFloorShade: { value: 0.72 },
       uLift: { value: 0 },
-      uWorleyAmp: { value: 0 },
-      uWorleyFreq: { value: 1 },
-      uTurb: { value: 0 },
-      uMorph: { value: 0 },
-      uStretch: { value: new THREE.Vector3(1, 1, 1) },
-      uScanY: { value: 2 },
-      uScanOn: { value: 0 },
     };
 
     const P = PEARL_MATERIAL;
@@ -281,14 +260,6 @@ export class Sphere {
     this.uniforms.uTime.value = time;
   }
 
-  /** @deprecated морфинга больше нет (BRIEF-3 §2): сфера всегда сфера; методы оставлены до переписывания сцен в фазе B */
-  setShapes(_a: number, _b: number) {}
-  /** @deprecated */
-  morphAlong(_track: number[], _t: number) {}
-  /** @deprecated */
-  whenShapesReady() {
-    return Promise.resolve();
-  }
 
   dispose() {
     this.geometry.dispose();

@@ -1,103 +1,133 @@
 /**
- * S4 · БРЕНД И КОНТЕНТ — SYSTEM (BRIEF §7 S4). Тема ivory, студийный свет.
- * Одна крупная матовая капля, морфинг: капля → звезда (ядро бренда) → объектив (продакшн) →
- * рамка 9:16 (SMM) → волны (PR) → монолит в тёплом луче (личный бренд). Скролл сменяет формы, hover принуждает.
- * Выход: капля распадается на четыре струи частиц, фон переходит в clay от центра.
+ * S4 · БРЕНД И КОНТЕНТ (BRIEF-3 §5). Сфера не деформируется. Пять линейных фигур рисуются и стираются по кругу
+ * в порядке строк (каждая 1.4 с рисуется, 3 с держится, 0.6 с стирается); hover фиксирует свою фигуру.
+ * Свет при «луче» становится контровым (поворот окружения на 140°, 1.5 с).
  */
+import gsap from 'gsap';
+import * as THREE from 'three';
 import type { Engine } from '../Engine';
 import type { Rig } from '../Story';
-import type { SceneModule } from './types';
-import { getTarget } from '../objects/targets';
-import { POST_PAPER } from '../Post';
-import { SURFACE } from '../objects/Sphere';
-import { range, smooth, easeInOutCubic, lerp, damp } from '../math';
+import type { SceneModule, Phase } from './types';
+import { range, smooth, lerp } from '../math';
 import { HoverMix } from './hover';
+import { FIGURE_IDS } from '../objects/Figures';
 import { state } from '../../lib/state';
+import { applyLayout, serviceLayout } from './layout';
 
-const KEYS = ['brand-core', 'production', 'smm', 'pr', 'personal-brand'] as const;
-/** дорожка форм: индекс 0 — капля, далее формы услуг по порядку */
-const TRACK = [6, 1, 2, 3, 4, 5];
+const DRAW = 1.4;
+const HOLD = 3.0;
+const ERASE = 0.6;
+const STEP = DRAW + HOLD + ERASE;
 
 export class BrandScene implements SceneModule {
   readonly id = 'brand';
-  readonly range = { enter: 0.12, exit: 0.82 };
-  private hover = new HoverMix(KEYS, 5);
-  private hoverBlend = 0;
-  private hoverPos = 1;
+  private hover = new HoverMix(FIGURE_IDS, 5);
+  private tmp = new THREE.Vector3();
+  private anim = { on: 0, label: 0 };
+  /** текущая фигура цикла */
+  private current = 0;
+  private hoverFig = -1;
+  private beamLight = 0;
 
   init() {}
 
+  setActive(on: boolean, e: Engine) {
+    e.figures.group.visible = on;
+    if (!on) {
+      const a = state.anchors['figure'];
+      if (a) a.visible = 0;
+    }
+  }
+
+  private figureTween(f: number, tl: gsap.core.Timeline, at: number, e: Engine) {
+    const fig = e.figures;
+    tl.set(fig.erase, { [f]: 0 }, at);
+    tl.set(fig.draw, { [f]: 0 }, at);
+    tl.to(fig.draw, { [f]: 1, duration: DRAW, ease: 'power2.inOut' }, at);
+    tl.to(fig.erase, { [f]: 1, duration: ERASE, ease: 'power2.inOut' }, at + DRAW + HOLD);
+    tl.set(this, { current: f }, at);
+    if (f === 3) tl.fromTo(fig, { wave: 0 }, { wave: 3.999, duration: DRAW + HOLD, ease: 'none' }, at);
+    if (f === 4) {
+      tl.to(this, { beamLight: 1, duration: 1.5, ease: 'power2.inOut' }, at + 0.2);
+      tl.to(this, { beamLight: 0, duration: 1.0, ease: 'power2.inOut' }, at + DRAW + HOLD);
+    }
+  }
+
+  timeline(phase: Phase, e: Engine) {
+    if (phase === 'enter') {
+      const tl = gsap.timeline();
+      this.anim.on = 0;
+      for (let f = 0; f < 5; f++) {
+        e.figures.draw[f] = 0;
+        e.figures.erase[f] = 0;
+      }
+      tl.to(this.anim, { on: 1, duration: 0.4 }, 0);
+      this.figureTween(0, tl, 0.3, e);
+      tl.to(this.anim, { label: 1, duration: 0.4 }, 0.3 + DRAW);
+      return tl;
+    }
+    if (phase === 'hold') {
+      // цикл фигур 2..5 → 1 …: repeat; после отменённого выхода — сначала вернуть видимость
+      const tl = gsap.timeline({ repeat: -1 });
+      if (this.anim.on < 0.999) tl.to(this.anim, { on: 1, label: 1, duration: 0.5 }, 0);
+      for (let k = 0; k < 5; k++) this.figureTween((k + 1) % 5, tl, k * STEP, e);
+      return tl;
+    }
+    const tl = gsap.timeline();
+    tl.to(this.anim, { on: 0, label: 0, duration: 0.6, ease: 'power2.inOut' }, 0);
+    tl.to(this, { beamLight: 0, duration: 0.6 }, 0);
+    return tl;
+  }
+
   update(rig: Rig, local: number, dt: number, time: number, e: Engine) {
-    const cu = e.core.uniforms;
-    const pu = e.particles.uniforms;
     this.hover.update(dt, state.screen === 3);
     const active = this.hover.active;
-
-    const exitX = range(local, 0.82, 1.0);
-    const ex = easeInOutCubic(exitX);
-
-    // ---------- фон: ivory; выход — clay от центра
+    const exit = smooth(range(local, 0.7, 1.0));
     rig.bg.a = 'ivory';
     rig.bg.b = 'clay';
-    rig.bg.mix = ex;
-    rig.bg.mask = 'radial';
-    rig.envMix = ex;
-    Object.assign(rig.post, POST_PAPER);
-
-    // ---------- камера, ядро крупно
+    rig.bg.mix = exit;
+    rig.bg.mask = 'uniform'; // радиальная маска давала тёмное «пятно» вокруг сферы на выходе
+    rig.envMix = 0;
+    rig.envRot = 0.9 + local * 0.6 + this.beamLight * 2.44;
+    rig.beam = this.beamLight * 0.6;
     rig.cam.set(0, 0, 7.2);
     rig.look.set(0, 0, 0);
     rig.fov = 30;
-    rig.layoutOffset = 1;
+    applyLayout(rig, serviceLayout());
     rig.parallax = 0.8;
-    rig.pointerBulge = 0.6;
-    rig.atomScale = 0.95;
-    rig.coreVisible = true;
-    rig.coreStretch.set(1, 1, 1);
-    cu.uNoiseAmp.value = SURFACE.noiseAmp * 1.6;
-    cu.uNoiseSpeed.value = SURFACE.noiseSpeed * 1.2;
-    cu.uWorleyAmp.value = SURFACE.worleyAmp * 0.3;
-    cu.uTurb.value = 0.09;
-    rig.orbits.visible = 0;
-    rig.orbits.count = 0;
-    // световые карты скользят по поверхности
-    rig.envRot = 0.9 + local * 2.4;
-
-    // ---------- морфинг: позиция на дорожке по скроллу, hover принуждает форму строки
-    const scrollPos = 1 + smooth(range(local, 0.1, 0.8)) * 4; // 1 (звезда) … 5 (монолит)
-    const target = active >= 0 ? active + 1 : scrollPos;
-    this.hoverBlend = dt === 0 ? (active >= 0 ? 1 : 0) : damp(this.hoverBlend, active >= 0 ? 1 : 0, 5, dt);
-    if (active >= 0) this.hoverPos = dt === 0 ? target : damp(this.hoverPos, target, 5, dt);
-    else this.hoverPos = dt === 0 ? scrollPos : damp(this.hoverPos, scrollPos, 5, dt);
-    let pos = lerp(scrollPos, this.hoverPos, this.hoverBlend);
-    // вход: из капли в звезду; выход: обратно в каплю и растворение
-    const enterT = smooth(range(local, 0.0, 0.12));
-    pos = lerp(0, pos, enterT);
-    if (exitX > 0) pos = lerp(pos, 0, smooth(range(exitX, 0, 0.6)));
-    e.core.morphAlong(TRACK, pos);
-    // монолит в тёплом слабом луче (BRIEF-2 §4.7)
-    const monolith = Math.max(0, 1 - Math.abs(pos - 5));
-    rig.beam = monolith * 0.6 * (1 - ex);
-    rig.coreScale = lerp(1.05, 0.98, enterT) * (1 - smooth(range(exitX, 0.35, 0.95)));
-    // монолит стоит вертикально: без покачивания
-    rig.coreUpright = monolith;
-
-    // ---------- частицы: спокойное облако; выход — четыре струи
-    if (exitX <= 0) {
-      e.particles.setTarget('A', getTarget('1s'), '1s');
-      e.particles.setTarget('B', getTarget('calm'), 'calm');
-      pu.uMix.value = smooth(range(local, 0, 0.3));
-      pu.uCurlAmp.value = 0.06;
-      rig.particles.opacity = 0.3;
-      rig.particles.size = 1.2;
-    } else {
-      e.particles.setTarget('A', getTarget('calm'), 'calm');
-      e.particles.setTarget('B', getTarget('jets'), 'jets');
-      pu.uMix.value = smooth(range(exitX, 0.2, 1.0));
-      pu.uCurlAmp.value = 0.06 + 0.35 * Math.sin(ex * Math.PI);
-      rig.particles.opacity = lerp(0.3, 0.5, ex);
-      rig.particles.size = lerp(1.2, 1.5, ex);
-    }
+    rig.pointerBulge = 0.4;
+    rig.sphereScale = 1;
+    rig.sphereVisible = true;
     rig.atomPos.set(0, 0, 0);
+    rig.lift = 0;
+
+    // hover фиксирует фигуру: она дорисовывается и держится, остальные приглушены
+    const fig = e.figures;
+    if (active >= 0) {
+      if (this.hoverFig !== active) {
+        this.hoverFig = active;
+        gsap.killTweensOf(fig.draw);
+        gsap.to(fig.draw, { [active]: 1, duration: 0.9, ease: 'power2.inOut', overwrite: true });
+        gsap.to(fig.erase, { [active]: 0, duration: 0.3, overwrite: true });
+      }
+    } else if (this.hoverFig >= 0) {
+      const f = this.hoverFig;
+      this.hoverFig = -1;
+      if (f !== this.current) gsap.to(fig.erase, { [f]: 1, duration: ERASE, ease: 'power2.inOut', overwrite: true });
+    }
+    fig.lines.uniforms.uGlobal.value = this.anim.on;
+    fig.update(time, active);
+    // подпись у текущей фигуры (сверху-справа от сферы)
+    const shown = active >= 0 ? active : this.current;
+    const r = [1.9, 1.55, 1.5, 1.95, 0.5][shown];
+    this.tmp.set(shown === 4 ? 0.5 : r * 0.72, shown === 4 ? 2.6 : r * 0.72, 0.2).applyMatrix4(e.atom.matrixWorld);
+    const p = e.project(this.tmp, { x: 0, y: 0, z: 0 });
+    const a = state.anchors['figure'] || (state.anchors['figure'] = { x: 0, y: 0, visible: 0, hot: 0 });
+    a.x = p.x;
+    a.y = p.y;
+    a.visible = this.anim.label * this.anim.on * (fig.draw[shown] > 0.6 && fig.erase[shown] < 0.4 ? 1 : 0);
+    a.hot = active >= 0 ? 1 : 0;
+    state.figureIndex = shown;
+    rig.status = `FIGURE 0${shown + 1}/05 · ${['STAR', 'LENS', '9:16', 'WAVE', 'BEAM'][shown]}`;
   }
 }

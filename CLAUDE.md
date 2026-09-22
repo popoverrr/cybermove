@@ -1,13 +1,14 @@
 # CYBERMOVE — контекст для Claude Code
 
-Сайт консалтинговой компании CYBERMOVE (Cyber Move Consulting). Полное ТЗ: `docs/BRIEF.md`, итерация 2 (палитра, скролл, плейсхолдеры): `docs/BRIEF-2.md` — где противоречит, действует BRIEF-2. Тексты: `docs/CONTENT.md`. Референс стилистики: `reference/ref-12.jpg`.
-Если сессия начата заново или контекст сжат: прочитай `docs/BRIEF-2.md`, `docs/PROGRESS-2.md`, `docs/DECISIONS.md` и продолжай с первого незакрытого пункта `PROGRESS-2.md`. Закрытое не переделывай.
+Сайт консалтинговой компании CYBERMOVE (Cyber Move Consulting). Полное ТЗ: `docs/BRIEF.md`, итерация 2 (палитра, скролл, плейсхолдеры): `docs/BRIEF-2.md`, итерация 3 (жемчужная сфера, линии туши, модель движения «время решает, скролл выбирает»): `docs/BRIEF-3.md` — где противоречат, действует более поздний. Тексты: `docs/CONTENT.md`. Референс стилистики: `reference/ref-12.jpg`.
+Если сессия начата заново или контекст сжат: прочитай `docs/BRIEF-3.md`, `docs/PROGRESS-3.md`, `docs/DECISIONS.md` и продолжай с первого незакрытого пункта `PROGRESS-3.md`. Закрытое не переделывай.
 `docs/` и `reference/` не публикуются: они в `.gitignore`, живут только на диске (решение заказчика, репозиторий публичный).
 
 ## Стек
 
 - Astro 7 (static, `build.format: 'directory'`, `trailingSlash: 'always'`), TypeScript.
-- Three.js 0.186 без обёрток, GLSL через `onBeforeCompile`; postprocessing (pmndrs); GSAP 3.15 (ScrollTrigger, SplitText); Lenis.
+- Three.js 0.186 без обёрток, GLSL через `onBeforeCompile`; postprocessing (pmndrs, только HIGH: SMAA + зерно); GSAP 3.15; Lenis (без autoRaf — единый цикл в `gsap.ticker`, см. `src/lib/home.ts`).
+- WebGL главной: `src/webgl/Engine.ts` (рендер по вызову `frame(now)`), `Story.ts` (rig, фазы вход/удержание/выход, раскладка сферы в долях вьюпорта `scenes/layout.ts`), `scenes/*` (таймлайны по времени), `objects/*` (Sphere — жемчуг, LineSet/Dots — линии туши, Orbits/Grid/Satellites/Figures/Ribbons/Sheets/Rings/Dust).
 - Свой CSS на custom properties: `src/styles/tokens.css`, `base.css`, `typography.css`. Без Tailwind, без UI-китов, без иконочных паков.
 - Шрифты self-hosted (Fontsource): Inter Tight (основной, заголовки 300–350), JetBrains Mono (микрометки, меню). Unbounded удалён.
 - Форма: `public/api/lead.php` (PHP 8+, настройки в `public/api/config.php`, в git только `config.sample.php`).
@@ -25,6 +26,10 @@ npm run check        # astro check
 python scripts/build-logo.py [--active a|b|c]   # пересобрать логотип и favicon (активен a)
 node scripts/posters.mjs http://127.0.0.1:4330   # постеры экранов, рендеры направлений, OG
 node scripts/shots.mjs --out docs/screens/<фаза> --base http://127.0.0.1:4330 "/path:name" ...   # скриншоты Playwright (SwiftShader)
+node scripts/probe.mjs "http://127.0.0.1:4330/?still&t=4&screen=2&local=0.45" [--mobile] [--eval "<js>"] [--shot f.png]   # ошибки консоли + состояние движка
+node scripts/video.mjs --out docs/screens/v3/B/video --seconds 6 "/?screen=1&local=0.45:s2-hold"   # видео удержания (webm)
+node scripts/test-scroll.mjs --base http://127.0.0.1:4331 [--nogl] [--sizes desktop,mobile]   # модель движения BRIEF-3 §6.7 (флик, колесо, Δ, флипы)
+node scripts/test-frame.mjs --base http://127.0.0.1:4331 [--suffix v3]   # время кадра, Pixel 7, CPU ×4
 ```
 
 PHP локально: портативный `php.exe` (см. `docs/DECISIONS.md`), `php -l public/api/lead.php`.
@@ -46,8 +51,9 @@ docs/                   BRIEF, CONTENT, PROGRESS, DECISIONS, TODO-CONTENT, DEPLO
 
 - Все тексты из `docs/CONTENT.md`; чего нет — `[PLACEHOLDER]` и запись в `docs/TODO-CONTENT.md`. Цифры не выдумывать.
 - Русские заголовки, английский только в микрометках.
-- Палитра BRIEF-2 §3: тёплая светлая шкала ivory / sand / stone / clay, текст ink, единственный акцент — `--ink`; тёмная зона только футер и меню-оверлей (`--night`). Синего, хрома, свечения, bloom и хроматической аберрации нет. Запрещены фиолетовые градиенты, glassmorphism, тени-облака, скругления 16px+, эмодзи, стоковые иконки.
+- Палитра BRIEF-2 §3: тёплая светлая шкала ivory / sand / stone / clay, текст ink, единственный акцент — `--ink`; тёмная зона — S8 «Контакт» (BRIEF-3 §8.1, один атрибут `data-theme`), футер и меню-оверлей (`--night`). Синего, хрома, свечения, bloom и хроматической аберрации нет. Запрещены фиолетовые градиенты, glassmorphism, тени-облака, скругления 16px+, эмодзи, стоковые иконки.
 - Микрометки: JetBrains Mono 11px, трекинг +0.12em, `--umber` (на stone/clay — `--bark`). Контраст: основной ≥ 4.5:1, микрометки ≥ 3:1 — проверять цифрами.
 - Все открытые решения — одной строкой в `docs/DECISIONS.md`. После каждой фазы — коммит и отметка в `docs/PROGRESS.md`.
-- Параметры отладки главной: `?progress=0.37`, `?still`, `?tier=high|mid|low`, `?debug`.
+- Параметры отладки главной: `?screen=N&local=0.45` (экран и его прогресс), `?progress=0.37`, `?still&t=4` (стоп-кадр: таймлайн текущей фазы на секунде t; `&te=0.4` — время выхода), `?hover=<service-id>`, `?tier=high|mid|low`, `?debug` (Tweakpane), `?stats` (fps / мс / тир / DPR / draw calls), `?nogl` (постер-фолбэк).
+- Скриншоты и тесты — только через Playwright (`scripts/*.mjs`): во встроенном браузере rAF стоит, пока вкладка не на переднем плане. Под SwiftShader композитор иногда отдаёт пустой кадр — `shots.mjs` повторяет снимок.
 - В Bash-хередоках на этой машине ломаются `\\` — файлы с бэкслэшами писать через Write.

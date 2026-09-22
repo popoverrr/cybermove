@@ -18,7 +18,13 @@ export class GrowthScene implements SceneModule {
   /** кольца с подписями (индексы) */
   private labelRings = [3, 7, 11];
 
-  init() {}
+  /** переход к тёмной теме S8 (если она не отключена атрибутом) */
+  private toNight = true;
+
+  init() {
+    const band = document.querySelector<HTMLElement>('[data-screen="contact"]')?.dataset.themeBand;
+    this.toNight = !band || band === 'night';
+  }
 
   setActive(on: boolean, e: Engine) {
     e.rings.group.visible = on;
@@ -66,7 +72,7 @@ export class GrowthScene implements SceneModule {
   update(rig: Rig, local: number, dt: number, time: number, e: Engine) {
     const enter = smooth(range(local, 0, 0.3));
     // фон темнеет к night за последние 25 % экрана (BRIEF-3 §8.1)
-    const night = smooth(range(local, 0.75, 1.0));
+    const night = this.toNight ? smooth(range(local, 0.75, 1.0)) : 0;
     rig.bg.a = 'ivory';
     rig.bg.b = 'night';
     rig.bg.mix = night;

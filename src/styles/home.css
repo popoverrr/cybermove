@@ -1,7 +1,9 @@
 /* Главная: fixed-canvas под контентом, sticky-стейдж с экранами S1–S7, S8 в потоке. */
 
 body.is-home {
-  background: var(--ivory);
+  /* фон страницы следует теме (её переключает JS по порогу): виден до готовности канваса и в фолбэках */
+  background: var(--bg);
+  transition: background-color 900ms;
   --rail-offset: 0px;
 }
 @media (min-width: 900px) and (min-height: 561px) {
@@ -25,7 +27,8 @@ body.is-home .s1__corner--bl {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: var(--ivory);
+  background: var(--bg);
+  transition: background-color 900ms;
   overflow: hidden;
 }
 .gl-canvas {

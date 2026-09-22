@@ -32,18 +32,12 @@ const TEXT_IN = 0.08;
 const TEXT_OUT = 0.78;
 const COARSE = matchMedia('(pointer: coarse)').matches;
 /**
- * сглаживание λ и лимит скорости (единиц прогресса экрана в секунду) в фазах входа/выхода: переход (выход 0.3 +
- * вход 0.3) ≥ 1.4 с при любой прокрутке; в удержании (0.3–0.7, по скроллу ничего не меняется) лимит выше,
- * чтобы флик через два экрана не растягивался на 6 с
+ * Сглаживание λ и лимит скорости (единиц прогресса экрана в секунду): переход (выход 0.3 + вход 0.3) занимает
+ * не меньше 0.6 / 0.42 ≈ 1.4 с при любой резкости прокрутки, а Δ прогресса за кадр 60 fps не выходит за 0.008
+ * (критерий §6.7c). Очередь экранов (см. smoothStep) делает флик через два экрана двумя переходами подряд.
  */
 const LAMBDA = COARSE ? 4.5 : 7;
 const VMAX = COARSE ? 0.35 : 0.42;
-const VHOLD = 1.1;
-const smooth01 = (x: number) => {
-  const t = x < 0 ? 0 : x > 1 ? 1 : x;
-  return t * t * (3 - 2 * t);
-};
-const speedLimit = (cur: number) => VMAX + (VHOLD - VMAX) * smooth01((cur - 0.24) / 0.1) * smooth01((0.76 - cur) / 0.1);
 /** гистерезис смены активного экрана */
 const HYST = COARSE ? 0.06 : 0.03;
 
@@ -121,9 +115,9 @@ function layoutScreens(force = false) {
   }
   // секции после стейджа (блок «О компании», S8, футер); шапка, меню и drawer — фиксированные, их не считаем
   flowBands.length = 0;
-  for (const el of Array.from(document.querySelectorAll<HTMLElement>('section[data-theme], footer[data-theme]'))) {
+  for (const el of Array.from(document.querySelectorAll<HTMLElement>('section[data-theme], section[data-theme-band], footer[data-theme]'))) {
     if (el.closest('[data-stage]') || el.offsetTop < acc) continue;
-    flowBands.push({ top: el.offsetTop, theme: el.dataset.theme || 'ivory' });
+    flowBands.push({ top: el.offsetTop, theme: el.dataset.themeBand || el.dataset.theme || 'ivory' });
   }
   flowBands.sort((a, b) => a.top - b.top);
   measureRibbon();
@@ -196,7 +190,7 @@ function smoothStep(dt: number): boolean {
       continue;
     }
     let step = (target - cur) * (1 - Math.exp(-LAMBDA * dt));
-    const limit = autoScrolling ? Infinity : speedLimit(cur) * dt;
+    const limit = autoScrolling ? Infinity : VMAX * dt;
     if (Math.abs(step) > limit) step = Math.sign(step) * limit;
     s[i] = cur + step;
     moving = true;
@@ -503,7 +497,7 @@ export function initHome() {
     const first = screens.length === 0;
     const inFlow = !el.closest('[data-stage]');
     const tw = Array.from(el.querySelectorAll<HTMLElement>('[data-tw]'));
-    screens.push({ el, pin: el.querySelector('.screen__pin'), start: 0, dur: 1, inFlow, tw, textIn: first || inFlow, textOut: false, enterVar: -1, exitVar: -1, active: false, theme: el.dataset.theme || 'ivory' });
+    screens.push({ el, pin: el.querySelector('.screen__pin'), start: 0, dur: 1, inFlow, tw, textIn: first || inFlow, textOut: false, enterVar: -1, exitVar: -1, active: false, theme: el.dataset.themeBand || el.dataset.theme || 'ivory' });
     if (!first && !inFlow && tw.length && !state.reduced) gsap.set(tw, { autoAlpha: 0 });
   }
   growthIdx = screens.findIndex((s) => s.el.id === 'growth');

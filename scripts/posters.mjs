@@ -17,9 +17,9 @@ const SCREENS = [
   ['s1', 'still&t=6'],
   ['s2', 'still&t=8&screen=1&local=0.45'],
   ['s3', 'still&t=8&screen=2&local=0.5'],
-  ['s4', 'still&t=8&screen=3&local=0.14'],
+  ['s4', 'still&t=8&screen=3&local=0.45'],
   ['s5', 'still&t=8&screen=4&local=0.5'],
-  ['s6', 'still&t=8&screen=5&local=0.78'],
+  ['s6', 'still&t=8&screen=5&local=0.45'],
   ['s7', 'still&t=8&screen=6&local=0.6'],
   ['s8', 'still&t=8&screen=7&local=1'],
 ];
@@ -31,8 +31,10 @@ async function shot(width, height, query) {
   const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1, colorScheme: 'dark' });
   const page = await ctx.newPage();
   await page.goto(`${base}/?${query}&tier=high&poster`, { waitUntil: 'networkidle', timeout: 180000 });
-  await page.waitForTimeout(3500);
-  const buf = await page.screenshot({ type: 'png' });
+  // still-режим: движок рисует ~2.5 с и ставит data-still; под SwiftShader кадр 1920×1080 на HIGH — секунды
+  await page.waitForSelector('#gl[data-still]', { timeout: 180000 }).catch(() => {});
+  await page.waitForTimeout(1500);
+  const buf = await page.screenshot({ type: 'png', timeout: 180000, animations: 'disabled' });
   await ctx.close();
   return buf;
 }

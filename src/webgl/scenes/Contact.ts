@@ -19,9 +19,13 @@ export class ContactScene implements SceneModule {
   private tmp = new THREE.Vector3();
   private anim = { labels: [0, 0, 0] };
   private pulseTl: gsap.core.Timeline | null = null;
+  private night = true;
 
   init(engine: Engine) {
     state.events.on('formSuccess', () => this.pulse(engine));
+    // «без тёмного» = один атрибут data-theme-band на секции S8 (BRIEF-3 §8.1)
+    const band = document.querySelector<HTMLElement>('[data-screen="contact"]')?.dataset.themeBand;
+    this.night = !band || band === 'night';
   }
 
   private pulse(e: Engine) {
@@ -75,12 +79,12 @@ export class ContactScene implements SceneModule {
   update(rig: Rig, local: number, dt: number, time: number, e: Engine) {
     const enter = smooth(range(local, 0, 0.6));
     this.focus = dt === 0 ? (state.formFocus ? 1 : 0) : damp(this.focus, state.formFocus ? 1 : 0, 4, dt);
-    rig.bg.a = 'night';
-    rig.bg.b = 'night';
+    rig.bg.a = this.night ? 'night' : 'sand';
+    rig.bg.b = rig.bg.a;
     rig.bg.mix = 0;
     rig.bg.mask = 'uniform';
     rig.beam = 0;
-    rig.envMix = 1;
+    rig.envMix = this.night ? 1 : 0;
     // фокус в поле формы — свет поворачивается к форме (влево)
     rig.envRot = 4.6 - this.focus * 0.9;
     rig.cam.set(0, 0, 8.4);
@@ -111,6 +115,6 @@ export class ContactScene implements SceneModule {
       a.visible = this.anim.labels[i] * o.electron[i];
       a.hot = 0;
     }
-    rig.status = `NIGHT · ${state.formFocus ? 'INPUT' : 'READY'} · E ${Math.round(o.electron.reduce((s, v) => s + v, 0))}/5`;
+    rig.status = `${this.night ? 'NIGHT' : 'DAY'} · ${state.formFocus ? 'INPUT' : 'READY'} · E ${Math.round(o.electron.reduce((s, v) => s + v, 0))}/5`;
   }
 }

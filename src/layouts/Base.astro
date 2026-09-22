@@ -109,7 +109,7 @@ const analyticsOn = Boolean(ANALYTICS.ga4 || ANALYTICS.metaPixel || ANALYTICS.ti
     {!bare && !noFooter && <Footer lang={lang} />}
 
     <!-- BRIEF-4 §2: музыка и кнопка SOUND на всех страницах -->
-    <button class="audio" type="button" data-audio-toggle aria-pressed="false" aria-label={content.ui.soundOn} data-label-on={content.ui.soundOn} data-label-off={content.ui.soundOff}>
+    <button class="audio" type="button" data-audio-toggle aria-pressed="false" aria-label={`SOUND — ${content.ui.soundOn}`} data-label-on={`SOUND — ${content.ui.soundOn}`} data-label-off={`SOUND — ${content.ui.soundOff}`}>
       <span class="audio__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <span class="audio__text t-micro">SOUND</span>
     </button>
@@ -149,6 +149,10 @@ const analyticsOn = Boolean(ANALYTICS.ga4 || ANALYTICS.metaPixel || ANALYTICS.ti
   }
   .audio:hover {
     border-color: var(--hair-strong);
+  }
+  /* подпись кнопки наследует цвет кнопки (--fg), а не «тихий» цвет микрометок */
+  .audio__text {
+    color: inherit;
   }
   .audio__bars {
     display: inline-flex;

@@ -1,7 +1,7 @@
 # CYBERMOVE — контекст для Claude Code
 
-Сайт консалтинговой компании CYBERMOVE (Cyber Move Consulting). Полное ТЗ: `docs/BRIEF.md`, итерация 2 (палитра, скролл, плейсхолдеры): `docs/BRIEF-2.md`, итерация 3 (жемчужная сфера, линии туши, модель движения «время решает, скролл выбирает»): `docs/BRIEF-3.md` — где противоречат, действует более поздний. Тексты: `docs/CONTENT.md`. Референс стилистики: `reference/ref-12.jpg`.
-Если сессия начата заново или контекст сжат: прочитай `docs/BRIEF-3.md`, `docs/PROGRESS-3.md`, `docs/DECISIONS.md` и продолжай с первого незакрытого пункта `PROGRESS-3.md`. Закрытое не переделывай.
+Сайт консалтинговой компании CYBERMOVE (Cyber Move Consulting). Полное ТЗ: `docs/BRIEF.md`, итерация 2 (палитра, скролл, плейсхолдеры): `docs/BRIEF-2.md`, итерация 3 (жемчужная сфера, линии туши, модель движения): `docs/BRIEF-3.md`, итерация 4 (исправления v3, медиа, звук, подсказки, выбор языка): `docs/BRIEF-4.md` + `docs/MEDIA-INTEGRATION.md` — где противоречат, действует более поздний. Тексты: `docs/CONTENT.md`. Референс стилистики: `reference/ref-12.jpg`.
+Если сессия начата заново или контекст сжат: прочитай `docs/BRIEF-4.md`, `docs/PROGRESS-4.md`, `docs/DECISIONS.md` и продолжай с первого незакрытого пункта `PROGRESS-4.md`. Закрытое не переделывай.
 `docs/` и `reference/` не публикуются: они в `.gitignore`, живут только на диске (решение заказчика, репозиторий публичный).
 
 ## Стек
@@ -30,6 +30,9 @@ node scripts/probe.mjs "http://127.0.0.1:4330/?still&t=4&screen=2&local=0.45" [-
 node scripts/video.mjs --out docs/screens/v3/B/video --seconds 6 "/?screen=1&local=0.45:s2-hold"   # видео удержания (webm)
 node scripts/test-scroll.mjs --base http://127.0.0.1:4331 [--nogl] [--sizes desktop,mobile]   # модель движения BRIEF-3 §6.7 (флик, колесо, Δ, флипы)
 node scripts/test-frame.mjs --base http://127.0.0.1:4331 [--suffix v3]   # время кадра, Pixel 7, CPU ×4
+node scripts/test-overlap.mjs --base http://127.0.0.1:4331 [--shots docs/screens/v4]   # S7 и полоса шапки на семи размерах
+node scripts/test-audio.mjs --base http://127.0.0.1:4331    # автозапуск, жест, память, перенос позиции
+node scripts/test-hints.mjs --base http://127.0.0.1:4331    # карточка языка и подсказка прокрутки
 ```
 
 PHP локально: портативный `php.exe` (см. `docs/DECISIONS.md`), `php -l public/api/lead.php`.
@@ -54,6 +57,7 @@ docs/                   BRIEF, CONTENT, PROGRESS, DECISIONS, TODO-CONTENT, DEPLO
 - Палитра BRIEF-2 §3: тёплая светлая шкала ivory / sand / stone / clay, текст ink, единственный акцент — `--ink`; тёмная зона — S8 «Контакт» (BRIEF-3 §8.1, один атрибут `data-theme`), футер и меню-оверлей (`--night`). Синего, хрома, свечения, bloom и хроматической аберрации нет. Запрещены фиолетовые градиенты, glassmorphism, тени-облака, скругления 16px+, эмодзи, стоковые иконки.
 - Микрометки: JetBrains Mono 11px, трекинг +0.12em, `--umber` (на stone/clay — `--bark`). Контраст: основной ≥ 4.5:1, микрометки ≥ 3:1 — проверять цифрами.
 - Все открытые решения — одной строкой в `docs/DECISIONS.md`. После каждой фазы — коммит и отметка в `docs/PROGRESS.md`.
+- Медиа: значение слота в `src/content/media.json` — строка или объект (`src`, `mono`, `kind`, `hover`, `brand`, `alt`); `hover: "lift"` — подъём плитки, `kind: "render"` — рендер без кейлайна. Плитки кейсов цветные в покое.
 - Параметры отладки главной: `?screen=N&local=0.45` (экран и его прогресс), `?progress=0.37`, `?still&t=4` (стоп-кадр: таймлайн текущей фазы на секунде t; `&te=0.4` — время выхода), `?hover=<service-id>`, `?tier=high|mid|low`, `?debug` (Tweakpane), `?stats` (fps / мс / тир / DPR / draw calls), `?nogl` (постер-фолбэк).
 - Скриншоты и тесты — только через Playwright (`scripts/*.mjs`): во встроенном браузере rAF стоит, пока вкладка не на переднем плане. Под SwiftShader композитор иногда отдаёт пустой кадр — `shots.mjs` повторяет снимок.
 - В Bash-хередоках на этой машине ломаются `\\` — файлы с бэкслэшами писать через Write.

@@ -121,12 +121,33 @@ function initWhatsApp() {
   });
 }
 
+/**
+ * Тач: hover-подъём плиток заменяется на IntersectionObserver — плитка в центральных 16 % высоты экрана
+ * получает то же состояние (MEDIA-INTEGRATION §2).
+ */
+function initTileLift() {
+  if (finePointer()) return;
+  const tiles = Array.from(document.querySelectorAll<HTMLElement>('[data-lift]'));
+  if (!tiles.length || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        const el = e.target as HTMLElement;
+        el.classList.toggle('is-lifted', e.isIntersecting);
+      }
+    },
+    { rootMargin: '-42% 0px -42% 0px', threshold: 0 },
+  );
+  tiles.forEach((t) => io.observe(t));
+}
+
 export function initSite() {
   initCursor();
   initMagnetic();
   initMenu();
   initHeader();
   initWhatsApp();
+  initTileLift();
   if (document.body.dataset.analytics === '1') {
     const start = () => initAnalytics();
     if ('requestIdleCallback' in window) (window as any).requestIdleCallback(start, { timeout: 4000 });

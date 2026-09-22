@@ -83,7 +83,7 @@ const jsonLd = [
                     const k = findCase(c, id);
                     return k ? (
                       <li>
-                        <a href={`${localePath(lang, '/cases/')}#${k.id}`}>{k.name}</a>
+                        <a href={localePath(lang, `/cases/${k.id}/`)}>{k.name}</a>
                         <span class="t-small">{k.summary}</span>
                       </li>
                     ) : null;

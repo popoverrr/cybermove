@@ -12,6 +12,7 @@ import { initRows, initDrawer, initAnchors, updateAnchors } from './home-ui';
 import { runCounters, measureRibbon, updateRibbon, initRail, updateRail, initPreloader } from './home-extra';
 import { initForms } from './form';
 import { initAudio } from './audio';
+import { initHints } from './home-hints';
 import type { Engine } from '../webgl/boot';
 
 const q = new URLSearchParams(location.search);
@@ -613,5 +614,7 @@ export function initHome() {
     }, 400);
   }
   document.body.classList.add('home-ready');
+  // BRIEF-4 §4: карточка языка (первый визит) и подсказка прокрутки — после готовности сценария
+  initHints(state.reduced);
   (window as unknown as { __cmScrollTo: typeof scrollToScreen }).__cmScrollTo = scrollToScreen;
 }

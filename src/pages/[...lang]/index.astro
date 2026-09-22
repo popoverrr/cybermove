@@ -9,6 +9,7 @@ import HomeAbout from '../../components/home/HomeAbout.astro';
 import Drawer from '../../components/home/Drawer.astro';
 import Rail from '../../components/home/Rail.astro';
 import Overlays from '../../components/home/Overlays.astro';
+import Hints from '../../components/home/Hints.astro';
 import { getContent, langStaticPaths } from '../../lib/i18n';
 import '../../styles/home.css';
 
@@ -76,6 +77,7 @@ const s1 = c.home.s1;
 
   <Rail lang={lang} />
   <Overlays lang={lang} />
+  <Hints lang={lang} />
   <Drawer lang={lang} />
 
   <script>

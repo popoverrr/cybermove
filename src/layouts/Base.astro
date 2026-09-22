@@ -3,7 +3,6 @@
  * Базовый layout: шрифты, токены, SEO-мета, hreflang, JSON-LD, шапка, подвал, курсор.
  */
 import '@fontsource-variable/inter-tight/index.css';
-import '@fontsource-variable/unbounded/index.css';
 import '@fontsource-variable/jetbrains-mono/index.css';
 import '../styles/tokens.css';
 import '../styles/base.css';
@@ -25,7 +24,7 @@ export interface Props {
   path: string;
   title: string;
   description: string;
-  theme?: 'black' | 'graphite' | 'steel' | 'blue' | 'silver';
+  theme?: 'ivory' | 'sand' | 'stone' | 'clay';
   ogImage?: string;
   ogType?: 'website' | 'article';
   noindex?: boolean;
@@ -42,7 +41,7 @@ const {
   path,
   title,
   description,
-  theme = 'black',
+  theme = 'ivory',
   ogImage = '/posters/og-default.jpg',
   ogType = 'website',
   noindex = false,
@@ -90,8 +89,8 @@ const analyticsOn = Boolean(ANALYTICS.ga4 || ANALYTICS.metaPixel || ANALYTICS.ti
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
     <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
     <link rel="manifest" href={withBase('/site.webmanifest')} />
-    <meta name="theme-color" content="#050505" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#f2efe9" />
+    <meta name="color-scheme" content="light" />
 
     <link rel="preload" as="font" type="font/woff2" href={interLatin} crossorigin />
     {preloadCyr && <link rel="preload" as="font" type="font/woff2" href={interCyr} crossorigin />}
@@ -102,21 +101,6 @@ const analyticsOn = Boolean(ANALYTICS.ga4 || ANALYTICS.metaPixel || ANALYTICS.ti
   </head>
   <body class:list={[bodyClass, { 'is-bare': bare }]} data-lang={lang} data-analytics={analyticsOn ? '1' : '0'}>
     <a class="skip-link" href="#main">{content.ui.skip}</a>
-
-    <!-- SVG-фильтр для .chrome-text: тиснение со specular lighting, как в ref-01 -->
-    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
-      <defs>
-        <filter id="chrome-emboss" x="-10%" y="-20%" width="120%" height="140%" color-interpolation-filters="sRGB">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="blur" />
-          <feSpecularLighting in="blur" surfaceScale="4" specularConstant="1.1" specularExponent="22" lighting-color="#ffffff" result="spec">
-            <feDistantLight azimuth="235" elevation="38" />
-          </feSpecularLighting>
-          <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn" />
-          <feComposite in="SourceGraphic" in2="specIn" operator="arithmetic" k1="0" k2="1" k3="0.9" k4="0" result="lit" />
-          <feDropShadow dx="0" dy="0.6" stdDeviation="0.4" flood-color="#000" flood-opacity="0.45" />
-        </filter>
-      </defs>
-    </svg>
 
     {!bare && <Header lang={lang} path={path} />}
     <main id="main">

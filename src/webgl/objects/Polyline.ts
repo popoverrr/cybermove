@@ -44,6 +44,7 @@ uniform vec3 uColor2;
 uniform float uOpacity;
 uniform float uDraw;
 uniform float uDash;      // частота пунктира (0 — сплошная)
+uniform float uDashBase;  // яркость линии между точками (0 — только точки)
 uniform float uDashSpeed;
 uniform float uTime;
 uniform float uAdditive;
@@ -57,7 +58,7 @@ void main() {
   a *= 1.0 + 0.8 * smoothstep(0.06, 0.0, uDraw - vT) * step(uDraw, 0.999);
   if (uDash > 0.0) {
     float d = fract(vT * uDash - uTime * uDashSpeed);
-    a *= 0.35 + 0.65 * smoothstep(0.55, 0.15, d);
+    a *= uDashBase + (1.0 - uDashBase) * smoothstep(0.42, 0.18, d);
   }
   a *= mix(1.0, smoothstep(0.0, 0.08, vT) * smoothstep(1.0, 0.92, vT), uFadeEnds);
   if (a < 0.003) discard;
@@ -79,6 +80,7 @@ export class Polyline {
     uOpacity: THREE.IUniform<number>;
     uDraw: THREE.IUniform<number>;
     uDash: THREE.IUniform<number>;
+    uDashBase: THREE.IUniform<number>;
     uDashSpeed: THREE.IUniform<number>;
     uTime: THREE.IUniform<number>;
     uAdditive: THREE.IUniform<number>;
@@ -128,9 +130,10 @@ export class Polyline {
       uOpacity: { value: opts.opacity ?? 0.7 },
       uDraw: { value: 1 },
       uDash: { value: 0 },
+      uDashBase: { value: 0.35 },
       uDashSpeed: { value: 0.6 },
       uTime: { value: 0 },
-      uAdditive: { value: 1 },
+      uAdditive: { value: 0 },
       uFadeEnds: { value: 0 },
     };
     const m = new THREE.ShaderMaterial({

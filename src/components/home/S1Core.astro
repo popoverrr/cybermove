@@ -13,7 +13,7 @@ const s1 = c.home.s1;
 const tickerItems = [...TICKER, ...TICKER];
 ---
 
-<section class="screen screen--s1" data-screen="core" data-dur="200" data-dur-mobile="130" id="core" aria-labelledby="h1">
+<section class="screen screen--s1" data-screen="core" data-dur="260" data-dur-mobile="180" id="core" aria-labelledby="h1">
   <div class="screen__pin">
     <div class="s1 container">
       <p class="s1__corner s1__corner--tl t-micro" data-hero-micro>{s1.label}</p>
@@ -23,7 +23,7 @@ const tickerItems = [...TICKER, ...TICKER];
       <span class="crosshair s1__cross s1__cross--b" aria-hidden="true"></span>
 
       <div class="s1__text">
-        <h1 class="t-display s1__h1 split-mask" id="h1" data-hero-title set:html={s1.h1.replace(s1.h1Accent, `<span class="chrome-text">${s1.h1Accent}</span>`)} />
+        <h1 class="t-display s1__h1 split-mask" id="h1" data-hero-title set:html={s1.h1} />
         <p class="t-lead s1__lead" data-hero-lead>{s1.lead}</p>
         <div class="s1__ctas" data-hero-cta>
           <Button href={localePath(lang, '/contact/')} variant="fill" size="lg">{s1.ctaPrimary}</Button>

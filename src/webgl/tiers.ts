@@ -1,8 +1,8 @@
 /**
- * Тиры качества (BRIEF §8.8).
- * HIGH: 60k частиц, полная пост-обработка, DPR до 1.75.
- * MID:  30k, только bloom, DPR 1.5.
- * LOW:  12k, без пост-обработки, упрощённые шейдеры, DPR до 1.5.
+ * Тиры качества (BRIEF §8.8, BRIEF-2 §4.4 и §8.6).
+ * HIGH: 30k частиц, пост-обработка (зерно, виньетка, SMAA), DPR до 1.75.
+ * MID:  15k, пост без SMAA, DPR 1.5.
+ * LOW:  6k, без пост-обработки, упрощённые шейдеры, DPR ≤ 1.25, фон в одну октаву.
  */
 import type { Tier } from './params';
 
@@ -12,18 +12,19 @@ export interface TierSpec {
   maxDpr: number;
   post: boolean;
   smaa: boolean;
-  chromatic: boolean;
   noise: boolean;
   sphereDetail: number;
   worley: boolean;
   envSize: number;
   trailSegments: number;
+  /** 1 — полный шум фона, 0 — одна октава */
+  bgDetail: number;
 }
 
 export const TIERS: Record<Tier, TierSpec> = {
-  high: { name: 'high', particles: 60000, maxDpr: 1.75, post: true, smaa: true, chromatic: true, noise: true, sphereDetail: 63, worley: true, envSize: 256, trailSegments: 56 },
-  mid: { name: 'mid', particles: 30000, maxDpr: 1.5, post: true, smaa: false, chromatic: false, noise: false, sphereDetail: 63, worley: true, envSize: 256, trailSegments: 40 },
-  low: { name: 'low', particles: 12000, maxDpr: 1.5, post: false, smaa: false, chromatic: false, noise: false, sphereDetail: 31, worley: false, envSize: 128, trailSegments: 24 },
+  high: { name: 'high', particles: 30000, maxDpr: 1.75, post: true, smaa: true, noise: true, sphereDetail: 63, worley: true, envSize: 256, trailSegments: 40, bgDetail: 1 },
+  mid: { name: 'mid', particles: 15000, maxDpr: 1.5, post: true, smaa: false, noise: true, sphereDetail: 63, worley: true, envSize: 256, trailSegments: 32, bgDetail: 1 },
+  low: { name: 'low', particles: 6000, maxDpr: 1.25, post: false, smaa: false, noise: false, sphereDetail: 31, worley: false, envSize: 128, trailSegments: 24, bgDetail: 0 },
 };
 
 export function lowerTier(t: Tier): Tier | null {

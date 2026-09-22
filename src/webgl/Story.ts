@@ -5,8 +5,8 @@
  */
 import * as THREE from 'three';
 import type { Engine } from './Engine';
-import { state, SCREEN_IDS } from '../lib/state';
-import { POST_DARK, lerpPost, type PostParams } from './Post';
+import { state } from '../lib/state';
+import { POST_PAPER, lerpPost, type PostParams } from './Post';
 import type { BgMode, MASK } from './backgrounds/Background';
 import { damp, clamp01 } from './math';
 import { CoreScene } from './scenes/Core';
@@ -19,6 +19,7 @@ import { GrowthScene } from './scenes/Growth';
 import { ContactScene } from './scenes/Contact';
 import type { SceneModule } from './scenes/types';
 import './objects/fields';
+import { ORBIT_LINE } from './objects/Orbits';
 
 export interface Rig {
   cam: THREE.Vector3;
@@ -42,7 +43,7 @@ export interface Rig {
   beam: number;
   post: PostParams;
   orbits: { visible: number; spread: number; speedMul: number; width: number; opacity: number; color: THREE.Color; count: number };
-  particles: { opacity: number; additive: number; size: number };
+  particles: { opacity: number; size: number };
   parallax: number;
   pointerBulge: number;
 }
@@ -62,13 +63,9 @@ export class Story {
   private tmp2 = new THREE.Vector3();
   private lastPointer = new THREE.Vector2(-1, -1);
   private hoverDist = Infinity;
-  readonly postNow: PostParams = { ...POST_DARK };
-  private particleDarkA = new THREE.Color(0xb8c2d4);
-  private particleDarkB = new THREE.Color(0x5d86ff);
-  private particleDarkSpark = new THREE.Color(0xffffff);
-  private particleLightA = new THREE.Color(0x33373d);
-  private particleLightB = new THREE.Color(0x0a24f5);
-  private particleLightSpark = new THREE.Color(0x0e0f12);
+  readonly postNow: PostParams = { ...POST_PAPER };
+  /** шлейфы электронов только с мышью (BRIEF-2 §8.6) */
+  private trails = !matchMedia('(pointer: coarse)').matches;
 
   constructor(engine: Engine) {
     this.engine = engine;
@@ -86,11 +83,11 @@ export class Story {
       coreUpright: 0,
       envMix: 0,
       envRot: 0,
-      bg: { a: 'black', b: 'black', mix: 0, mask: 'uniform' },
+      bg: { a: 'ivory', b: 'ivory', mix: 0, mask: 'uniform' },
       beam: 0,
-      post: { ...POST_DARK },
-      orbits: { visible: 1, spread: 1, speedMul: 1, width: 1, opacity: 0.55, color: new THREE.Color(0xc9ced6), count: 5 },
-      particles: { opacity: 1, additive: 1, size: 2.2 },
+      post: { ...POST_PAPER },
+      orbits: { visible: 1, spread: 1, speedMul: 1, width: 1, opacity: 0.7, color: ORBIT_LINE.clone(), count: 5 },
+      particles: { opacity: 0.35, size: 1.2 },
       parallax: 1,
       pointerBulge: 1,
     };
@@ -110,22 +107,34 @@ export class Story {
     this.scenes.forEach((s) => s.onResize?.(w, h, mobile));
   }
 
-  /** активный экран: последний, у которого прогресс > 0 */
+  /** Активный экран выбирает DOM (home.ts, с гистерезисом по сглаженному прогрессу) */
   private pickActive(): number {
-    let a = 0;
-    for (let i = 0; i < SCREEN_IDS.length; i++) if (state.screens[i] > 0) a = i;
-    return Math.min(a, this.scenes.length - 1);
+    return Math.min(Math.max(0, state.screen), this.scenes.length - 1);
+  }
+
+  /**
+   * Прокрутка экрана → local сцены (BRIEF-2 §8.2): вход занимает первые 20 % (power2.inOut → range.enter),
+   * выход — последние 30 % (range.exit → 1), середина линейная. Сглаженный прогресс уже без рывков,
+   * easing на краях делает старт и финиш переходов мягкими.
+   */
+  private sceneLocal(local: number, range: { enter: number; exit: number }): number {
+    const ENTER = 0.2;
+    const EXIT = 0.7;
+    const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+    if (local <= ENTER) return ease(local / ENTER) * range.enter;
+    if (local < EXIT) return range.enter + ((local - ENTER) / (EXIT - ENTER)) * (range.exit - range.enter);
+    return range.exit + ease((local - EXIT) / (1 - EXIT)) * (1 - range.exit);
   }
 
   update(dt: number, time: number) {
     const e = this.engine;
     const rig = this.rig;
     this.active = this.pickActive();
-    const local = clamp01(state.screens[this.active]);
-    state.screen = this.active;
+    const scene = this.scenes[this.active];
+    const local = this.sceneLocal(clamp01(state.screens[this.active]), scene.range);
     rig.coreEmissive = 0;
     rig.coreUpright = 0;
-    this.scenes[this.active].update(rig, local, dt, time, e);
+    scene.update(rig, local, dt, time, e);
     this.applyObjectDefaults(dt, time);
 
     // --- камера + параллакс от курсора (инерционный)
@@ -162,7 +171,8 @@ export class Story {
     core.uniforms.uEnvMix.value = rig.envMix;
     core.mesh.rotation.y = time * 0.05;
     core.mesh.rotation.x = Math.sin(time * 0.11) * 0.08 * (1 - rig.coreUpright);
-    core.material.emissiveIntensity = rig.coreEmissive * 2.6;
+    // светлеет к бумаге, а не раскаляется: emissive paper с небольшой интенсивностью
+    core.material.emissiveIntensity = rig.coreEmissive * 0.42;
     // прогиб к курсору: направление в объектных координатах
     if (rig.pointerBulge > 0 && state.pointer.active && !state.reduced) {
       this.tmp.set(this.smoothPointer.x * 3.5, this.smoothPointer.y * 2.2, 2.5).sub(this.tmp2.copy(e.atom.position));
@@ -178,7 +188,7 @@ export class Story {
 
     // --- окружение: вращение бликов
     e.scene.environmentRotation.set(0, rig.envRot + time * 0.035 + this.smoothPointer.x * 0.08, 0);
-    e.scene.environment = e.env.dark;
+    e.scene.environment = e.env.warm;
 
     // --- фон
     e.background.set(rig.bg.a, rig.bg.b, rig.bg.mix, rig.bg.mask);
@@ -191,6 +201,9 @@ export class Story {
 
     // --- орбиты
     const ob = rig.orbits;
+    // NDC на device-px для спрайтов-электронов: 2·tan(fov/2) / высота / масштаб атома
+    const ndcPerPx = (2 * Math.tan((e.camera.fov * Math.PI) / 360)) / Math.max(1, e.resolution.y) / Math.max(1e-3, e.atom.scale.x);
+    const dpr = e.renderer.getPixelRatio();
     for (let i = 0; i < e.orbits.length; i++) {
       const o = e.orbits[i];
       const inCount = i < ob.count ? 1 : 0;
@@ -198,19 +211,13 @@ export class Story {
       if (dt === 0) o.visible = ob.visible * inCount;
       o.spread = ob.spread;
       o.highlight = damp(o.highlight, state.orbitHover === i ? 1 : 0, 8, dt);
-      o.update(dt, time, { speedMul: ob.speedMul, additive: rig.particles.additive, baseColor: ob.color, baseOpacity: ob.opacity, width: ob.width });
+      o.update(dt, time, { speedMul: ob.speedMul, baseColor: ob.color, baseOpacity: ob.opacity, width: ob.width, trails: this.trails, dpr, ndcPerPx });
     }
 
-    // --- частицы
+    // --- частицы: тёмная пыль, цвет по глубине задан в шейдере
     const pu = e.particles.uniforms;
     pu.uOpacity.value = rig.particles.opacity;
-    pu.uAdditive.value = rig.particles.additive;
     pu.uSize.value = rig.particles.size;
-    // на светлых темах частицы тёмные (обычная альфа), на тёмных — светлые (additive)
-    const light = 1 - rig.particles.additive;
-    pu.uColorA.value.copy(this.particleDarkA).lerp(this.particleLightA, light);
-    pu.uColorB.value.copy(this.particleDarkB).lerp(this.particleLightB, light);
-    pu.uColorSpark.value.copy(this.particleDarkSpark).lerp(this.particleLightSpark, light);
 
     // --- пост-эффекты
     lerpPost(this.postNow, rig.post, dt === 0 ? 1 : 1 - Math.exp(-5 * dt), this.postNow);
@@ -230,7 +237,7 @@ export class Story {
         if (a) a.visible = 0;
       }
     }
-    if (!e.nodes.touched) e.nodes.update({ time, dt, assemble: 1, collapse: 1, hovered: -1, additive: 1, on: 0 });
+    if (!e.nodes.touched) e.nodes.update({ time, dt, assemble: 1, collapse: 1, hovered: -1, on: 0 });
     if (!e.streams.touched) {
       e.streams.update({ time, dt, draw: 1, on: 0, hovered: -1, freeze: 1 });
       for (const k of Object.keys(state.anchors)) if (k.startsWith('metric-')) state.anchors[k].visible = 0;
@@ -239,11 +246,17 @@ export class Story {
     e.scan.touched = e.nodes.touched = e.streams.touched = e.plates.touched = false;
   }
 
-  /** Hover/подписи орбит: проекция орбит в экран, расстояние до курсора (только на первом экране) */
+  /** Hover/подписи орбит: проекция орбит в экран, расстояние до курсора (только на первом экране, только с мышью) */
   private updateOrbitHover() {
     const e = this.engine;
     const labels = state.orbitLabels;
     const p = state.pointer;
+    if (!this.trails) {
+      // тач: без hover орбит (BRIEF-2 §8.6) — подписи прячем, проекции не считаем
+      for (const lab of labels) if (lab) lab.visible = 0;
+      state.orbitHover = -1;
+      return;
+    }
     const onCore = this.active === 0 && state.screens[0] < 0.55;
     let best = -1;
     let bestD = 28;

@@ -35,7 +35,9 @@ export class Streams {
           const off = new THREE.Vector3(Math.cos(twist), Math.sin(twist) * 0.6, Math.sin(twist * 0.7)).multiplyScalar(u * width);
           v.set(Math.cos(ang) * r, Math.sin(ang) * r * 0.78, Math.sin(ang * 1.7 + s) * 0.35 * (1 - t)).add(off);
         });
-        const line = new Polyline(pts, resolution, { width: 0.9, color: 0xffffff, color2: 0xbfd4ff, opacity: 0.55 });
+        const line = new Polyline(pts, resolution, { width: 0.9, color: 0x1b1a18, color2: 0x1b1a18, opacity: 0.45 });
+        line.uniforms.uAdditive.value = 0;
+        line.uniforms.uDashBase.value = 0.3;
         line.uniforms.uDash.value = 16 + k * 0.7;
         line.uniforms.uDashSpeed.value = 1.1 + (k % 3) * 0.25;
         line.uniforms.uDraw.value = 0;
@@ -61,7 +63,7 @@ export class Streams {
       for (let k = 0; k < this.lines[s].length; k++) {
         const l = this.lines[s][k];
         l.uniforms.uDraw.value = draw;
-        l.uniforms.uOpacity.value = (0.85 + h * 0.5) * (1 - dim) * opts.on;
+        l.uniforms.uOpacity.value = (0.45 + h * 0.35) * (1 - dim) * opts.on;
         l.uniforms.uWidth.value = (0.9 + h * 0.8) * (1 + opts.freeze * 0.6);
         l.uniforms.uDashSpeed.value = (1.1 + (k % 3) * 0.25) * (1 + h * 1.6) * (1 - opts.freeze);
         l.uniforms.uDash.value = opts.freeze > 0.5 ? 0 : 16 + k * 0.7;

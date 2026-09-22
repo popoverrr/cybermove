@@ -1,8 +1,8 @@
 /**
- * ParticleField — THREE.Points со своим шейдером (BRIEF §8.4).
+ * ParticleField — THREE.Points со своим шейдером (BRIEF-2 §4.4): тонкая тёмная пыль.
  * У частицы текущая (aTargetA) и следующая (aTargetB) цели плюс seed. Смена цели — подмена буфера.
- * Между целями curl-noise; размер и яркость зависят от глубины; additive на тёмных темах,
- * обычная альфа на светлых (premultiplied-трюк: альфа выхода → 0 даёт additive).
+ * Между целями curl-noise. Цвет umber → ink по глубине (ближе — темнее), размер 1–1.5px,
+ * обычное альфа-смешивание (premultiplied), без additive, без дымки и искр.
  */
 import * as THREE from 'three';
 import { GLSL_HASH, GLSL_SIMPLEX, GLSL_CURL } from '../shaders/noise';
@@ -21,14 +21,11 @@ uniform float uDpr;
 uniform float uJitter;
 uniform float uDepthNear;
 uniform float uDepthFar;
-uniform vec3 uColorA;
-uniform vec3 uColorB;
-uniform vec3 uColorSpark;
-uniform float uSparkRatio;
+uniform vec3 uColorNear;
+uniform vec3 uColorFar;
 uniform float uSwirl;
 varying float vAlpha;
 varying vec3 vColor;
-varying float vSpark;
 ${GLSL_HASH}
 ${GLSL_SIMPLEX}
 ${GLSL_CURL}
@@ -51,35 +48,26 @@ void main() {
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
   float depth = -mv.z;
-  float spark = step(1.0 - uSparkRatio, aSeed.x);
-  // дымка: часть частиц — крупные и очень прозрачные, дают объёмное свечение облака
-  float haze = step(0.88, aSeed.y);
-  float size = uSize * (0.55 + 1.45 * aSeed.y * aSeed.y) * (1.0 + spark * 1.4) * (1.0 + haze * 2.6);
-  gl_PointSize = clamp(size * uDpr * (6.5 / max(depth, 0.5)), 1.0, 30.0 * uDpr);
-  vAlpha = smoothstep(uDepthFar, uDepthNear, depth) * (0.35 + 0.65 * aSeed.x) * (1.0 - haze * 0.9);
-  vSpark = spark;
-  vColor = mix(mix(uColorA, uColorB, aSeed.w * aSeed.w), uColorSpark, spark);
+  float near = smoothstep(uDepthFar, uDepthNear, depth);
+  // 1–1.5 px: лёгкий разброс по seed, чуть крупнее ближе к камере
+  float size = uSize * (0.8 + 0.5 * aSeed.y) * (0.75 + 0.5 * near);
+  gl_PointSize = clamp(size * uDpr, 1.0, 2.2 * uDpr);
+  vAlpha = mix(0.45, 1.0, near) * (0.55 + 0.45 * aSeed.x);
+  vColor = mix(uColorFar, uColorNear, near);
 }
 `;
 
 const FRAG = /* glsl */ `
 precision highp float;
 uniform float uOpacity;
-uniform float uAdditive;
-uniform float uTime;
 varying float vAlpha;
 varying vec3 vColor;
-varying float vSpark;
 void main() {
   vec2 c = gl_PointCoord - 0.5;
   float d = length(c);
-  float soft = smoothstep(0.5, 0.12, d);
-  float core = smoothstep(0.22, 0.0, d);
-  float a = (soft * 0.75 + core * 0.6) * vAlpha * uOpacity;
-  a += vSpark * smoothstep(0.3, 0.0, d) * 1.2 * vAlpha * uOpacity;
+  float a = smoothstep(0.5, 0.18, d) * vAlpha * uOpacity;
   if (a < 0.002) discard;
-  vec3 col = vColor * a * (1.0 + vSpark * 1.8);
-  gl_FragColor = vec4(col, a * (1.0 - uAdditive));
+  gl_FragColor = vec4(vColor * a, a);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
 }
@@ -96,13 +84,10 @@ export interface ParticleUniforms {
   uJitter: THREE.IUniform<number>;
   uDepthNear: THREE.IUniform<number>;
   uDepthFar: THREE.IUniform<number>;
-  uColorA: THREE.IUniform<THREE.Color>;
-  uColorB: THREE.IUniform<THREE.Color>;
-  uColorSpark: THREE.IUniform<THREE.Color>;
-  uSparkRatio: THREE.IUniform<number>;
+  uColorNear: THREE.IUniform<THREE.Color>;
+  uColorFar: THREE.IUniform<THREE.Color>;
   uSwirl: THREE.IUniform<number>;
   uOpacity: THREE.IUniform<number>;
-  uAdditive: THREE.IUniform<number>;
 }
 
 export class ParticleField {
@@ -146,16 +131,13 @@ export class ParticleField {
       uCurlSpeed: { value: 0.12 },
       uSize: { value: 1.2 },
       uDpr: { value: opts.dpr },
-      uJitter: { value: 0.015 },
+      uJitter: { value: 0.012 },
       uDepthNear: { value: 4.0 },
       uDepthFar: { value: 12.0 },
-      uColorA: { value: new THREE.Color(0xb8c2d4) },
-      uColorB: { value: new THREE.Color(0x5d86ff) },
-      uColorSpark: { value: new THREE.Color(0xffffff) },
-      uSparkRatio: { value: 0.012 },
+      uColorNear: { value: new THREE.Color(0x1b1a18) }, // --ink
+      uColorFar: { value: new THREE.Color(0x8a8177) }, // --umber
       uSwirl: { value: 0.02 },
-      uOpacity: { value: 0.8 },
-      uAdditive: { value: 1 },
+      uOpacity: { value: 0.35 },
     };
 
     const mat = new THREE.ShaderMaterial({

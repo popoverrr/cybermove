@@ -1,15 +1,16 @@
 /**
- * S2 · АУДИТ — CORE (BRIEF §7 S2). Тема graphite, холодный белый свет.
+ * S2 · АУДИТ — CORE (BRIEF §7 S2). Тема sand, тёплый студийный свет.
  * Вход: камера отъезжает от заполнившего экран ядра, атом уходит вправо. Сквозь ядро проходит
- * сканирующая плоскость (прогресс по скроллу): с одной стороны хром, с другой рентген. Проявляются
+ * сканирующая плоскость (прогресс по скроллу): с одной стороны жемчуг, с другой тёмный каркас. Проявляются
  * точки данных (CAC, LTV, ROMI, Cash flow, маржа, конверсия). Выход: точки становятся узлами сети,
- * фон светлеет до стали.
+ * фон переходит в stone.
  */
 import type { Engine } from '../Engine';
 import type { Rig } from '../Story';
 import type { SceneModule } from './types';
 import { getTarget } from '../objects/targets';
-import { POST_DARK, POST_LIGHT, lerpPost } from '../Post';
+import { POST_PAPER } from '../Post';
+import { SURFACE } from '../objects/LiquidChrome';
 import { range, smooth, easeInOutCubic, easeOutCubic, lerp } from '../math';
 import { HoverMix } from './hover';
 import { state } from '../../lib/state';
@@ -20,6 +21,7 @@ const KEYS = ['business-audit', 'financial-audit', 'investment', 'strategy'] as 
 
 export class AuditScene implements SceneModule {
   readonly id = 'audit';
+  readonly range = { enter: 0.22, exit: 0.8 };
   private hover = new HoverMix(KEYS);
   private tmp = new THREE.Vector3();
 
@@ -38,23 +40,21 @@ export class AuditScene implements SceneModule {
     const exitX = range(local, 0.8, 1.0);
     const ex = easeInOutCubic(exitX);
 
-    // ---------- фон: black → graphite на входе, graphite → steel на выходе (сверху вниз)
+    // ---------- фон: ivory → sand на входе, sand → stone на выходе (сверху вниз)
     if (exitX <= 0) {
-      rig.bg.a = 'black';
-      rig.bg.b = 'graphite';
+      rig.bg.a = 'ivory';
+      rig.bg.b = 'sand';
       rig.bg.mix = smooth(range(local, 0, 0.18));
       rig.bg.mask = 'uniform';
     } else {
-      rig.bg.a = 'graphite';
-      rig.bg.b = 'steel';
+      rig.bg.a = 'sand';
+      rig.bg.b = 'stone';
       rig.bg.mix = ex;
       rig.bg.mask = 'top';
     }
     rig.beam = 0;
     rig.envMix = ex;
-    lerpPost(POST_DARK, POST_LIGHT, ex, rig.post);
-    rig.post.bloomIntensity = lerp(POST_DARK.bloomIntensity * 0.8, POST_LIGHT.bloomIntensity, ex);
-    rig.particles.additive = 1 - ex;
+    Object.assign(rig.post, POST_PAPER);
 
     // ---------- камера и раскладка: от 2.35 (ядро во весь экран) к 6.6, атом вправо
     rig.cam.set(0, 0, lerp(2.35, 6.6, enter));
@@ -67,8 +67,8 @@ export class AuditScene implements SceneModule {
     rig.coreVisible = true;
     rig.coreScale = lerp(1.15, 1.0, enter) * (1 - ex * 0.42);
     rig.coreStretch.set(1, 1 + hBiz * 0.22, 1);
-    cu.uNoiseAmp.value = lerp(0.015, 0.03, enter);
-    cu.uWorleyAmp.value = 0.065;
+    cu.uNoiseAmp.value = lerp(SURFACE.noiseAmp * 0.5, SURFACE.noiseAmp, enter);
+    cu.uWorleyAmp.value = SURFACE.worleyAmp;
     e.core.setShapes(0, 0);
     cu.uMorph.value = 0;
     rig.orbits.visible = 0;
@@ -109,15 +109,15 @@ export class AuditScene implements SceneModule {
       e.particles.setTarget('B', getTarget('calm'), 'calm');
       pu.uMix.value = smooth(range(local, 0, 0.25));
       pu.uCurlAmp.value = 0.05;
-      rig.particles.opacity = lerp(0.6, 0.35, enter);
-      rig.particles.size = lerp(2.4, 1.2, enter);
+      rig.particles.opacity = lerp(0.45, 0.3, enter);
+      rig.particles.size = lerp(1.5, 1.2, enter);
     } else {
       e.particles.setTarget('A', getTarget('calm'), 'calm');
       e.particles.setTarget('B', getTarget('network'), 'network');
       pu.uMix.value = ex;
       pu.uCurlAmp.value = 0.04 + 0.2 * Math.sin(ex * Math.PI);
-      rig.particles.opacity = lerp(0.35, 0.9, ex);
-      rig.particles.size = lerp(1.2, 1.5, ex);
+      rig.particles.opacity = lerp(0.3, 0.45, ex);
+      rig.particles.size = lerp(1.2, 1.4, ex);
     }
     rig.atomPos.set(0, 0, 0);
   }

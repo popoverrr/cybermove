@@ -13,7 +13,7 @@ const c = getContent(lang);
 const year = new Date().getFullYear();
 ---
 
-<footer class:list={['footer', { 'footer--compact': compact }]}>
+<footer class:list={['footer', { 'footer--compact': compact }]} data-theme="night">
   <div class="container">
     <div class="footer__top hair">
       <div class="footer__brand">
@@ -54,6 +54,7 @@ const year = new Date().getFullYear();
 <style>
   .footer {
     position: relative;
+    background: var(--night);
     color: var(--fg);
     padding: var(--space-16) 0 var(--space-8);
   }

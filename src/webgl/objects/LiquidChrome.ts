@@ -1,13 +1,13 @@
 /**
- * LiquidChrome — один высокополигональный icosphere на весь сюжет (BRIEF §8.3).
- * MeshPhysicalMaterial (metalness 1, roughness 0.04–0.12, clearcoat), смещение вершин в вершинном шейдере
- * (simplex + worley), нормали пересчитываются конечными разностями. Морфинг между SDF-формами:
- * две активные цели в атрибутах (aPosA/aNorA, aPosB/aNorB), смешение mix() с шумовой турбулентностью.
+ * LiquidChrome (ядро) — один высокополигональный icosphere на весь сюжет (BRIEF §8.3, материал — BRIEF-2 §4.1).
+ * MeshPhysicalMaterial матовый жемчуг (metalness ≈ 0, roughness 0.62, sheen), смещение вершин в вершинном
+ * шейдере (simplex + едва заметный worley), нормали пересчитываются конечными разностями. Морфинг между
+ * SDF-формами: две активные цели в атрибутах (aPosA/aNorA, aPosB/aNorB), смешение mix() с турбулентностью.
  */
 import * as THREE from 'three';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { GLSL_NOISE_ALL } from '../shaders/noise';
-import { patchEnvBlend } from '../Environment';
+import { pearlMaterial } from '../Environment';
 import { SHAPE_COUNT, projectShape } from './shapes';
 
 export interface ChromeUniforms {
@@ -99,12 +99,15 @@ vec3 transformed = cmP;
 #endif
 `;
 
+/** Базовые амплитуды поверхности (BRIEF-2 §4.1: сфера дышит, а не кипит; рельеф едва заметен) */
+export const SURFACE = { noiseAmp: 0.01, noiseSpeed: 0.1, worleyAmp: 0.008 } as const;
+
 export interface LiquidChromeOptions {
   /** detail для IcosahedronGeometry three: граней = 20·(detail+1)²; 63 → ~41k вершин, 31 → ~10k */
   detail: number;
   worley: boolean;
-  envDark: THREE.Texture;
-  envLight: THREE.Texture;
+  envWarm: THREE.Texture;
+  envCrisp: THREE.Texture;
 }
 
 export class LiquidChrome {
@@ -153,13 +156,13 @@ export class LiquidChrome {
 
     this.uniforms = {
       uTime: { value: 0 },
-      uNoiseAmp: { value: 0.03 },
+      uNoiseAmp: { value: SURFACE.noiseAmp },
       uNoiseFreq: { value: 1.6 },
-      uNoiseSpeed: { value: 0.18 },
-      uWorleyAmp: { value: 0.065 },
+      uNoiseSpeed: { value: SURFACE.noiseSpeed },
+      uWorleyAmp: { value: SURFACE.worleyAmp },
       uWorleyFreq: { value: 1.6 },
       uMorph: { value: 0 },
-      uTurb: { value: 0.16 },
+      uTurb: { value: 0.1 },
       uPointerDir: { value: new THREE.Vector3(0, 0, 1) },
       uPointerAmt: { value: 0 },
       uStretch: { value: new THREE.Vector3(1, 1, 1) },
@@ -168,20 +171,12 @@ export class LiquidChrome {
       uScanOn: { value: 0 },
     };
 
-    const mat = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(0xf3f5f9),
-      metalness: 1.0,
-      roughness: 0.07,
-      clearcoat: 0.55,
-      clearcoatRoughness: 0.06,
-      envMap: opts.envDark,
-      envMapIntensity: 1.0,
-      side: THREE.FrontSide,
-    });
+    const mat = pearlMaterial(opts.envWarm, opts.envCrisp, this.uniforms.uEnvMix, { side: THREE.FrontSide });
     mat.defines = { ...(mat.defines || {}) };
     if (opts.worley) mat.defines.CM_WORLEY = '';
     const u = this.uniforms;
-    mat.onBeforeCompile = (shader) => {
+    const prevCompile = mat.onBeforeCompile;
+    mat.onBeforeCompile = (shader, renderer) => {
       Object.assign(shader.uniforms, {
         uTime: u.uTime,
         uNoiseAmp: u.uNoiseAmp,
@@ -199,9 +194,9 @@ export class LiquidChrome {
         .replace('#include <common>', `#include <common>\n${CHROME_VERTEX_PARS}`)
         .replace('#include <beginnormal_vertex>', CHROME_BEGINNORMAL)
         .replace('#include <begin_vertex>', CHROME_BEGIN_VERTEX);
+      prevCompile?.(shader, renderer);
     };
-    mat.customProgramCacheKey = () => `liquidchrome${opts.worley ? '-w' : ''}`;
-    patchEnvBlend(mat, opts.envLight, { uEnvMix: u.uEnvMix });
+    mat.customProgramCacheKey = () => `liquidchrome${opts.worley ? '-w' : ''}|envblend`;
     this.material = mat;
 
     this.mesh = new THREE.Mesh(geo, mat);

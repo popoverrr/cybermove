@@ -202,8 +202,16 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
     position: fixed;
     inset: 0;
     z-index: -1;
-    background: var(--black);
-    color: var(--white);
+    background: var(--night);
+    color: var(--paper);
+    --fg: var(--paper);
+    --fg-2: #cfc8be;
+    --fg-3: var(--taupe);
+    --hair: rgba(250, 248, 244, 0.14);
+    --hair-strong: rgba(250, 248, 244, 0.32);
+    --accent: var(--paper);
+    --btn-fill: var(--paper);
+    --btn-fill-fg: var(--ink);
     opacity: 0;
     visibility: hidden;
     transition: opacity var(--dur) var(--ease-out), visibility 0s linear var(--dur);
@@ -242,7 +250,7 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
   :global(body.menu-open) .mobile-menu li:nth-child(3) .mobile-menu__link { transition-delay: 0.1s; }
   :global(body.menu-open) .mobile-menu li:nth-child(4) .mobile-menu__link { transition-delay: 0.15s; }
   .mobile-menu__idx {
-    color: var(--steel-600);
+    color: var(--taupe);
   }
   .mobile-menu__foot {
     display: grid;
@@ -267,7 +275,7 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
       overflow: hidden;
     }
     :global(body.menu-open) .header {
-      color: var(--white);
+      color: var(--paper);
       transform: none !important;
     }
   }

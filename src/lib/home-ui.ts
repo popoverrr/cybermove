@@ -154,11 +154,10 @@ export function initAnchors() {
 /* ---------- синхронная интерполяция темы ---------- */
 type ThemeVars = Record<string, string>;
 const THEMES: Record<string, ThemeVars> = {
-  black: { '--fg': '#f4f6fa', '--fg-2': '#aab0b8', '--fg-3': '#7a8190', '--hair': 'rgba(244,246,250,0.14)', '--hair-strong': 'rgba(244,246,250,0.32)', '--accent': '#4d7cff', '--btn-fill': '#f4f6fa', '--btn-fill-fg': '#050505', '--bg': '#050505' },
-  graphite: { '--fg': '#f4f6fa', '--fg-2': '#aab0b8', '--fg-3': '#7a8190', '--hair': 'rgba(244,246,250,0.14)', '--hair-strong': 'rgba(244,246,250,0.32)', '--accent': '#4d7cff', '--btn-fill': '#f4f6fa', '--btn-fill-fg': '#050505', '--bg': '#0e0f12' },
-  steel: { '--fg': '#0e0f12', '--fg-2': '#33373d', '--fg-3': '#4f5560', '--hair': 'rgba(5,5,5,0.16)', '--hair-strong': 'rgba(5,5,5,0.36)', '--accent': '#0a24f5', '--btn-fill': '#0e0f12', '--btn-fill-fg': '#f4f6fa', '--bg': '#cfd3d9' },
-  blue: { '--fg': '#f4f6fa', '--fg-2': '#bfd4ff', '--fg-3': 'rgba(191,212,255,0.82)', '--hair': 'rgba(244,246,250,0.22)', '--hair-strong': 'rgba(244,246,250,0.45)', '--accent': '#f4f6fa', '--btn-fill': '#f4f6fa', '--btn-fill-fg': '#0a24f5', '--bg': '#0a24f5' },
-  silver: { '--fg': '#1a1c20', '--fg-2': '#33373d', '--fg-3': '#525863', '--hair': 'rgba(5,5,5,0.14)', '--hair-strong': 'rgba(5,5,5,0.34)', '--accent': '#0a24f5', '--btn-fill': '#0a24f5', '--btn-fill-fg': '#f4f6fa', '--bg': '#d9dce1' },
+  ivory: { '--fg': '#1b1a18', '--fg-2': '#5a544d', '--fg-3': '#8a8177', '--hair': 'rgba(27,26,24,0.14)', '--hair-strong': 'rgba(27,26,24,0.32)', '--accent': '#1b1a18', '--btn-fill': '#1b1a18', '--btn-fill-fg': '#faf8f4', '--bg': '#f2efe9' },
+  sand: { '--fg': '#1b1a18', '--fg-2': '#5a544d', '--fg-3': '#8a8177', '--hair': 'rgba(27,26,24,0.14)', '--hair-strong': 'rgba(27,26,24,0.32)', '--accent': '#1b1a18', '--btn-fill': '#1b1a18', '--btn-fill-fg': '#faf8f4', '--bg': '#e9e4dc' },
+  stone: { '--fg': '#1b1a18', '--fg-2': '#5a544d', '--fg-3': '#5a544d', '--hair': 'rgba(27,26,24,0.16)', '--hair-strong': 'rgba(27,26,24,0.36)', '--accent': '#1b1a18', '--btn-fill': '#1b1a18', '--btn-fill-fg': '#faf8f4', '--bg': '#ddd7ce' },
+  clay: { '--fg': '#1b1a18', '--fg-2': '#4a453f', '--fg-3': '#5a544d', '--hair': 'rgba(27,26,24,0.18)', '--hair-strong': 'rgba(27,26,24,0.4)', '--accent': '#1b1a18', '--btn-fill': '#1b1a18', '--btn-fill-fg': '#faf8f4', '--bg': '#cfc7bb' },
 };
 
 function parseColor(c: string): [number, number, number, number] {
@@ -181,7 +180,7 @@ function mixColor(a: string, b: string, t: number) {
 let lastKey = '';
 /** Вызывается из measure(): тема = тема активного экрана, в фазе выхода смешивается со следующей */
 export function syncTheme(themes: string[], active: number, exitT: number) {
-  const a = THEMES[themes[active]] || THEMES.black;
+  const a = THEMES[themes[active]] || THEMES.ivory;
   const b = THEMES[themes[Math.min(active + 1, themes.length - 1)]] || a;
   const t = a === b ? 0 : exitT;
   const key = `${themes[active]}|${themes[active + 1]}|${t.toFixed(2)}`;

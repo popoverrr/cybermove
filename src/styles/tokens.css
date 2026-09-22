@@ -1,37 +1,32 @@
-/* CYBERMOVE — дизайн-токены. Источник: docs/BRIEF.md §6, доводка по референсам. */
+/* CYBERMOVE — дизайн-токены. Источник: docs/BRIEF-2.md §3 (тёплая палитра, референс ref-12). */
 :root {
   /* Палитра */
-  --black: #050505;
-  --graphite: #0e0f12;
-  --steel-900: #1a1c20;
-  --steel-700: #33373d;
-  --steel-600: #5b616b;
-  --steel-500: #7a8190;
-  --steel-400: #8a9099;
-  --steel-300: #aab0b8;
-  --steel-200: #c9ced6;
-  --steel-100: #e6e9ee;
-  --white: #f4f6fa;
-  --blue: #0a24f5;
-  --blue-deep: #001489;
-  --blue-glow: #4d7cff;
-  --blue-ice: #bfd4ff;
+  --ivory: #f2efe9;
+  --sand: #e9e4dc;
+  --stone: #ddd7ce;
+  --clay: #cfc7bb;
+  --taupe: #b9afa2;
+  --umber: #8a8177;
+  --bark: #5a544d;
+  --bark-deep: #4a453f; /* вторичный текст на clay: 5.7:1 */
+  --ink: #1b1a18;
+  --paper: #faf8f4;
+  --night: #23211e;
 
-  /* Тема по умолчанию (black). Экраны переопределяют через data-theme / JS. */
-  --bg: var(--black);
-  --fg: var(--white);
-  --fg-2: var(--steel-300);
-  --fg-3: var(--steel-500);
-  --hair: rgba(244, 246, 250, 0.14);
-  --hair-strong: rgba(244, 246, 250, 0.32);
-  --accent: var(--blue-glow);
-  --accent-ink: var(--blue);
-  --btn-fill: var(--white);
-  --btn-fill-fg: var(--black);
+  /* Тема по умолчанию (ivory). Экраны переопределяют через data-theme / JS. */
+  --bg: var(--ivory);
+  --fg: var(--ink);
+  --fg-2: var(--bark);
+  --fg-3: var(--umber);
+  --hair: rgba(27, 26, 24, 0.14);
+  --hair-strong: rgba(27, 26, 24, 0.32);
+  --accent: var(--ink);
+  --accent-ink: var(--ink);
+  --btn-fill: var(--ink);
+  --btn-fill-fg: var(--paper);
 
   /* Шрифты */
   --font-sans: 'Inter Tight Variable', 'Inter Tight', -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  --font-wide: 'Unbounded Variable', 'Unbounded', var(--font-sans);
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* Типографическая шкала (fluid) */
@@ -46,13 +41,13 @@
   --fs-micro: 0.6875rem;   /* 11px микрометки */
   --fs-counter: clamp(3.5rem, 1rem + 9vw, 10rem);
 
-  --lh-tight: 0.98;
+  --lh-tight: 1.0;
   --lh-snug: 1.1;
   --lh-body: 1.5;
 
-  --ls-display: -0.035em;
-  --ls-h: -0.025em;
-  --ls-micro: 0.08em;
+  --ls-display: -0.02em;
+  --ls-h: -0.02em;
+  --ls-micro: 0.12em;
 
   /* Сетка и отступы */
   --gutter: clamp(1.25rem, 2.5vw, 3rem);
@@ -70,8 +65,8 @@
   --space-16: 4rem;
   --space-24: 6rem;
 
-  /* Радиусы: минимальные */
-  --radius: 2px;
+  /* Радиусы: без скруглений */
+  --radius: 0px;
   --radius-pill: 999px;
 
   /* Моушн */
@@ -85,59 +80,64 @@
   --rail-w: 56px;
 }
 
-/* Темы экранов. JS главной интерполирует те же переменные по скроллу. */
-[data-theme='black'] {
-  --bg: var(--black);
-  --fg: var(--white);
-  --fg-2: var(--steel-300);
-  --fg-3: var(--steel-500);
-  --hair: rgba(244, 246, 250, 0.14);
-  --hair-strong: rgba(244, 246, 250, 0.32);
-  --accent: var(--blue-glow);
-  --btn-fill: var(--white);
-  --btn-fill-fg: var(--black);
+/*
+ * Темы экранов (BRIEF-2 §3): вся шкала тёплая и светлая, контраст между экранами — по тону.
+ * Третичный текст: umber на ivory/sand (3.3:1, 3.0:1), bark на stone/clay (5.2:1, 4.5:1).
+ * JS главной интерполирует те же переменные по скроллу (THEMES в home-ui.ts — те же значения).
+ */
+[data-theme='ivory'] {
+  --bg: var(--ivory);
+  --fg: var(--ink);
+  --fg-2: var(--bark);
+  --fg-3: var(--umber);
+  --hair: rgba(27, 26, 24, 0.14);
+  --hair-strong: rgba(27, 26, 24, 0.32);
+  --accent: var(--ink);
+  --btn-fill: var(--ink);
+  --btn-fill-fg: var(--paper);
 }
-[data-theme='graphite'] {
-  --bg: var(--graphite);
-  --fg: var(--white);
-  --fg-2: var(--steel-300);
-  --fg-3: var(--steel-500);
-  --hair: rgba(244, 246, 250, 0.14);
-  --hair-strong: rgba(244, 246, 250, 0.32);
-  --accent: var(--blue-glow);
-  --btn-fill: var(--white);
-  --btn-fill-fg: var(--black);
+[data-theme='sand'] {
+  --bg: var(--sand);
+  --fg: var(--ink);
+  --fg-2: var(--bark);
+  --fg-3: var(--umber);
+  --hair: rgba(27, 26, 24, 0.14);
+  --hair-strong: rgba(27, 26, 24, 0.32);
+  --accent: var(--ink);
+  --btn-fill: var(--ink);
+  --btn-fill-fg: var(--paper);
 }
-[data-theme='steel'] {
-  --bg: #cfd3d9;
-  --fg: var(--graphite);
-  --fg-2: var(--steel-700);
-  --fg-3: #4f5560;
-  --hair: rgba(5, 5, 5, 0.16);
-  --hair-strong: rgba(5, 5, 5, 0.36);
-  --accent: var(--blue);
-  --btn-fill: var(--graphite);
-  --btn-fill-fg: var(--white);
+[data-theme='stone'] {
+  --bg: var(--stone);
+  --fg: var(--ink);
+  --fg-2: var(--bark);
+  --fg-3: var(--bark);
+  --hair: rgba(27, 26, 24, 0.16);
+  --hair-strong: rgba(27, 26, 24, 0.36);
+  --accent: var(--ink);
+  --btn-fill: var(--ink);
+  --btn-fill-fg: var(--paper);
 }
-[data-theme='blue'] {
-  --bg: var(--blue);
-  --fg: var(--white);
-  --fg-2: var(--blue-ice);
-  --fg-3: rgba(191, 212, 255, 0.82);
-  --hair: rgba(244, 246, 250, 0.22);
-  --hair-strong: rgba(244, 246, 250, 0.45);
-  --accent: var(--white);
-  --btn-fill: var(--white);
-  --btn-fill-fg: var(--blue);
+[data-theme='clay'] {
+  --bg: var(--clay);
+  --fg: var(--ink);
+  --fg-2: var(--bark-deep);
+  --fg-3: var(--bark);
+  --hair: rgba(27, 26, 24, 0.18);
+  --hair-strong: rgba(27, 26, 24, 0.4);
+  --accent: var(--ink);
+  --btn-fill: var(--ink);
+  --btn-fill-fg: var(--paper);
 }
-[data-theme='silver'] {
-  --bg: #d9dce1;
-  --fg: var(--steel-900);
-  --fg-2: var(--steel-700);
-  --fg-3: #525863;
-  --hair: rgba(5, 5, 5, 0.14);
-  --hair-strong: rgba(5, 5, 5, 0.34);
-  --accent: var(--blue);
-  --btn-fill: var(--blue);
-  --btn-fill-fg: var(--white);
+/* Единственная тёмная зона: футер и полноэкранное меню */
+[data-theme='night'] {
+  --bg: var(--night);
+  --fg: var(--paper);
+  --fg-2: #cfc8be;
+  --fg-3: var(--taupe);
+  --hair: rgba(250, 248, 244, 0.14);
+  --hair-strong: rgba(250, 248, 244, 0.32);
+  --accent: var(--paper);
+  --btn-fill: var(--paper);
+  --btn-fill-fg: var(--ink);
 }

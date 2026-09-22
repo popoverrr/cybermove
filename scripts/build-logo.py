@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
 Сборка логотипа CYBERMOVE: три варианта знака (A, B, C), словесный знак «CYBER MOVE»
-(Unbounded, в кривых), дескриптор «CONSULTING» (JetBrains Mono, разрядка), комплект favicon.
+(Inter Tight 700, в кривых), дескриптор «CONSULTING» (JetBrains Mono, разрядка), комплект favicon.
+Итерация 2 (BRIEF-2 §5): активен вариант A — тонкое замкнутое кольцо с монограммой CM обычным гротеском,
+без акцентной черты; цвета ink на светлом, paper на night.
 
 Запуск: python scripts/build-logo.py
 Выход:  src/assets/logo/*.svg, public/favicon.svg, public/favicon-*.png, public/favicon.ico,
         public/apple-touch-icon.png, public/icon-*.png, public/site.webmanifest
 
-Активный вариант сайта: B (см. docs/DECISIONS.md). Чтобы сменить на A или C:
-    python scripts/build-logo.py --active a
+Активный вариант сайта: A (см. docs/DECISIONS.md). Чтобы сменить на B или C:
+    python scripts/build-logo.py --active b
 """
 import argparse
 import io
@@ -29,10 +31,11 @@ FONTS = ROOT / 'node_modules' / '@fontsource-variable'
 OUT = ROOT / 'src' / 'assets' / 'logo'
 PUBLIC = ROOT / 'public'
 
-INK_DARK = '#F4F6FA'
-ACCENT_DARK = '#4D7CFF'
-INK_LIGHT = '#0E0F12'
-ACCENT_LIGHT = '#0A24F5'
+INK_DARK = '#FAF8F4'    # paper — на night
+ACCENT_DARK = '#FAF8F4'
+INK_LIGHT = '#1B1A18'   # ink — на светлом
+ACCENT_LIGHT = '#1B1A18'
+PLATE = '#F2EFE9'       # ivory — плашка favicon
 
 
 def load_instance(woff2_path: Path, axes: dict) -> TTFont:
@@ -129,11 +132,11 @@ def mark(variant: str, ink: str, accent: str, cm_face: Face) -> str:
     """Знак в viewBox 0 0 100 100."""
     parts = []
     if variant == 'a':
-        # A. Бережная перерисовка: CM гротеском в волосяном кольце, синяя черта вместо золотой.
-        parts.append(f'<circle cx="50" cy="50" r="45" fill="none" stroke="{ink}" stroke-width="1.5"/>')
-        cm, w = text_group(cm_face, 'CM', 0, 0, 30, ink, tracking_em=-0.02)
-        parts.append(f'<g transform="translate({50 - w / 2:.3f} 58.5)">{cm}</g>')
-        parts.append(f'<rect x="{50 - 11:.3f}" y="66.5" width="22" height="2" fill="{accent}"/>')
+        # A (ref-12): тонкое замкнутое кольцо ~1.2px при высоте 26px, монограмма CM гротеском weight 460,
+        # без черты и без точки-электрона.
+        parts.append(f'<circle cx="50" cy="50" r="46" fill="none" stroke="{ink}" stroke-width="4.4"/>')
+        cm, w = text_group(cm_face, 'CM', 0, 0, 31, ink, tracking_em=-0.01)
+        parts.append(f'<g transform="translate({50 - w / 2:.3f} 65.5)">{cm}</g>')
     elif variant == 'b':
         # B. Кольцо как орбита: разомкнутое кольцо, точка-электрон на нём, CM внутри.
         gap_start, gap_end = 296, 338  # разрыв справа сверху
@@ -158,7 +161,7 @@ def svg(w, h, body, bg=None):
 def lockup(variant, ink, accent, cm_face, wide_face, mono_face):
     """Горизонтальная версия: знак + CYBER MOVE + CONSULTING. Возвращает (svg, width)."""
     x0 = 122
-    word, ww = text_group(wide_face, 'CYBER MOVE', x0, 55.5, 27, ink, tracking_em=0.0)
+    word, ww = text_group(wide_face, 'CYBER MOVE', x0, 55.5, 27, ink, tracking_em=0.02)
     desc, dw = text_group(mono_face, 'CONSULTING', x0 + 1.2, 78, 8.4, ink, tracking_em=0.42,
                           attrs='opacity="0.72"')
     width = math.ceil(x0 + ww + 6)
@@ -206,11 +209,13 @@ def ico_from_pngs(pngs):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--active', default='b', choices=['a', 'b', 'c'])
+    ap.add_argument('--active', default='a', choices=['a', 'b', 'c'])
     args = ap.parse_args()
 
-    inter = Face(load_instance(FONTS / 'inter-tight' / 'files' / 'inter-tight-latin-wght-normal.woff2', {'wght': 640}))
-    unbounded = Face(load_instance(FONTS / 'unbounded' / 'files' / 'unbounded-latin-wght-normal.woff2', {'wght': 600}))
+    inter_woff = FONTS / 'inter-tight' / 'files' / 'inter-tight-latin-wght-normal.woff2'
+    inter = Face(load_instance(inter_woff, {'wght': 640}))       # CM для вариантов B/C
+    inter_cm = Face(load_instance(inter_woff, {'wght': 460}))    # CM варианта A: обычный гротеск
+    unbounded = Face(load_instance(inter_woff, {'wght': 700}))   # словесный знак: Inter Tight 700 (Unbounded удалён)
     mono = Face(load_instance(FONTS / 'jetbrains-mono' / 'files' / 'jetbrains-mono-latin-wght-normal.woff2', {'wght': 520}))
 
     schemes = {
@@ -221,24 +226,25 @@ def main():
     }
 
     for variant in 'abc':
+        cm_face = inter_cm if variant == 'a' else inter
         for scheme, (ink, accent) in schemes.items():
-            s, _ = lockup(variant, ink, accent, inter, unbounded, mono)
+            s, _ = lockup(variant, ink, accent, cm_face, unbounded, mono)
             write(OUT / f'{variant}-horizontal-{scheme}.svg', s)
-            write(OUT / f'{variant}-mark-{scheme}.svg', svg(100, 100, mark(variant, ink, accent, inter)))
+            write(OUT / f'{variant}-mark-{scheme}.svg', svg(100, 100, mark(variant, ink, accent, cm_face)))
         # Версия для инлайна в шапке: currentColor + CSS-переменная акцента
-        s, _ = lockup(variant, 'currentColor', 'var(--logo-accent, #4D7CFF)', inter, unbounded, mono)
+        s, _ = lockup(variant, 'currentColor', 'var(--logo-accent, currentColor)', cm_face, unbounded, mono)
         write(OUT / f'{variant}-horizontal-current.svg', s)
         write(OUT / f'{variant}-mark-current.svg',
-              svg(100, 100, mark(variant, 'currentColor', 'var(--logo-accent, #4D7CFF)', inter)))
+              svg(100, 100, mark(variant, 'currentColor', 'var(--logo-accent, currentColor)', cm_face)))
 
     # Активный вариант: один файл logo.svg (шапка) + logo-mark.svg (компакт) + favicon
     a = args.active
     write(OUT / 'logo.svg', (OUT / f'{a}-horizontal-current.svg').read_text(encoding='utf-8'))
     write(OUT / 'logo-mark.svg', (OUT / f'{a}-mark-current.svg').read_text(encoding='utf-8'))
 
-    # Favicon: знак на чёрной плашке со скруглением 20%
-    fav_body = (f'<rect width="100" height="100" rx="20" fill="#050505"/>'
-                f'<g transform="translate(9 9) scale(0.82)">{mark(a, INK_DARK, ACCENT_DARK, inter)}</g>')
+    # Favicon: знак ink на плашке ivory
+    fav_body = (f'<rect width="100" height="100" rx="12" fill="{PLATE}"/>'
+                f'<g transform="translate(9 9) scale(0.82)">{mark(a, INK_LIGHT, ACCENT_LIGHT, inter_cm if a == "a" else inter)}</g>')
     fav_svg = svg(100, 100, fav_body)
     write(PUBLIC / 'favicon.svg', fav_svg)
     pngs = []
@@ -253,7 +259,7 @@ def main():
         '{\n  "name": "CYBERMOVE",\n  "short_name": "CYBERMOVE",\n'
         '  "icons": [\n    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },\n'
         '    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }\n  ],\n'
-        '  "theme_color": "#050505",\n  "background_color": "#050505",\n  "display": "browser"\n}\n'))
+        '  "theme_color": "#F2EFE9",\n  "background_color": "#F2EFE9",\n  "display": "browser"\n}\n'))
     print(f'Логотип собран. Активный вариант: {a.upper()}. Файлы: {OUT} и {PUBLIC}')
 
 

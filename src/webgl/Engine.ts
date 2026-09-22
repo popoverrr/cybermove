@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { PARAMS, type Tier } from './params';
 import { TIERS, detectTier, lowerTier, isSoftwareRenderer, type TierSpec } from './tiers';
-import { buildEnvironments, type EnvironmentMaps } from './Environment';
+import { buildEnvironments, addStudioLights, type EnvironmentMaps } from './Environment';
 import { Background } from './backgrounds/Background';
 import { LiquidChrome } from './objects/LiquidChrome';
 import { ParticleField } from './objects/ParticleField';
@@ -15,7 +15,7 @@ import { Nodes } from './objects/Nodes';
 import { Streams } from './objects/Streams';
 import { Plates } from './objects/Plates';
 import { mulberry32 } from './objects/orbitals';
-import { Post, POST_DARK } from './Post';
+import { Post, POST_PAPER } from './Post';
 import { Story } from './Story';
 import { state } from '../lib/state';
 
@@ -75,33 +75,36 @@ export class Engine {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.renderer.toneMappingExposure = 1.0;
-    this.renderer.setClearColor(0x050505, 1);
+    this.renderer.setClearColor(0xf2efe9, 1);
     this.renderer.autoClear = true;
 
     this.camera = new THREE.PerspectiveCamera(30, 1, 0.5, 80);
     this.camera.position.set(0, 0, 7.6);
 
     this.env = buildEnvironments(this.renderer, this.tier.envSize);
-    this.scene.environment = this.env.dark;
+    this.scene.environment = this.env.warm;
     this.scene.environmentIntensity = 1;
+    addStudioLights(this.scene);
 
     this.background = new Background(this.resolution);
+    this.background.uniforms.uDetail.value = this.tier.bgDetail;
     this.scene.add(this.background.mesh);
 
     const rng = mulberry32(20260921);
-    this.core = new LiquidChrome({ detail: this.tier.sphereDetail, worley: this.tier.worley, envDark: this.env.dark, envLight: this.env.light });
+    this.core = new LiquidChrome({ detail: this.tier.sphereDetail, worley: this.tier.worley, envWarm: this.env.warm, envCrisp: this.env.crisp });
     this.particles = new ParticleField(TIERS.high.particles, rng, { curl: tierName !== 'low', dpr: 1 });
     this.particles.setDrawCount(this.tier.particles);
     for (const p of [...CORE_ORBITS, ...GROWTH_ORBITS]) this.orbits.push(new Orbit(p, this.resolution, this.tier.trailSegments));
 
     this.renderer.localClippingEnabled = true;
-    this.core.material.emissive = new THREE.Color(0xdfe9ff);
+    // «светлеет до paper» (S5, импульс формы): emissive цвета бумаги, интенсивность задаёт Story
+    this.core.material.emissive = new THREE.Color(0xfaf8f4);
     this.core.material.emissiveIntensity = 0;
     const envMix = this.core.uniforms.uEnvMix;
-    this.scan = new Scan(this.core, this.resolution, this.env.dark, this.env.light, envMix);
-    this.nodes = new Nodes(this.resolution, this.env.dark, this.env.light, envMix);
+    this.scan = new Scan(this.core, this.resolution, this.env.warm, this.env.crisp, envMix);
+    this.nodes = new Nodes(this.resolution, this.env.warm, this.env.crisp, envMix);
     this.streams = new Streams(this.resolution);
-    this.plates = new Plates(this.resolution, this.env.dark, this.env.light, envMix);
+    this.plates = new Plates(this.resolution, this.env.warm, this.env.crisp, envMix);
 
     this.atom.add(this.core.mesh, this.particles.points, this.scan.group, this.nodes.group, this.streams.group, this.plates.group);
     for (const o of this.orbits) this.atom.add(o.group);
@@ -126,7 +129,7 @@ export class Engine {
     this.post = null;
     if (this.tier.post) {
       this.post = new Post(this.renderer, this.scene, this.camera, this.tier);
-      this.post.apply(POST_DARK);
+      this.post.apply(POST_PAPER);
       this.renderer.toneMapping = THREE.NoToneMapping;
     } else {
       this.renderer.toneMapping = THREE.NeutralToneMapping;
@@ -246,6 +249,7 @@ export class Engine {
     this.stats.tier = name;
     this.stats.particles = this.tier.particles;
     this.particles.setDrawCount(this.tier.particles);
+    this.background.uniforms.uDetail.value = this.tier.bgDetail;
     this.setupPost();
     this.resize();
     this.canvas.dataset.tier = name;

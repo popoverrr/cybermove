@@ -1,9 +1,10 @@
 /**
- * Сценарий главной: скролл (Lenis + ScrollTrigger), прогресс экранов → state, курсор, подписи орбит,
- * появление текста (SplitText), ленивая загрузка three-чанка, постер и фолбэки.
+ * Сценарий главной: скролл (Lenis на десктопе, нативный на тач) → цели прогресса экранов; единый rAF
+ * сглаживает их (BRIEF-2 §8: сцены, фон и CSS читают только сглаженные значения), выбирает активный экран
+ * с гистерезисом, ведёт пороговые твины текста (вход 0.08, выход 0.78), Rail, постер и фолбэки.
+ * Snap убран; автоскролл по Rail и якорям — 1.6 с power2.inOut.
  */
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
@@ -14,7 +15,7 @@ import { initForms } from './form';
 import { initAudio } from './audio';
 import type { Engine } from '../webgl/boot';
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(SplitText);
 
 const q = new URLSearchParams(location.search);
 const STILL = q.has('still');
@@ -26,11 +27,17 @@ const T = q.get('t');
 const HOVER = q.get('hover');
 const POSTER = q.has('poster');
 
+/** Пороги (BRIEF-2 §8.2, §8.5): вход/выход экрана в долях его прокрутки, появление/уход текста */
+export const ENTER_END = 0.2;
+export const EXIT_START = 0.7;
+const TEXT_IN = 0.08;
+const TEXT_OUT = 0.78;
+/** сглаживание: λ ≈ 7 на десктопе (~150 мс отставания), 4.5 на тач (~250 мс) */
+const COARSE = matchMedia('(pointer: coarse)').matches;
+const LAMBDA = COARSE ? 4.5 : 7;
+
 let engine: Engine | null = null;
 let lenis: Lenis | null = null;
-/** идёт программный скролл (Rail, якоря, клик по орбите) — snap не вмешивается */
-let autoScrolling = false;
-let autoTimer = 0;
 
 function supportsWebGL2(): boolean {
   try {
@@ -49,20 +56,34 @@ interface ScreenDef {
   /** начало и длительность в px (пересчитываются при ресайзе) */
   start: number;
   dur: number;
-  enterEnd: number;
-  exitStart: number;
   inFlow: boolean;
+  /** элементы текста для пороговых твинов (в порядке DOM) */
+  tw: HTMLElement[];
+  textIn: boolean;
+  textOut: boolean;
 }
 const screens: ScreenDef[] = [];
+const themes: string[] = [];
 let stageWrap: HTMLElement | null = null;
+let active = 0;
+let layoutW = 0;
+let layoutPortrait = false;
+let layoutVh = 0;
 
-function layoutScreens() {
-  const vh = window.innerHeight;
-  const mobile = window.innerWidth < 900;
+function layoutScreens(force = false) {
+  const w = window.innerWidth;
+  const portrait = window.innerHeight > w;
+  // тач: адресная строка меняет только высоту — раскладку не трогаем, иначе прогресс прыгает (§8.7)
+  if (!force && COARSE && layoutVh && w === layoutW && portrait === layoutPortrait) return;
+  layoutW = w;
+  layoutPortrait = portrait;
+  layoutVh = window.innerHeight;
+  const vh = layoutVh;
+  const mobile = w < 900;
   let acc = 0;
   for (const s of screens) {
     if (s.inFlow) continue;
-    const durVh = Number((mobile && s.el.dataset.durMobile) || s.el.dataset.dur || 160);
+    const durVh = Number((mobile && s.el.dataset.durMobile) || s.el.dataset.dur || 220);
     s.start = acc;
     s.dur = (durVh / 100) * vh;
     acc += s.dur;
@@ -76,55 +97,136 @@ function layoutScreens() {
   }
 }
 
-function measure() {
-  const vh = window.innerHeight;
+/** Скролл пишет только цели */
+function measureTargets() {
+  const vh = layoutVh || window.innerHeight;
   const y = window.scrollY;
   const total = document.documentElement.scrollHeight - vh;
-  state.progress = total > 0 ? Math.min(1, Math.max(0, y / total)) : 0;
-  let active = 0;
+  state.targetProgress = total > 0 ? Math.min(1, Math.max(0, y / total)) : 0;
   for (let i = 0; i < screens.length; i++) {
     const s = screens[i];
     const raw = (y - s.start) / Math.max(s.dur, 1);
-    const local = raw < 0 ? 0 : raw > 1 ? 1 : raw;
-    state.screens[i] = local;
-    if (raw > 0) active = i;
-    const enter = s.enterEnd > 0 ? Math.min(1, local / s.enterEnd) : 1;
-    const exit = s.exitStart < 1 ? Math.max(0, (local - s.exitStart) / (1 - s.exitStart)) : 0;
-    s.el.style.setProperty('--enter', enter.toFixed(4));
-    s.el.style.setProperty('--exit', exit.toFixed(4));
+    state.targets[i] = raw < 0 ? 0 : raw > 1 ? 1 : raw;
   }
+}
+
+/** Мгновенно поставить сглаженные значения в цели (still, ?progress, reduced) */
+function snapToTargets() {
+  state.screens.set(state.targets);
+  state.progress = state.targetProgress;
+  active = pickActive(true);
+  applyFrame(0);
+}
+
+/** Активный экран с гистерезисом: вперёд при > 0.03 следующего, назад при < 0.005 текущего */
+function pickActive(instant = false): number {
+  const s = state.screens;
+  if (instant) {
+    let a = 0;
+    for (let i = 0; i < screens.length; i++) if (s[i] > 0) a = i;
+    return a;
+  }
+  let a = active;
+  while (a + 1 < screens.length && s[a + 1] > 0.03) a++;
+  while (a > 0 && s[a] < 0.005) a--;
+  return a;
+}
+
+const damp = (a: number, b: number, l: number, dt: number) => a + (b - a) * (1 - Math.exp(-l * dt));
+
+/** Единый кадр: сглаживание целей, выбор экрана, CSS-переменные, тема, Rail, текст */
+function tick(_time: number, deltaMs: number) {
+  const dt = Math.min(0.1, Math.max(0, deltaMs / 1000));
+  state.frame.dt = dt;
+  state.frame.t = performance.now();
+  let moving = false;
+  for (let i = 0; i < screens.length; i++) {
+    const cur = state.screens[i];
+    const target = state.targets[i];
+    if (Math.abs(target - cur) < 0.0004) {
+      if (cur !== target) state.screens[i] = target;
+      continue;
+    }
+    state.screens[i] = damp(cur, target, LAMBDA, dt);
+    moving = true;
+  }
+  if (Math.abs(state.targetProgress - state.progress) < 0.0004) state.progress = state.targetProgress;
+  else state.progress = damp(state.progress, state.targetProgress, LAMBDA, dt);
+  const next = pickActive();
+  if (next !== active) {
+    active = next;
+    moving = true;
+  }
+  if (moving || frameDirty) applyFrame(dt);
+}
+let frameDirty = true;
+
+function applyFrame(dt: number) {
+  frameDirty = false;
   for (let i = 0; i < screens.length; i++) {
     const s = screens[i];
-    const isActive = i === active || (i === active + 1 && state.screens[active] > screens[active].exitStart && !s.inFlow);
+    const local = state.screens[i];
+    const enter = i === 0 ? 1 : Math.min(1, local / ENTER_END);
+    const exit = Math.max(0, (local - EXIT_START) / (1 - EXIT_START));
+    s.el.style.setProperty('--enter', enter.toFixed(4));
+    s.el.style.setProperty('--exit', exit.toFixed(4));
+    const isActive = i === active || (i === active + 1 && state.screens[active] > EXIT_START && !s.inFlow);
     s.el.classList.toggle('is-active', isActive);
+    updateText(s, i, local, dt);
   }
   const prev = document.body.dataset.screen;
   document.body.dataset.screen = String(active);
+  state.screen = active;
   if (prev !== String(active)) document.dispatchEvent(new CustomEvent('cm:screenchange', { detail: active }));
-  const a = screens[active];
-  const exitT = a ? Math.max(0, Math.min(1, (state.screens[active] - a.exitStart) / (1 - a.exitStart))) : 0;
+  const exitT = Math.max(0, Math.min(1, (state.screens[active] - EXIT_START) / (1 - EXIT_START)));
   syncTheme(themes, active, exitT);
   updateRail(active, state.progress);
   updatePoster();
   const growthIdx = screens.findIndex((x) => x.el.id === 'growth');
   if (growthIdx >= 0) updateGrowth(state.screens[growthIdx], state.reduced);
 }
-const themes: string[] = [];
+
+/* ---------- пороговые твины текста (§8.5) ---------- */
+function updateText(s: ScreenDef, i: number, local: number, dt: number) {
+  // первый экран уходит целиком (pin), остальные — по элементам data-tw
+  if (!s.tw.length && !(i === 0 && s.pin)) return;
+  const mobile = state.mobile || COARSE;
+  const instant = dt === 0 || state.reduced;
+  // гистерезис, чтобы не дёргать твины на границе
+  const wantIn = i === 0 ? true : s.textIn ? local > TEXT_IN - 0.04 : local >= TEXT_IN;
+  const wantOut = s.inFlow ? false : s.textOut ? local > TEXT_OUT - 0.04 : local >= TEXT_OUT;
+  if (wantIn !== s.textIn) {
+    s.textIn = wantIn;
+    if (i === 0) return; // первый экран появляется по времени (initHeroText)
+    gsap.killTweensOf(s.tw);
+    if (wantIn) {
+      gsap.fromTo(s.tw, { autoAlpha: 0, y: mobile ? 0 : 24 }, { autoAlpha: 1, y: 0, duration: instant ? 0 : 0.9, ease: 'expo.out', stagger: instant ? 0 : 0.06, overwrite: true });
+    } else {
+      gsap.to(s.tw, { autoAlpha: 0, y: mobile ? 0 : 24, duration: instant ? 0 : 0.5, ease: 'power2.out', overwrite: true });
+    }
+  }
+  if (wantOut !== s.textOut) {
+    s.textOut = wantOut;
+    const targets = i === 0 && s.pin ? [s.pin] : s.tw;
+    gsap.killTweensOf(targets);
+    if (wantOut) {
+      gsap.to(targets, { autoAlpha: 0, y: mobile ? 0 : -18, duration: instant ? 0 : 0.6, ease: 'power2.inOut', overwrite: true });
+    } else {
+      gsap.to(targets, { autoAlpha: 1, y: 0, duration: instant ? 0 : 0.7, ease: 'expo.out', stagger: instant || i === 0 ? 0 : 0.04, overwrite: true });
+    }
+  }
+}
+
 function currentScreen() {
-  let a = 0;
-  for (let i = 0; i < screens.length; i++) if (state.screens[i] > 0) a = i;
-  return a;
+  return active;
 }
 
 /* ---------- скролл ---------- */
 function initScroll() {
   const fine = matchMedia('(pointer: fine)').matches;
   if (fine && !state.reduced && !STILL) {
-    lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 1, smoothWheel: true, syncTouch: false, autoRaf: true });
-    lenis.on('scroll', () => {
-      ScrollTrigger.update();
-      measure();
-    });
+    lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.85, smoothWheel: true, syncTouch: false, autoRaf: true });
+    lenis.on('scroll', measureTargets);
     gsap.ticker.lagSmoothing(0);
     (window as unknown as { __cmLenis: Lenis }).__cmLenis = lenis;
     // Страховка: если первый rAF Lenis не сработал (встроенные/скрытые вкладки), запускаем цикл вручную
@@ -137,56 +239,29 @@ function initScroll() {
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) setTimeout(kick, 100);
     });
-  } else {
-    window.addEventListener('scroll', measure, { passive: true });
   }
+  // нативный скролл (тач, reduced, still) и дубль для Lenis: цели пишутся из любого источника
+  window.addEventListener('scroll', measureTargets, { passive: true });
   window.addEventListener(
     'resize',
     () => {
       layoutScreens();
-      measure();
+      measureTargets();
+      frameDirty = true;
     },
     { passive: true },
   );
-  measure();
-}
-
-/** Мягкий snap к экранам: после остановки скролла доезжаем до ближайшей «полки» */
-function initSnap() {
-  if (!lenis || state.reduced) return;
-  let timer = 0;
-  let lastY = window.scrollY;
-  const snapTargets = () => {
-    const pts: number[] = [];
-    screens.forEach((s, i) => {
-      if (s.inFlow) {
-        pts.push(s.start + s.dur);
-        return;
-      }
-      pts.push(s.start + s.dur * (i === 0 ? 0.0 : 0.02)); // вход
-      pts.push(s.start + s.dur * (i === 0 ? 0.22 : 0.42)); // удержание
-    });
-    return pts;
-  };
-  lenis.on('scroll', ({ scroll, velocity }: { scroll: number; velocity: number }) => {
-    clearTimeout(timer);
-    lastY = scroll;
-    if (Math.abs(velocity) > 0.5) return;
-    timer = window.setTimeout(() => {
-      if (document.body.classList.contains('drawer-open') || autoScrolling) return;
-      const pts = snapTargets();
-      let best = -1;
-      let bestD = window.innerHeight * 0.18;
-      for (const p of pts) {
-        const d = Math.abs(p - lastY);
-        if (d < bestD && d > 2) {
-          bestD = d;
-          best = p;
-        }
-      }
-      if (best >= 0) lenis!.scrollTo(best, { duration: 0.9, easing: (t: number) => 1 - Math.pow(1 - t, 3) });
-    }, 260);
-  });
+  measureTargets();
+  if (STILL || state.reduced) {
+    snapToTargets();
+  } else {
+    state.screens.set(state.targets);
+    state.progress = state.targetProgress;
+    active = pickActive(true);
+    applyFrame(0);
+  }
+  // единый rAF: сглаживание + DOM (сцена читает state в своём кадре)
+  gsap.ticker.add(tick);
 }
 
 /* ---------- курсор в state ---------- */
@@ -204,7 +279,7 @@ function initPointer() {
     { passive: true },
   );
   document.addEventListener('mouseleave', () => (p.active = false));
-  if (matchMedia('(pointer: coarse)').matches) p.active = false;
+  if (COARSE) p.active = false;
 }
 
 /* ---------- подписи орбит (HTML-лейблы, привязанные к 3D-точкам) ---------- */
@@ -238,15 +313,23 @@ function initOrbitLabels() {
   labels.forEach((el, i) => el.addEventListener('click', () => scrollToScreen(targets[i] + 1)));
 }
 
+const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+/** Автоскролл к экрану: 1.6 с power2.inOut (Lenis на десктопе, твин window.scrollTo на тач) */
 export function scrollToScreen(index: number, hold = true) {
   const s = screens[index];
   if (!s) return;
-  const y = s.inFlow ? s.start + s.dur : s.start + (hold ? s.dur * (index === 0 ? 0.22 : 0.42) : 0);
-  autoScrolling = true;
-  clearTimeout(autoTimer);
-  autoTimer = window.setTimeout(() => (autoScrolling = false), 1800);
-  if (lenis) lenis.scrollTo(y, { duration: 1.4, easing: (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), onComplete: () => (autoScrolling = false) });
-  else window.scrollTo({ top: y, behavior: state.reduced ? 'auto' : 'smooth' });
+  const y = s.inFlow ? s.start + s.dur : s.start + (hold ? s.dur * (index === 0 ? 0.25 : 0.4) : 0);
+  if (state.reduced) {
+    window.scrollTo(0, y);
+    return;
+  }
+  if (lenis) {
+    lenis.scrollTo(y, { duration: 1.6, easing: easeInOutQuad });
+  } else {
+    const from = { y: window.scrollY };
+    gsap.to(from, { y, duration: 1.6, ease: 'power2.inOut', overwrite: true, onUpdate: () => window.scrollTo(0, from.y) });
+  }
 }
 
 /* ---------- текст первого экрана ---------- */
@@ -302,9 +385,9 @@ function showFallback(reason: string) {
 }
 function updatePoster(force = false) {
   if (!posterLayers.length) return;
-  const active = currentScreen();
+  const cur = currentScreen();
   const mobile = window.innerWidth < 900 && window.innerHeight > window.innerWidth;
-  const name = `s${active + 1}${mobile ? '-m' : ''}`;
+  const name = `s${cur + 1}${mobile ? '-m' : ''}`;
   if (name === posterCurrent && !force) return;
   posterCurrent = name;
   const on = posterLayers.find((l) => !l.classList.contains('is-on')) || posterLayers[0];
@@ -346,7 +429,8 @@ function applyProgressParam() {
   }
   if (lenis) lenis.scrollTo(y, { immediate: true });
   window.scrollTo(0, y);
-  measure();
+  measureTargets();
+  snapToTargets();
 }
 
 export function initHome() {
@@ -355,18 +439,14 @@ export function initHome() {
   stageWrap = document.querySelector<HTMLElement>('[data-stage-wrap]');
   for (const el of Array.from(document.querySelectorAll<HTMLElement>('[data-screen]'))) {
     const first = screens.length === 0;
-    screens.push({
-      el,
-      pin: el.querySelector('.screen__pin'),
-      start: 0,
-      dur: 1,
-      enterEnd: first ? 0 : Number(el.dataset.enter || 0.12),
-      exitStart: Number(el.dataset.exit || (first ? 0.55 : 0.86)),
-      inFlow: !el.closest('[data-stage]'),
-    });
+    const inFlow = !el.closest('[data-stage]');
+    const tw = Array.from(el.querySelectorAll<HTMLElement>('[data-tw]'));
+    screens.push({ el, pin: el.querySelector('.screen__pin'), start: 0, dur: 1, inFlow, tw, textIn: first || inFlow, textOut: false });
+    // до входа текст скрыт (первый экран и S8 — видимы)
+    if (!first && !inFlow && tw.length && !state.reduced) gsap.set(tw, { autoAlpha: 0 });
   }
-  layoutScreens();
-  themes.push(...screens.map((s) => s.el.dataset.theme || 'black'));
+  layoutScreens(true);
+  themes.push(...screens.map((s) => s.el.dataset.theme || 'ivory'));
   initRows();
   initDrawer();
   initAnchors();
@@ -388,7 +468,6 @@ export function initHome() {
 
   initPointer();
   initScroll();
-  initSnap();
   initOrbitLabels();
 
   const canGl = canvas && supportsWebGL2() && !state.reduced && !FORCE_FALLBACK;

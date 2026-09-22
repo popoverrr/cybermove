@@ -1,13 +1,14 @@
 /**
- * Процедурное студийное окружение (BRIEF §8.2): без HDRI-файлов.
- * Сцена из emissive-плоскостей — длинные софтбоксы (белые и два синих) — прогоняется через
- * PMREMGenerator.fromScene(). Два пресета: тёмная студия (чёрные экраны) и светлая (сталь, серебро).
- * Смешение пресетов — в шейдере материала (см. patchEnvBlend), движение бликов — scene.environmentRotation.
+ * Процедурное студийное окружение (BRIEF-2 §4.2): без HDRI-файлов и без синих панелей.
+ * Сцена из emissive-плоскостей прогоняется через PMREMGenerator.fromScene(). Один тёплый пресет
+ * (большой мягкий ключевой софтбокс сверху-слева, слабый заполняющий спереди, рефлекс цвета sand снизу,
+ * светло-тёплые стены) и второй, чуть контрастнее, для экранов stone и clay.
+ * Смешение пресетов — в шейдере материала (patchEnvBlend), движение бликов — scene.environmentRotation.
  */
 import * as THREE from 'three';
 
 export interface StudioPreset {
-  key: 'dark' | 'light';
+  key: 'warm' | 'crisp';
   build(scene: THREE.Scene): void;
 }
 
@@ -21,58 +22,45 @@ function panel(scene: THREE.Scene, w: number, h: number, color: THREE.ColorRepre
   return mesh;
 }
 
-/** Мягкий градиентный «пол/стены»: большие тёмные плоскости, чтобы низ хрома не был пустым */
-function shell(scene: THREE.Scene, floor: number, walls: number, ceil: number) {
-  const box = new THREE.Mesh(
-    new THREE.BoxGeometry(40, 30, 40),
-    new THREE.MeshBasicMaterial({ color: new THREE.Color(walls, walls, walls), side: THREE.BackSide, toneMapped: false }),
-  );
+/** Стены студии: тёплая коробка, пол — рефлекс цвета sand, потолок светлее */
+function shell(scene: THREE.Scene, walls: THREE.ColorRepresentation, floor: number, ceil: number) {
+  const box = new THREE.Mesh(new THREE.BoxGeometry(40, 30, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(walls), side: THREE.BackSide, toneMapped: false }));
   scene.add(box);
-  panel(scene, 40, 40, 0xffffff, floor, new THREE.Vector3(0, -6, 0), new THREE.Vector3(0, 0, 0));
-  panel(scene, 40, 40, 0xffffff, ceil, new THREE.Vector3(0, 9, 0), new THREE.Vector3(0, 0, 0));
+  panel(scene, 40, 40, 0xe9e4dc, floor, new THREE.Vector3(0, -6, 0));
+  panel(scene, 40, 40, 0xfff7ec, ceil, new THREE.Vector3(0, 9, 0));
 }
 
-export const DARK_STUDIO: StudioPreset = {
-  key: 'dark',
+export const WARM_STUDIO: StudioPreset = {
+  key: 'warm',
   build(scene) {
-    scene.background = new THREE.Color(0x000000);
-    // серый купол: силуэт хрома читается на чёрном, полосы софтбоксов остаются главным бликом
-    shell(scene, 0.07, 0.17, 0.34);
-    // Верхний длинный софтбокс — главная светлая полоса (как в ref-05)
-    panel(scene, 14, 1.15, 0xf6f8ff, 6.5, new THREE.Vector3(0, 4.2, 1.2));
-    // Второй верхний, тоньше и дальше — вторая линия блика
-    panel(scene, 12, 0.45, 0xffffff, 4.0, new THREE.Vector3(0, 3.6, -3.4));
-    // Ключевой вертикальный слева-спереди
-    panel(scene, 1.6, 7, 0xeef2ff, 3.2, new THREE.Vector3(-6.0, 0.6, 3.5));
-    // Тонкая полоса снизу-спереди: отражение «стола»
-    panel(scene, 10, 0.35, 0xdfe6ff, 2.2, new THREE.Vector3(0, -3.9, 3.0));
-    // Синий софтбокс справа
-    panel(scene, 0.9, 8, 0x2a56ff, 5.0, new THREE.Vector3(6.2, 0.4, -1.0));
-    // Синий rim снизу-сзади слева
-    panel(scene, 4, 0.5, 0x0a24f5, 3.5, new THREE.Vector3(-3.5, -3.2, -4.5));
+    scene.background = new THREE.Color(0x85817b);
+    shell(scene, 0x7d7973, 0.42, 0.7);
+    // ключевой софтбокс сверху-слева: большой и мягкий — освещённая сторона сферы сверху-слева
+    panel(scene, 9, 6, 0xfffaf4, 3.2, new THREE.Vector3(-5.5, 6.0, 4.0));
+    // заполняющий спереди, слабее
+    panel(scene, 8, 5, 0xf8f5f0, 0.6, new THREE.Vector3(1.5, 0.5, 9.0));
+    // рефлекс снизу цвета sand
+    panel(scene, 10, 3, 0xe9e4dc, 0.5, new THREE.Vector3(2.0, -5.5, 3.0));
+    // правая стена темнее: тень справа-снизу читается
+    panel(scene, 6, 12, 0x57534e, 0.8, new THREE.Vector3(9.0, -1.0, -2.0));
   },
 };
 
-export const LIGHT_STUDIO: StudioPreset = {
-  key: 'light',
+export const CRISP_STUDIO: StudioPreset = {
+  key: 'crisp',
   build(scene) {
-    scene.background = new THREE.Color(0x9ea4ad);
-    shell(scene, 0.55, 0.62, 0.9);
-    // Большой светлый потолок — хром становится серебром
-    panel(scene, 16, 10, 0xffffff, 1.35, new THREE.Vector3(0, 5.5, 0));
-    // Яркая полоса остаётся: без неё пропадает «жидкость»
-    panel(scene, 14, 0.9, 0xffffff, 6.5, new THREE.Vector3(0, 4.3, 1.5));
-    panel(scene, 12, 0.4, 0xffffff, 4.0, new THREE.Vector3(0, 3.8, -3.2));
-    panel(scene, 2.2, 8, 0xffffff, 2.2, new THREE.Vector3(-6.2, 0.5, 3.0));
-    // Синий акцент тише
-    panel(scene, 0.8, 8, 0x2a56ff, 2.4, new THREE.Vector3(6.2, 0.4, -1.0));
-    panel(scene, 4, 0.5, 0x0a24f5, 1.4, new THREE.Vector3(-3.5, -3.2, -4.5));
+    scene.background = new THREE.Color(0x76726c);
+    shell(scene, 0x6b6762, 0.35, 0.55);
+    panel(scene, 8, 5, 0xfffaf4, 4.2, new THREE.Vector3(-5.5, 6.2, 4.0));
+    panel(scene, 7, 4, 0xf8f5f0, 0.4, new THREE.Vector3(1.5, 0.5, 9.0));
+    panel(scene, 10, 3, 0xe9e4dc, 0.45, new THREE.Vector3(2.0, -5.5, 3.0));
+    panel(scene, 6, 12, 0x46433f, 0.8, new THREE.Vector3(9.0, -1.0, -2.0));
   },
 };
 
 export interface EnvironmentMaps {
-  dark: THREE.Texture;
-  light: THREE.Texture;
+  warm: THREE.Texture;
+  crisp: THREE.Texture;
   dispose(): void;
 }
 
@@ -82,8 +70,8 @@ export function buildEnvironments(renderer: THREE.WebGLRenderer, size = 256): En
   const make = (preset: StudioPreset) => {
     const scene = new THREE.Scene();
     preset.build(scene);
-    // sigma даёт лёгкую мягкость краям софтбоксов
-    const rt = pmrem.fromScene(scene, 0.035, 0.1, 100, { size });
+    // sigma даёт мягкость краям софтбоксов
+    const rt = pmrem.fromScene(scene, 0.06, 0.1, 100, { size });
     scene.traverse((o) => {
       const m = o as THREE.Mesh;
       if (m.geometry) m.geometry.dispose();
@@ -91,21 +79,21 @@ export function buildEnvironments(renderer: THREE.WebGLRenderer, size = 256): En
     });
     return rt;
   };
-  const darkRt = make(DARK_STUDIO);
-  const lightRt = make(LIGHT_STUDIO);
+  const warmRt = make(WARM_STUDIO);
+  const crispRt = make(CRISP_STUDIO);
   pmrem.dispose();
   return {
-    dark: darkRt.texture,
-    light: lightRt.texture,
+    warm: warmRt.texture,
+    crisp: crispRt.texture,
     dispose() {
-      darkRt.dispose();
-      lightRt.dispose();
+      warmRt.dispose();
+      crispRt.dispose();
     },
   };
 }
 
 /**
- * Патч MeshPhysicalMaterial: второй envMap и uEnvMix для непрерывного смешения тёмной и светлой студии.
+ * Патч MeshPhysicalMaterial: второй envMap и uEnvMix для непрерывного смешения двух студий.
  * Заменяет textureCubeUV(envMap, …) на смесь двух PMREM-текстур одинакового размера.
  */
 export function patchEnvBlend(material: THREE.MeshPhysicalMaterial | THREE.MeshStandardMaterial, env2: THREE.Texture, uniforms: { uEnvMix: THREE.IUniform<number> }) {
@@ -135,4 +123,46 @@ export function patchEnvBlend(material: THREE.MeshPhysicalMaterial | THREE.MeshS
   const prevKey = material.customProgramCacheKey;
   material.customProgramCacheKey = () => `${prevKey.call(material)}|envblend`;
   material.needsUpdate = true;
+}
+
+/** Матовый жемчуг / гипс (BRIEF-2 §4.1) — общий рецепт для ядра, узлов и пластин */
+export const PEARL = {
+  color: 0xd8d3cb,
+  metalness: 0.03,
+  roughness: 0.62,
+  clearcoat: 0.12,
+  clearcoatRoughness: 0.5,
+  sheen: 0.22,
+  sheenRoughness: 0.6,
+  sheenColor: 0xfffaf4,
+  envMapIntensity: 0.45,
+} as const;
+
+export function pearlMaterial(envWarm: THREE.Texture, envCrisp: THREE.Texture, envMix: THREE.IUniform<number>, over: Partial<THREE.MeshPhysicalMaterialParameters> = {}) {
+  const mat = new THREE.MeshPhysicalMaterial({
+    color: PEARL.color,
+    metalness: PEARL.metalness,
+    roughness: PEARL.roughness,
+    clearcoat: PEARL.clearcoat,
+    clearcoatRoughness: PEARL.clearcoatRoughness,
+    sheen: PEARL.sheen,
+    sheenRoughness: PEARL.sheenRoughness,
+    sheenColor: new THREE.Color(PEARL.sheenColor),
+    envMap: envWarm,
+    envMapIntensity: PEARL.envMapIntensity,
+    ...over,
+  });
+  patchEnvBlend(mat, envCrisp, { uEnvMix: envMix });
+  return mat;
+}
+
+/** Ключевой и заполняющий свет: направленная светотень сверху-слева, как на референсе (3:1) */
+export function addStudioLights(scene: THREE.Scene) {
+  const key = new THREE.DirectionalLight(0xfffaf4, 2.3);
+  key.position.set(-4.5, 6.5, 5.0);
+  const fill = new THREE.DirectionalLight(0xf6f2ec, 0.28);
+  fill.position.set(3.0, -1.0, 6.0);
+  const hemi = new THREE.HemisphereLight(0xf2efe9, 0x8a8177, 0.22);
+  scene.add(key, fill, hemi);
+  return { key, fill, hemi };
 }

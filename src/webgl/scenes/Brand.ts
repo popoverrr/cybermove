@@ -1,14 +1,15 @@
 /**
- * S4 · БРЕНД И КОНТЕНТ — SYSTEM (BRIEF §7 S4). Тема black, студийный свет.
- * Одна крупная капля жидкого хрома, морфинг: капля → звезда (ядро бренда) → объектив (продакшн) →
- * рамка 9:16 (SMM) → волны (PR) → монолит в луче (личный бренд). Скролл сменяет формы, hover принуждает.
- * Выход: капля распадается на четыре струи частиц, фон заливается синим от центра.
+ * S4 · БРЕНД И КОНТЕНТ — SYSTEM (BRIEF §7 S4). Тема ivory, студийный свет.
+ * Одна крупная матовая капля, морфинг: капля → звезда (ядро бренда) → объектив (продакшн) →
+ * рамка 9:16 (SMM) → волны (PR) → монолит в тёплом луче (личный бренд). Скролл сменяет формы, hover принуждает.
+ * Выход: капля распадается на четыре струи частиц, фон переходит в clay от центра.
  */
 import type { Engine } from '../Engine';
 import type { Rig } from '../Story';
 import type { SceneModule } from './types';
 import { getTarget } from '../objects/targets';
-import { POST_DARK, POST_BLUE, lerpPost } from '../Post';
+import { POST_PAPER } from '../Post';
+import { SURFACE } from '../objects/LiquidChrome';
 import { range, smooth, easeInOutCubic, lerp, damp } from '../math';
 import { HoverMix } from './hover';
 import { state } from '../../lib/state';
@@ -19,6 +20,7 @@ const TRACK = [6, 1, 2, 3, 4, 5];
 
 export class BrandScene implements SceneModule {
   readonly id = 'brand';
+  readonly range = { enter: 0.12, exit: 0.82 };
   private hover = new HoverMix(KEYS, 5);
   private hoverBlend = 0;
   private hoverPos = 1;
@@ -34,14 +36,13 @@ export class BrandScene implements SceneModule {
     const exitX = range(local, 0.82, 1.0);
     const ex = easeInOutCubic(exitX);
 
-    // ---------- фон: black; выход — синим от центра
-    rig.bg.a = 'black';
-    rig.bg.b = 'blue';
+    // ---------- фон: ivory; выход — clay от центра
+    rig.bg.a = 'ivory';
+    rig.bg.b = 'clay';
     rig.bg.mix = ex;
     rig.bg.mask = 'radial';
-    rig.envMix = 0;
-    lerpPost(POST_DARK, POST_BLUE, ex, rig.post);
-    rig.particles.additive = 1;
+    rig.envMix = ex;
+    Object.assign(rig.post, POST_PAPER);
 
     // ---------- камера, ядро крупно
     rig.cam.set(0, 0, 7.2);
@@ -53,10 +54,10 @@ export class BrandScene implements SceneModule {
     rig.atomScale = 0.95;
     rig.coreVisible = true;
     rig.coreStretch.set(1, 1, 1);
-    cu.uNoiseAmp.value = 0.05;
-    cu.uNoiseSpeed.value = 0.22;
-    cu.uWorleyAmp.value = 0.02;
-    cu.uTurb.value = 0.14;
+    cu.uNoiseAmp.value = SURFACE.noiseAmp * 1.6;
+    cu.uNoiseSpeed.value = SURFACE.noiseSpeed * 1.2;
+    cu.uWorleyAmp.value = SURFACE.worleyAmp * 0.3;
+    cu.uTurb.value = 0.09;
     rig.orbits.visible = 0;
     rig.orbits.count = 0;
     // световые карты скользят по поверхности
@@ -74,9 +75,9 @@ export class BrandScene implements SceneModule {
     pos = lerp(0, pos, enterT);
     if (exitX > 0) pos = lerp(pos, 0, smooth(range(exitX, 0, 0.6)));
     e.core.morphAlong(TRACK, pos);
-    // монолит в луче света (ref-07)
+    // монолит в тёплом слабом луче (BRIEF-2 §4.7)
     const monolith = Math.max(0, 1 - Math.abs(pos - 5));
-    rig.beam = monolith * (1 - ex);
+    rig.beam = monolith * 0.6 * (1 - ex);
     rig.coreScale = lerp(1.05, 0.98, enterT) * (1 - smooth(range(exitX, 0.35, 0.95)));
     // монолит стоит вертикально: без покачивания
     rig.coreUpright = monolith;
@@ -87,15 +88,15 @@ export class BrandScene implements SceneModule {
       e.particles.setTarget('B', getTarget('calm'), 'calm');
       pu.uMix.value = smooth(range(local, 0, 0.3));
       pu.uCurlAmp.value = 0.06;
-      rig.particles.opacity = 0.45;
+      rig.particles.opacity = 0.3;
       rig.particles.size = 1.2;
     } else {
       e.particles.setTarget('A', getTarget('calm'), 'calm');
       e.particles.setTarget('B', getTarget('jets'), 'jets');
       pu.uMix.value = smooth(range(exitX, 0.2, 1.0));
       pu.uCurlAmp.value = 0.06 + 0.35 * Math.sin(ex * Math.PI);
-      rig.particles.opacity = lerp(0.45, 1.1, ex);
-      rig.particles.size = lerp(1.2, 2.0, ex);
+      rig.particles.opacity = lerp(0.3, 0.5, ex);
+      rig.particles.size = lerp(1.2, 1.5, ex);
     }
     rig.atomPos.set(0, 0, 0);
   }

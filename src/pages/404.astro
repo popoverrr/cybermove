@@ -5,10 +5,10 @@ import { getContent, localePath } from '../lib/i18n';
 const c = getContent('ru');
 ---
 
-<Base lang="ru" path="/404/" title={c.ui.meta.notFound.title} description={c.ui.meta.notFound.description} noindex theme="black">
+<Base lang="ru" path="/404/" title={c.ui.meta.notFound.title} description={c.ui.meta.notFound.description} noindex theme="ivory">
   <section class="nf container">
     <p class="t-micro">ERROR · {c.ui.notFound.code}</p>
-    <h1 class="t-h1"><span class="t-wide chrome-text">{c.ui.notFound.code}</span></h1>
+    <h1 class="t-h1">{c.ui.notFound.code}</h1>
     <p class="t-h3">{c.ui.notFound.title}</p>
     <p class="t-lead">{c.ui.notFound.text}</p>
     <div class="nf__btns">

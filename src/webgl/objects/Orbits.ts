@@ -1,6 +1,8 @@
 /**
- * Орбиты и электроны (BRIEF §8.5). Орбита — эллипс, вычисляемый в вершинном шейдере по параметрам,
- * линия постоянной экранной толщины. Электрон — emissive-сфера (bloom) + ленточный шлейф с затуханием.
+ * Орбиты и электроны (BRIEF-2 §4.3). Орбита — эллипс, вычисляемый в вершинном шейдере по параметрам,
+ * тонкая тёмная линия постоянной экранной толщины (1px, taupe, непрозрачность 0.7).
+ * Электрон — плотная точка цвета ink постоянного экранного размера (4–5px), без свечения и bloom.
+ * Шлейф по умолчанию выключен; при hover орбиты — короткий тёмный шлейф (0.25).
  */
 import * as THREE from 'three';
 
@@ -37,13 +39,12 @@ void main() {
   vec4 nxt = projectionMatrix * modelViewMatrix * vec4(pn, 1.0);
   vec4 prv = projectionMatrix * modelViewMatrix * vec4(pp, 1.0);
   vec2 aspect = vec2(uResolution.x / uResolution.y, 1.0);
-  vec2 sc = cur.xy / cur.w * aspect;
   vec2 sn = nxt.xy / nxt.w * aspect;
   vec2 sp = prv.xy / prv.w * aspect;
   vec2 dir = normalize(sn - sp);
   vec2 nrm = vec2(-dir.y, dir.x);
   float w = uWidth;
-  if (uTrail > 0.0) w *= (1.0 - aT) * (1.0 - aT) * 2.4 + 0.2;
+  if (uTrail > 0.0) w *= (1.0 - aT) * (1.0 - aT) * 1.6 + 0.3;
   vec2 off = nrm * aSide * w / uResolution.y * 2.0;
   off /= aspect;
   cur.xy += off * cur.w;
@@ -59,19 +60,18 @@ uniform float uOpacity;
 uniform float uTrail;
 uniform float uDepthNear;
 uniform float uDepthFar;
-uniform float uAdditive;
 varying float vT;
 varying float vDepth;
 void main() {
   float a = uOpacity;
   if (uTrail > 0.0) {
     float f = 1.0 - vT;
-    a *= f * f * f;
+    a *= f * f;
   }
-  a *= mix(0.55, 1.0, smoothstep(uDepthFar, uDepthNear, vDepth));
+  // дальняя часть орбиты чуть светлее — глубина без тумана
+  a *= mix(0.6, 1.0, smoothstep(uDepthFar, uDepthNear, vDepth));
   if (a < 0.003) discard;
-  vec3 col = uColor * a;
-  gl_FragColor = vec4(col, a * (1.0 - uAdditive));
+  gl_FragColor = vec4(uColor * a, a);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
 }
@@ -115,12 +115,17 @@ export interface OrbitParams {
   speed: number;
 }
 
+export const ORBIT_LINE = new THREE.Color(0xb9afa2); // --taupe
+export const ORBIT_INK = new THREE.Color(0x1b1a18); // --ink
+/** размер электрона в px (экранный, без перспективы) */
+export const ELECTRON_PX = 4.5;
+
 export class Orbit {
   readonly group = new THREE.Group();
   readonly line: THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>;
   readonly trail: THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>;
-  readonly electron: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>;
-  readonly glow: THREE.Sprite;
+  /** электрон — спрайт постоянного экранного размера */
+  readonly electron: THREE.Sprite;
   readonly orient = new THREE.Matrix3();
   readonly params: OrbitParams;
   spin = 0;
@@ -152,18 +157,17 @@ export class Orbit {
       uSpread: { value: 1 },
       uWobble: { value: 0 },
       uTime: { value: 0 },
-      uColor: { value: new THREE.Color(0xc9ced6) },
-      uOpacity: { value: 0.55 },
+      uColor: { value: ORBIT_LINE.clone() },
+      uOpacity: { value: 0.7 },
       uDepthNear: { value: 4 },
       uDepthFar: { value: 14 },
-      uAdditive: { value: 1 },
     });
     this.lineU = baseU();
     this.trailU = baseU();
-    this.trailU.uTrail.value = 0.16;
-    this.trailU.uWidth.value = 2.2;
-    this.trailU.uColor.value = new THREE.Color(0x8fb0ff);
-    this.trailU.uOpacity.value = 1.4;
+    this.trailU.uTrail.value = 0.12;
+    this.trailU.uWidth.value = 1.6;
+    this.trailU.uColor.value = ORBIT_INK.clone();
+    this.trailU.uOpacity.value = 0;
 
     const mk = (geo: THREE.BufferGeometry, u: Record<string, THREE.IUniform>) => {
       const m = new THREE.ShaderMaterial({
@@ -183,36 +187,33 @@ export class Orbit {
     };
     this.line = mk(orbitGeo, this.lineU);
     this.trail = mk(trailGeo, this.trailU);
+    this.trail.visible = false;
 
-    const eg = new THREE.SphereGeometry(0.03, 16, 12);
-    const em = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 2.6, 4.0), toneMapped: false });
-    this.electron = new THREE.Mesh(eg, em);
+    const sm = new THREE.SpriteMaterial({ map: Orbit.dotTexture(), color: ORBIT_INK, transparent: true, depthWrite: false, depthTest: true, sizeAttenuation: false, toneMapped: false });
+    this.electron = new THREE.Sprite(sm);
+    this.electron.renderOrder = 4;
 
-    const glowTex = Orbit.glowTexture();
-    const sm = new THREE.SpriteMaterial({ map: glowTex, color: new THREE.Color(0.6, 0.75, 1.4), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
-    this.glow = new THREE.Sprite(sm);
-    this.glow.scale.setScalar(0.3);
-
-    this.group.add(this.line, this.trail, this.electron, this.glow);
+    this.group.add(this.line, this.trail, this.electron);
   }
 
-  private static _glow: THREE.Texture | null = null;
-  static glowTexture() {
-    if (Orbit._glow) return Orbit._glow;
+  private static _dot: THREE.Texture | null = null;
+  /** плотный диск с мягкой кромкой в 1px (без свечения) */
+  static dotTexture() {
+    if (Orbit._dot) return Orbit._dot;
     const size = 64;
     const c = document.createElement('canvas');
     c.width = c.height = size;
     const ctx = c.getContext('2d')!;
     const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
     g.addColorStop(0, 'rgba(255,255,255,1)');
-    g.addColorStop(0.25, 'rgba(255,255,255,0.45)');
-    g.addColorStop(0.6, 'rgba(255,255,255,0.08)');
+    g.addColorStop(0.72, 'rgba(255,255,255,1)');
+    g.addColorStop(0.92, 'rgba(255,255,255,0)');
     g.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, size, size);
     const t = new THREE.CanvasTexture(c);
     t.colorSpace = THREE.SRGBColorSpace;
-    Orbit._glow = t;
+    Orbit._dot = t;
     return t;
   }
 
@@ -223,7 +224,11 @@ export class Orbit {
     return out.applyMatrix3(this.orient);
   }
 
-  update(dt: number, time: number, opts: { speedMul: number; additive: number; baseColor: THREE.Color; baseOpacity: number; width: number }) {
+  /**
+   * ndcPerPx — сколько NDC приходится на 1 device-px с учётом fov и масштаба родителя (считает Story):
+   * 2·tan(fov/2)/высота_в_px/масштаб_атома. Так электрон всегда ELECTRON_PX·dpr на экране.
+   */
+  update(dt: number, time: number, opts: { speedMul: number; baseColor: THREE.Color; baseOpacity: number; width: number; trails: boolean; dpr: number; ndcPerPx: number }) {
     this.spin += dt * this.params.speed * opts.speedMul;
     const h = this.highlight;
     const v = this.visible;
@@ -231,33 +236,27 @@ export class Orbit {
     this.trailU.uTime.value = time;
     this.lineU.uSpread.value = this.spread;
     this.trailU.uSpread.value = this.spread;
-    this.lineU.uWidth.value = opts.width * (1 + h * 0.9);
-    this.lineU.uOpacity.value = opts.baseOpacity * v * (1 + h * 1.1);
-    this.lineU.uColor.value.copy(opts.baseColor).lerp(new THREE.Color(0x8fb0ff), h);
-    this.lineU.uAdditive.value = opts.additive;
-    this.trailU.uAdditive.value = opts.additive;
+    this.lineU.uWidth.value = opts.width * (1 + h * 0.5);
+    this.lineU.uOpacity.value = opts.baseOpacity * v * (1 + h * 0.4);
+    // hover: линия темнеет к ink
+    this.lineU.uColor.value.copy(opts.baseColor).lerp(ORBIT_INK, h * 0.8);
     this.trailU.uSpin.value = this.spin;
-    this.trailU.uOpacity.value = 1.4 * v * (1 + h * 0.6);
-    this.trailU.uWidth.value = 2.2 * (1 + h * 0.5);
+    this.trailU.uOpacity.value = 0.25 * h * v;
     this.pointAt(this.spin, this.tmpV);
     this.electron.position.copy(this.tmpV);
-    this.glow.position.copy(this.tmpV);
-    const es = v * (1 + h * 0.5);
-    this.electron.scale.setScalar(es);
-    this.glow.scale.setScalar(0.3 * es + h * 0.15);
-    (this.glow.material as THREE.SpriteMaterial).opacity = 0.9 * v;
+    // размер спрайта без перспективы (sizeAttenuation=false): scale·tan(fov/2) = NDC-размер
+    const s = ELECTRON_PX * (1 + h * 0.35) * opts.dpr * opts.ndcPerPx;
+    this.electron.scale.set(s, s, 1);
+    (this.electron.material as THREE.SpriteMaterial).opacity = v;
     this.electron.visible = v > 0.02;
-    this.glow.visible = v > 0.02;
     this.line.visible = v > 0.01;
-    this.trail.visible = v > 0.02;
+    this.trail.visible = opts.trails && h > 0.02 && v > 0.02;
   }
 
   dispose() {
     this.line.material.dispose();
     this.trail.material.dispose();
-    this.electron.geometry.dispose();
-    this.electron.material.dispose();
-    (this.glow.material as THREE.SpriteMaterial).dispose();
+    (this.electron.material as THREE.SpriteMaterial).dispose();
   }
 }
 

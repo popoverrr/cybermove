@@ -16,8 +16,8 @@ const counts = Object.fromEntries(k.categories.map((cat) => [cat.id, k.items.fil
 const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: k.title, path: '/cases/' }])];
 ---
 
-<Base lang={lang} path="/cases/" title={c.ui.meta.cases.title} description={c.ui.meta.cases.description} theme="black" jsonLd={jsonLd} ogImage="/posters/og-cases.jpg">
-  <PageHero theme="black" label={`${k.title} · ${k.items.length}`} title={k.h1} lead={k.lead} render="/posters/dir-growth.webp" beam={0.5} size="md" />
+<Base lang={lang} path="/cases/" title={c.ui.meta.cases.title} description={c.ui.meta.cases.description} theme="ivory" jsonLd={jsonLd} ogImage="/posters/og-cases.jpg">
+  <PageHero theme="ivory" label={`${k.title} · ${k.items.length}`} title={k.h1} lead={k.lead} render="/posters/dir-growth.webp" beam={0.5} size="md" />
 
   <section class="cases">
     <div class="container cases__inner">

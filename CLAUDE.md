@@ -1,14 +1,15 @@
 # CYBERMOVE — контекст для Claude Code
 
-Сайт консалтинговой компании CYBERMOVE (Cyber Move Consulting). Полное ТЗ: `docs/BRIEF.md`. Тексты: `docs/CONTENT.md`.
-Если сессия начата заново или контекст сжат: прочитай `docs/BRIEF.md`, `docs/PROGRESS.md`, `docs/DECISIONS.md` и продолжай с первого незакрытого пункта `PROGRESS.md`. Закрытое не переделывай.
+Сайт консалтинговой компании CYBERMOVE (Cyber Move Consulting). Полное ТЗ: `docs/BRIEF.md`, итерация 2 (палитра, скролл, плейсхолдеры): `docs/BRIEF-2.md` — где противоречит, действует BRIEF-2. Тексты: `docs/CONTENT.md`. Референс стилистики: `reference/ref-12.jpg`.
+Если сессия начата заново или контекст сжат: прочитай `docs/BRIEF-2.md`, `docs/PROGRESS-2.md`, `docs/DECISIONS.md` и продолжай с первого незакрытого пункта `PROGRESS-2.md`. Закрытое не переделывай.
+`docs/` и `reference/` не публикуются: они в `.gitignore`, живут только на диске (решение заказчика, репозиторий публичный).
 
 ## Стек
 
 - Astro 7 (static, `build.format: 'directory'`, `trailingSlash: 'always'`), TypeScript.
 - Three.js 0.186 без обёрток, GLSL через `onBeforeCompile`; postprocessing (pmndrs); GSAP 3.15 (ScrollTrigger, SplitText); Lenis.
 - Свой CSS на custom properties: `src/styles/tokens.css`, `base.css`, `typography.css`. Без Tailwind, без UI-китов, без иконочных паков.
-- Шрифты self-hosted (Fontsource): Inter Tight (основной), Unbounded (широкий акцент), JetBrains Mono (микрометки).
+- Шрифты self-hosted (Fontsource): Inter Tight (основной, заголовки 300–350), JetBrains Mono (микрометки, меню). Unbounded удалён.
 - Форма: `public/api/lead.php` (PHP 8+, настройки в `public/api/config.php`, в git только `config.sample.php`).
 - Хостинг: Plesk shared, Apache + PHP, без Node на сервере. Деплой: `docs/DEPLOY.md`.
 
@@ -21,7 +22,8 @@ npm run build:labs   # сборка с лабораториями /dev/*
 # превью GitHub Pages: CYBERMOVE_BASE=/<репо>/ CYBERMOVE_SITE=https://<логин>.github.io PUBLIC_PREVIEW=1 npm run build (см. docs/DEPLOY.md)
 npm run preview      # предпросмотр dist/ (preview_start "cybermove-preview", порт 4331)
 npm run check        # astro check
-python scripts/build-logo.py [--active a|b|c]   # пересобрать логотип и favicon
+python scripts/build-logo.py [--active a|b|c]   # пересобрать логотип и favicon (активен a)
+node scripts/posters.mjs http://127.0.0.1:4330   # постеры экранов, рендеры направлений, OG
 node scripts/shots.mjs --out docs/screens/<фаза> --base http://127.0.0.1:4330 "/path:name" ...   # скриншоты Playwright (SwiftShader)
 ```
 
@@ -44,7 +46,8 @@ docs/                   BRIEF, CONTENT, PROGRESS, DECISIONS, TODO-CONTENT, DEPLO
 
 - Все тексты из `docs/CONTENT.md`; чего нет — `[PLACEHOLDER]` и запись в `docs/TODO-CONTENT.md`. Цифры не выдумывать.
 - Русские заголовки, английский только в микрометках.
-- Один акцент: синий. Запрещены фиолетовые градиенты, glassmorphism, тени-облака, скругления 16px+, эмодзи, стоковые иконки.
+- Палитра BRIEF-2 §3: тёплая светлая шкала ivory / sand / stone / clay, текст ink, единственный акцент — `--ink`; тёмная зона только футер и меню-оверлей (`--night`). Синего, хрома, свечения, bloom и хроматической аберрации нет. Запрещены фиолетовые градиенты, glassmorphism, тени-облака, скругления 16px+, эмодзи, стоковые иконки.
+- Микрометки: JetBrains Mono 11px, трекинг +0.12em, `--umber` (на stone/clay — `--bark`). Контраст: основной ≥ 4.5:1, микрометки ≥ 3:1 — проверять цифрами.
 - Все открытые решения — одной строкой в `docs/DECISIONS.md`. После каждой фазы — коммит и отметка в `docs/PROGRESS.md`.
 - Параметры отладки главной: `?progress=0.37`, `?still`, `?tier=high|mid|low`, `?debug`.
 - В Bash-хередоках на этой машине ломаются `\\` — файлы с бэкслэшами писать через Write.

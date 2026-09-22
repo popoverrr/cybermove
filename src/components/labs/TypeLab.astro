@@ -1,8 +1,7 @@
 ---
-/** /dev/type/ — сравнение широких гарнитур (Unbounded vs Roboto Flex wdth 140–151), шкала, микрометки, chrome-text, кнопки. */
-import '@fontsource-variable/roboto-flex/wdth.css';
+/** /dev/type/ — шкала Inter Tight (лёгкие заголовки, BRIEF-2 §5), микрометки, кнопки и темы ivory/sand/stone/clay/night. */
 import Button from '../Button.astro';
-const themes = ['black', 'graphite', 'steel', 'blue', 'silver'] as const;
+const themes = ['ivory', 'sand', 'stone', 'clay', 'night'] as const;
 ---
 
 <div class="lab">
@@ -12,21 +11,8 @@ const themes = ['black', 'graphite', 'steel', 'blue', 'silver'] as const;
   </header>
 
   <section class="lab__section">
-    <p class="t-micro">01 · Широкая гарнитура для заголовков и цифр (ref-06)</p>
-    <div class="cmp">
-      <div class="cmp__col">
-        <p class="t-micro">Unbounded Variable · wght 440 / 600</p>
-        <p class="big" style="font-family:'Unbounded Variable';font-weight:440">34+ · 13 · 7</p>
-        <p class="big-h" style="font-family:'Unbounded Variable';font-weight:500">Результат — это движение.</p>
-        <p class="big-h" style="font-family:'Unbounded Variable';font-weight:600">CHAOS → CORE → SYSTEM → GROWTH</p>
-      </div>
-      <div class="cmp__col">
-        <p class="t-micro">Roboto Flex · wdth 148 · wght 560 / 700</p>
-        <p class="big" style="font-family:'Roboto Flex Variable';font-stretch:148%;font-weight:560">34+ · 13 · 7</p>
-        <p class="big-h" style="font-family:'Roboto Flex Variable';font-stretch:148%;font-weight:600">Результат — это движение.</p>
-        <p class="big-h" style="font-family:'Roboto Flex Variable';font-stretch:151%;font-weight:700">CHAOS → CORE → SYSTEM → GROWTH</p>
-      </div>
-    </div>
+    <p class="t-micro">01 · Счётчики · Inter Tight 300 (широкая гарнитура удалена, BRIEF-2 §5)</p>
+    <p class="t-counter">34+ · 13 · 7</p>
   </section>
 
   <section class="lab__section">
@@ -53,9 +39,8 @@ const themes = ['black', 'graphite', 'steel', 'blue', 'silver'] as const;
   </section>
 
   <section class="lab__section">
-    <p class="t-micro">04 · Chrome text (ref-01)</p>
-    <p class="t-counter chrome-text">34+</p>
-    <h2 class="t-h1">Результат — это <span class="chrome-text">движение</span>.</h2>
+    <p class="t-micro">04 · Вторая строка заголовка серым (ref-12)</p>
+    <h2 class="t-h1">Системный подход.<br /><span class="t-dim">Реальный результат.</span></h2>
   </section>
 
   <section class="lab__section">

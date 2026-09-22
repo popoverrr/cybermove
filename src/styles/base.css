@@ -9,7 +9,7 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-behavior: auto;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
@@ -83,8 +83,8 @@ figure {
 }
 
 ::selection {
-  background: var(--blue);
-  color: var(--white);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 :focus {
@@ -142,8 +142,8 @@ figure {
   left: 8px;
   z-index: 1000;
   padding: 8px 12px;
-  background: var(--white);
-  color: var(--black);
+  background: var(--ink);
+  color: var(--paper);
   font-family: var(--font-mono);
   font-size: var(--fs-micro);
   letter-spacing: var(--ls-micro);

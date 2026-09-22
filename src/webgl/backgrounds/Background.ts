@@ -1,6 +1,6 @@
 /**
  * Шейдерный фон (BRIEF §6 «темы экранов», §7): один полноэкранный quad, режимы
- * black / graphite / steel / blue / silver и переход между двумя режимами по маске (равномерно,
+ * ivory / sand / stone / clay и переход между двумя режимами по маске (равномерно,
  * радиально от центра, сверху вниз, снизу вверх). Рисуется первым, под сценой.
  */
 import * as THREE from 'three';
@@ -24,6 +24,7 @@ export class Background {
     uBeam: THREE.IUniform<number>;
     uBeamPos: THREE.IUniform<THREE.Vector2>;
     uLightX: THREE.IUniform<number>;
+    uDetail: THREE.IUniform<number>;
   };
 
   constructor(resolution: THREE.Vector2) {
@@ -39,6 +40,7 @@ export class Background {
       uBeam: { value: 0 },
       uBeamPos: { value: new THREE.Vector2(0.0, -1.0) },
       uLightX: { value: 0 },
+      uDetail: { value: 1 },
     };
     const mat = new THREE.ShaderMaterial({
       vertexShader: VERT,

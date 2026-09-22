@@ -2,17 +2,17 @@
 /** /dev/logo/ — три варианта логотипа на чёрном, стальном и синем фонах; версии horizontal / mark / mono. */
 const variants = ['a', 'b', 'c'] as const;
 const names: Record<string, string> = {
-  a: 'A · Бережная перерисовка',
-  b: 'B · Кольцо как орбита (активный)',
+  a: 'A · Тонкое кольцо, CM гротеском (активный, ref-12)',
+  b: 'B · Кольцо как орбита',
   c: 'C · Новый знак',
 };
 const files = import.meta.glob<string>('../../assets/logo/*.svg', { query: '?raw', import: 'default', eager: true });
 import { withBase } from '../../lib/base';
 const get = (name: string) => files[`../../assets/logo/${name}.svg`] ?? '';
 const bgs = [
-  { id: 'black', bg: '#050505', scheme: 'color-dark', mono: 'mono-white' },
-  { id: 'steel', bg: '#cfd3d9', scheme: 'color-light', mono: 'mono-black' },
-  { id: 'blue', bg: '#0a24f5', scheme: 'mono-white', mono: 'mono-white' },
+  { id: 'ivory', bg: '#f2efe9', scheme: 'color-light', mono: 'mono-black' },
+  { id: 'stone', bg: '#ddd7ce', scheme: 'color-light', mono: 'mono-black' },
+  { id: 'night', bg: '#23211e', scheme: 'color-dark', mono: 'mono-white' },
 ];
 ---
 
@@ -20,7 +20,7 @@ const bgs = [
   <header class="lab__head">
     <p class="t-micro">LAB · LOGO</p>
     <h1 class="t-h3">Логотип: три варианта</h1>
-    <p class="t-small">Исходник: reference/logo-source.png. Словесный знак CYBER MOVE — Unbounded 600 в кривых, дескриптор CONSULTING — JetBrains Mono с разрядкой.</p>
+    <p class="t-small">Исходник: reference/logo-source.png. Словесный знак CYBER MOVE — Inter Tight 700 в кривых, дескриптор CONSULTING — JetBrains Mono с разрядкой. Активен вариант A (ref-12).</p>
   </header>
 
   {variants.map((v) => (

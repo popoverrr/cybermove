@@ -1,0 +1,80 @@
+---
+/**
+ * Фотослот (BRIEF-2 §7): если в src/content/media.json для id задан путь (относительно src/assets/,
+ * например "media/about.jpg"), рендерится <img> с width/height, lazy, srcset через astro:assets.
+ * Если null — плейсхолдер: процедурное изображение «свет на бетоне» из public/placeholders/,
+ * вариант выбирается по id. В dev-режиме в углу моно-подпись «ФОТО · 4:5».
+ */
+import { Image } from 'astro:assets';
+import media from '../content/media.json';
+import { withBase } from '../lib/base';
+
+export interface Props {
+  id: string;
+  ratio?: '3:4' | '4:5' | '1:1' | '4:3' | '16:9';
+  alt?: string;
+  sizes?: string;
+  class?: string;
+  /** приоритетная загрузка (первый экран) */
+  eager?: boolean;
+}
+const { id, ratio = '4:5', alt = '', sizes = '(max-width: 899px) 100vw, 50vw', class: cls = '', eager = false } = Astro.props;
+
+const files = import.meta.glob<{ default: ImageMetadata }>('/src/assets/media/**/*.{jpg,jpeg,png,webp,avif}');
+const rel = (media as Record<string, string | null>)[id] ?? null;
+let image: ImageMetadata | null = null;
+if (rel) {
+  const key = `/src/assets/${rel.replace(/^\/?(src\/assets\/)?/, '')}`;
+  const loader = files[key];
+  if (!loader) throw new Error(`media.json: файл ${key} для слота «${id}» не найден в src/assets/media/`);
+  image = (await loader()).default;
+}
+const [rw, rh] = ratio.split(':').map(Number);
+// вариант плейсхолдера по id — устойчивый хэш, чтобы соседние слоты отличались
+let h = 0;
+for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+const variant = (h % 6) + 1;
+const widths = [480, 800, 1200, 1600].filter((w) => !image || w <= image.width);
+---
+
+<figure class:list={['slot', cls, { 'slot--ph': !image }]} style={`--ratio:${rw}/${rh}`} data-slot={id}>
+  {image ? (
+    <Image src={image} alt={alt} widths={widths} sizes={sizes} loading={eager ? 'eager' : 'lazy'} decoding="async" class="slot__img" />
+  ) : (
+    <span class="slot__ph" style={`background-image:url(${withBase(`/placeholders/ph-${variant}.webp`)})`} role={alt ? 'img' : undefined} aria-label={alt || undefined}>
+      {import.meta.env.DEV && <span class="slot__dev t-micro">ФОТО · {ratio}</span>}
+    </span>
+  )}
+</figure>
+
+<style>
+  .slot {
+    position: relative;
+    margin: 0;
+    aspect-ratio: var(--ratio);
+    overflow: hidden;
+    background: var(--stone);
+  }
+  .slot__img,
+  .slot__ph {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .slot__img {
+    object-fit: cover;
+  }
+  .slot__ph {
+    background-size: cover;
+    background-position: center;
+  }
+  .slot__dev {
+    position: absolute;
+    right: 10px;
+    bottom: 8px;
+    color: var(--bark);
+    opacity: 0.7;
+  }
+</style>

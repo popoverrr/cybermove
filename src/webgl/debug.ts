@@ -48,9 +48,12 @@ export function mountDebug(engine: Engine) {
   env.addBinding(engine.scene, 'environmentIntensity', { min: 0, max: 3, step: 0.05 });
   env.addBinding(engine.renderer, 'toneMappingExposure', { min: 0.2, max: 2.5, step: 0.05 });
   if (engine.post) {
-    env.addBinding(engine.post.bloom, 'intensity', { min: 0, max: 4, step: 0.05 });
-    env.addBinding(engine.post.bloom.luminanceMaterial, 'threshold', { min: 0, max: 1.5, step: 0.01 });
+    env.addBinding(engine.post.vignette, 'darkness', { label: 'vignette', min: 0, max: 1, step: 0.01 });
   }
+  const cm = engine.core.material;
+  env.addBinding(cm, 'roughness', { min: 0, max: 1, step: 0.01 });
+  env.addBinding(cm, 'metalness', { min: 0, max: 1, step: 0.01 });
+  env.addBinding(cm, 'envMapIntensity', { min: 0, max: 2, step: 0.05 });
 
   pane.addButton({ title: 'Понизить тир' }).on('click', () => {
     const next = engine.tier.name === 'high' ? 'mid' : 'low';

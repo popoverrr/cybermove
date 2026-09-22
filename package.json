@@ -27,8 +27,6 @@
     "@astrojs/sitemap": "^3.7.4",
     "@fontsource-variable/inter-tight": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
-    "@fontsource-variable/roboto-flex": "^5.3.0",
-    "@fontsource-variable/unbounded": "^5.3.0",
     "@tweakpane/core": "^2.0.5",
     "@types/three": "^0.186.0",
     "astro": "^7.3.3",

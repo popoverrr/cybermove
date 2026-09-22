@@ -1,16 +1,18 @@
 /**
- * S1 · ЯДРО — CHAOS → CORE (BRIEF §7 S1).
- * Интро по времени (~2.8 с): осколки в curl-поле стягиваются в электронное облако (|ψ|² орбиталей),
- * из капли формируется ядро жидкого хрома, вокруг встают 5 орбит с электронами.
+ * S1 · ЯДРО — CHAOS → CORE (BRIEF §7 S1, палитра BRIEF-2).
+ * Интро по времени (~2.8 с): пыль в curl-поле стягивается в электронное облако (|ψ|² орбиталей),
+ * из капли формируется матовое жемчужное ядро, вокруг встают 5 орбит с электронами.
  * Удержание: облако медленно перетекает 1s → 2p → 3d. Выход: dolly-in камеры в ядро,
- * орбиты уходят за кадр, облако вытягивается в световые штрихи, ядро заполняет экран.
+ * орбиты уходят за кадр, облако вытягивается в тёмные штрихи, ядро заполняет экран.
  */
 import * as THREE from 'three';
 import type { Engine } from '../Engine';
 import type { Rig } from '../Story';
 import type { SceneModule } from './types';
 import { getTarget } from '../objects/targets';
-import { POST_DARK } from '../Post';
+import { POST_PAPER } from '../Post';
+import { SURFACE } from '../objects/LiquidChrome';
+import { ORBIT_LINE } from '../objects/Orbits';
 import { range, smooth, easeInOutCubic, easeOutCubic, lerp, clamp01 } from '../math';
 import { state } from '../../lib/state';
 
@@ -20,9 +22,10 @@ const SLOT = 6.5; // секунд на орбиталь
 
 export class CoreScene implements SceneModule {
   readonly id = 'core';
+  readonly range = { enter: 0, exit: 0.55 };
   private engine!: Engine;
   private introStart = 0;
-  private orbitColor = new THREE.Color(0xc9ced6);
+  private orbitColor = ORBIT_LINE.clone();
 
   init(engine: Engine) {
     this.engine = engine;
@@ -43,32 +46,30 @@ export class CoreScene implements SceneModule {
     const pu = e.particles.uniforms;
 
     // ---------- фон и пост
-    rig.bg.a = 'black';
-    rig.bg.b = 'black';
+    rig.bg.a = 'ivory';
+    rig.bg.b = 'ivory';
     rig.bg.mix = 0;
     rig.beam = 0;
     rig.envMix = 0;
-    Object.assign(rig.post, POST_DARK);
-    rig.post.bloomIntensity = lerp(1.5, POST_DARK.bloomIntensity, smooth(range(t, 0.4, 2.6)));
-    rig.particles.additive = 1;
+    Object.assign(rig.post, POST_PAPER);
 
     // ---------- интро: частицы
     const mixIntro = easeInOutCubic(range(t, 0.05, 2.3));
     const curlIntro = lerp(1.7, 0.07, smooth(range(t, 0.25, 2.5)));
     pu.uCurlFreq.value = lerp(0.22, 0.32, mixIntro);
     pu.uCurlSpeed.value = lerp(0.35, 0.09, mixIntro);
-    rig.particles.opacity = 0.8 * smooth(range(t, 0.0, 0.7));
-    rig.particles.size = lerp(1.6, 1.2, mixIntro);
+    rig.particles.opacity = 0.35 * smooth(range(t, 0.0, 0.7));
+    rig.particles.size = lerp(1.4, 1.2, mixIntro);
 
     // ---------- интро: ядро из капли
     const coreIn = easeOutCubic(range(t, 0.55, 2.15));
     rig.coreVisible = t > 0.5;
     const settle = smooth(range(t, 0.9, 2.7));
     rig.coreStretch.set(lerp(0.72, 1, settle), lerp(1.45, 1, settle), lerp(0.72, 1, settle));
-    cu.uNoiseAmp.value = lerp(0.30, 0.03, settle);
+    cu.uNoiseAmp.value = lerp(0.16, SURFACE.noiseAmp, settle);
     cu.uNoiseFreq.value = lerp(1.1, 1.6, settle);
-    cu.uNoiseSpeed.value = lerp(0.6, 0.18, settle);
-    cu.uWorleyAmp.value = lerp(0, 0.065, smooth(range(t, 1.5, 2.8)));
+    cu.uNoiseSpeed.value = lerp(0.35, SURFACE.noiseSpeed, settle);
+    cu.uWorleyAmp.value = lerp(0, SURFACE.worleyAmp, smooth(range(t, 1.5, 2.8)));
 
     // ---------- интро: орбиты
     const orbitCount = t > 1.35 ? Math.min(5, Math.floor((t - 1.35) / 0.21) + 1) : 0;
@@ -116,19 +117,16 @@ export class CoreScene implements SceneModule {
       e.particles.setTarget('B', getTarget('streak'), 'streak');
       pu.uMix.value = streak;
       pu.uCurlAmp.value = lerp(0.07, 0.015, streak);
-      rig.particles.size = lerp(1.2, 2.4, streak);
-      rig.particles.opacity = lerp(0.8, 1.1, streak) * (1 - range(local, 0.9, 1.0) * 0.6);
+      rig.particles.size = lerp(1.2, 1.5, streak);
+      rig.particles.opacity = lerp(0.35, 0.45, streak) * (1 - range(local, 0.9, 1.0) * 0.6);
       rig.orbits.spread = lerp(1, 2.8, ex);
-      rig.orbits.opacity = 0.55 * (1 - smooth(range(exitX, 0.1, 0.65)));
+      rig.orbits.opacity = 0.7 * (1 - smooth(range(exitX, 0.1, 0.65)));
       rig.orbits.visible = 1 - smooth(range(exitX, 0.35, 0.75));
       rig.coreScale = lerp(1, 1.15, ex);
-      cu.uNoiseAmp.value = lerp(0.03, 0.015, ex);
-      rig.post.bloomIntensity = lerp(POST_DARK.bloomIntensity, 1.25, ex);
-      rig.post.bloomThreshold = lerp(POST_DARK.bloomThreshold, 0.6, ex);
-      rig.post.vignette = lerp(POST_DARK.vignette, 0.7, ex);
+      cu.uNoiseAmp.value = lerp(SURFACE.noiseAmp, SURFACE.noiseAmp * 0.5, ex);
     } else {
       rig.orbits.spread = 1;
-      rig.orbits.opacity = 0.55;
+      rig.orbits.opacity = 0.7;
       rig.coreScale = coreIn;
     }
     rig.coreScale = exitX > 0 ? rig.coreScale : coreIn;

@@ -1,13 +1,13 @@
 /**
- * S2 · АУДИТ: сканирующая плоскость (clipping со светящейся кромкой): с одной стороны хром,
- * с другой — «рентген» (каркас, fresnel-свечение); точки данных с микроподписями; гистограмма-кольцо;
- * линия-траектория с засечками (hover «Стратегия и roadmap»).
+ * S2 · АУДИТ: сканирующая плоскость (clipping с волосяной кромкой ink): с одной стороны жемчуг,
+ * с другой — «рентген» (тонкий тёмный каркас); точки данных ink с микроподписями; гистограмма-кольцо
+ * из тёмных столбиков; тёмная линия-траектория с засечками (hover «Стратегия и roadmap»).
  */
 import * as THREE from 'three';
 import { CHROME_VERTEX_PARS } from './LiquidChrome';
 import type { LiquidChrome } from './LiquidChrome';
 import { Polyline, samplePath } from './Polyline';
-import { patchEnvBlend } from '../Environment';
+import { PEARL, patchEnvBlend } from '../Environment';
 
 const XRAY_VERT = /* glsl */ `
 uniform mat4 uAtomInv;
@@ -45,10 +45,10 @@ void main() {
     if (band > 1.0 - 0.55 * uLayers) discard;
   }
   float fres = pow(1.0 - max(dot(normalize(vNormalW), normalize(vViewDir)), 0.0), 2.2);
-  float edge = exp(-abs(y - uScanY) * 14.0);
-  float a = (0.035 + fres * 0.28 + edge * 0.9) * uOpacity;
-  vec3 col = mix(uColor, vec3(0.75, 0.85, 1.0), edge) * a;
-  gl_FragColor = vec4(col, 0.0);
+  float edge = exp(-abs(y - uScanY) * 26.0);
+  // каркас тонкий и тёмный, кромка скана — волосяная линия ink (обычная альфа, без свечения)
+  float a = (0.02 + fres * 0.05 + edge * 0.85) * uOpacity;
+  gl_FragColor = vec4(uColor * a, a);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
 }
@@ -63,12 +63,11 @@ varying vec2 vUv;
 void main() {
   vec2 c = vUv - 0.5;
   float d = length(c);
-  float ring = smoothstep(0.5, 0.42, d) * smoothstep(0.30, 0.38, d);
-  float dot_ = smoothstep(0.12, 0.0, d);
-  float a = (ring * 0.9 + dot_ * (1.0 + uHot * 2.0)) * uOpacity;
+  float ring = smoothstep(0.5, 0.45, d) * smoothstep(0.36, 0.41, d);
+  float dot_ = smoothstep(0.13, 0.07, d);
+  float a = (ring * 0.55 + dot_) * uOpacity * (0.85 + uHot * 0.15);
   if (a < 0.003) discard;
-  vec3 col = mix(uColor, vec3(0.55, 0.7, 1.0), uHot) * a;
-  gl_FragColor = vec4(col, 0.0);
+  gl_FragColor = vec4(uColor * a, a);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
 }
@@ -130,7 +129,7 @@ export class Scan {
       uLayers: { value: 0 },
       uOpacity: { value: 0 },
       uAtomInv: { value: new THREE.Matrix4() },
-      uColor: { value: new THREE.Color(0x8fa6d6) },
+      uColor: { value: new THREE.Color(0x3a3632) },
     };
     const xm = new THREE.ShaderMaterial({
       vertexShader: XRAY_VERT,
@@ -166,7 +165,7 @@ export class Scan {
     // точки данных
     const pg = new THREE.PlaneGeometry(1, 1);
     for (let i = 0; i < DATA_POINTS.length; i++) {
-      const u = { uOpacity: { value: 0 }, uHot: { value: 0 }, uColor: { value: new THREE.Color(0xdfe6f4) } };
+      const u = { uOpacity: { value: 0 }, uHot: { value: 0 }, uColor: { value: new THREE.Color(0x1b1a18) } };
       const m = new THREE.ShaderMaterial({ vertexShader: GLOW_VERT, fragmentShader: GLOW_FRAG, uniforms: u, transparent: true, depthWrite: false, depthTest: false, blending: THREE.NormalBlending, premultipliedAlpha: true });
       const mesh = new THREE.Mesh(pg, m);
       mesh.position.fromArray(DATA_POINTS[i]);
@@ -181,7 +180,8 @@ export class Scan {
     // гистограмма: тонкие столбики по окружности
     const bg = new THREE.BoxGeometry(0.045, 1, 0.045);
     bg.translate(0, 0.5, 0);
-    this.barMat = new THREE.MeshPhysicalMaterial({ color: 0xf0f3f8, metalness: 1, roughness: 0.18, envMap: envDark, envMapIntensity: 1.0, transparent: true, opacity: 1 });
+    // тёмные матовые столбики
+    this.barMat = new THREE.MeshPhysicalMaterial({ color: 0x3a3632, metalness: 0, roughness: 0.85, envMap: envDark, envMapIntensity: PEARL.envMapIntensity, transparent: true, opacity: 1 });
     patchEnvBlend(this.barMat, envLight, { uEnvMix: envMix });
     this.bars = new THREE.InstancedMesh(bg, this.barMat, this.barsCount);
     this.bars.visible = false;
@@ -193,12 +193,13 @@ export class Scan {
       const x = t * 2.1;
       v.set(x, Math.pow(t, 1.5) * 2.3 - 0.1 + Math.sin(t * 9.0) * 0.05 * t, 0.2 - t * 0.3);
     });
-    this.trajectory = new Polyline(pts, resolution, { width: 1.3, color: 0xdfe6f4, color2: 0x8fb0ff, opacity: 0.95 });
+    this.trajectory = new Polyline(pts, resolution, { width: 1.2, color: 0x1b1a18, color2: 0x1b1a18, opacity: 0.9 });
+    this.trajectory.uniforms.uAdditive.value = 0;
     this.trajectory.uniforms.uDraw.value = 0;
     this.trajectory.mesh.visible = false;
     this.group.add(this.trajectory.mesh);
     const tg = new THREE.BoxGeometry(0.012, 0.16, 0.012);
-    const tm = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.6, 1.8, 2.4), toneMapped: false, transparent: true });
+    const tm = new THREE.MeshBasicMaterial({ color: 0x1b1a18, transparent: true });
     this.ticks = new THREE.InstancedMesh(tg, tm, 8);
     const d = new THREE.Object3D();
     for (let i = 0; i < 8; i++) {

@@ -4,7 +4,7 @@
  * и статичный рендер объекта направления (постер из docs/screens → public/posters, Фаза 5).
  */
 export interface Props {
-  theme: 'black' | 'graphite' | 'steel' | 'blue' | 'silver';
+  theme: 'ivory' | 'sand' | 'stone' | 'clay';
   label: string;
   title: string;
   lead?: string;
@@ -17,7 +17,7 @@ export interface Props {
 import { withBase } from '../lib/base';
 const { theme, label, title, lead, micro = [], render, beam = 0, accent, size = 'lg' } = Astro.props;
 const renderUrl = render ? withBase(render) : '';
-const html = accent && title.includes(accent) ? title.replace(accent, `<span class="chrome-text">${accent}</span>`) : title;
+const html = title;
 ---
 
 <section class:list={['phero', `phero--${size}`]} data-theme={theme} data-lite-bg={theme} data-beam={beam}>

@@ -1,6 +1,6 @@
 /**
- * S6 · ТЕНДЕРЫ И ПРАВО: тонкие стальные пластины-документы слетаются и собираются в гранёную оболочку
- * вокруг ядра (грани икосаэдра). Синий лазерный контур обводит рёбра. Финал — замыкающее кольцо-печать.
+ * S6 · ТЕНДЕРЫ И ПРАВО: матовые карточки-документы цвета paper слетаются и собираются в гранёную оболочку
+ * вокруг ядра (грани икосаэдра). Тёмный волосяной контур обводит рёбра. Финал — тонкое тёмное кольцо-печать.
  * Hover: тендерные строки — пластины веером, одна вперёд; правовые — оболочка смыкается.
  */
 import * as THREE from 'three';
@@ -59,7 +59,7 @@ export class Plates {
     const R = this.radius * 1.06;
     for (const [a, b] of edgeSet.values()) {
       const pts = new Float32Array([a.x * R, a.y * R, a.z * R, b.x * R, b.y * R, b.z * R]);
-      const line = new Polyline(pts, resolution, { width: 1.2, color: 0x0a24f5, color2: 0x4d7cff, opacity: 1 });
+      const line = new Polyline(pts, resolution, { width: 1.0, color: 0x1b1a18, color2: 0x1b1a18, opacity: 0.8 });
       line.uniforms.uDraw.value = 0;
       line.uniforms.uAdditive.value = 0;
       line.mesh.visible = false;
@@ -69,16 +69,16 @@ export class Plates {
     ico.dispose();
 
     const g = new THREE.BoxGeometry(0.6, 0.76, 0.018);
-    this.mat = new THREE.MeshPhysicalMaterial({ color: 0xdfe3ea, metalness: 1, roughness: 0.3, clearcoat: 0.15, envMap: envDark, envMapIntensity: 1, transparent: true, opacity: 1, side: THREE.DoubleSide });
+    this.mat = new THREE.MeshPhysicalMaterial({ color: 0xfaf8f4, metalness: 0, roughness: 0.75, clearcoat: 0.05, clearcoatRoughness: 0.6, envMap: envDark, envMapIntensity: 0.6, transparent: true, opacity: 1, side: THREE.DoubleSide });
     patchEnvBlend(this.mat, envLight, { uEnvMix: envMix });
     this.plates = new THREE.InstancedMesh(g, this.mat, this.count);
     this.plates.frustumCulled = false;
     this.plates.visible = false;
     this.group.add(this.plates);
 
-    this.ringMat = new THREE.MeshPhysicalMaterial({ color: 0xf2f4f8, metalness: 1, roughness: 0.1, envMap: envDark, envMapIntensity: 1.2, emissive: new THREE.Color(0x0a24f5), emissiveIntensity: 0, transparent: true, opacity: 1 });
+    this.ringMat = new THREE.MeshPhysicalMaterial({ color: 0x5a544d, metalness: 0, roughness: 0.8, envMap: envDark, envMapIntensity: 0.6, emissive: new THREE.Color(0x1b1a18), emissiveIntensity: 0, transparent: true, opacity: 1 });
     patchEnvBlend(this.ringMat, envLight, { uEnvMix: envMix });
-    this.ring = new THREE.Mesh(new THREE.TorusGeometry(1.95, 0.028, 16, 128), this.ringMat);
+    this.ring = new THREE.Mesh(new THREE.TorusGeometry(1.95, 0.006, 8, 160), this.ringMat);
     this.ring.rotation.x = Math.PI / 2 - 0.35;
     this.ring.visible = false;
     this.group.add(this.ring);
@@ -134,8 +134,8 @@ export class Plates {
       const e = this.edges[k];
       const local = THREE.MathUtils.clamp((opts.contour * n - k) / 1.0, 0, 1);
       e.uniforms.uDraw.value = local;
-      e.uniforms.uOpacity.value = (0.9 + close * 0.6) * opts.on * (1 - opts.open);
-      e.uniforms.uWidth.value = 1.2 + close * 0.6;
+      e.uniforms.uOpacity.value = (0.8 + close * 0.2) * opts.on * (1 - opts.open);
+      e.uniforms.uWidth.value = 1.0 + close * 0.4;
       e.mesh.visible = local > 0.001 && opts.on > 0.01 && opts.open < 0.99;
       e.mesh.scale.setScalar(1 + fan * 0.25 - close * 0.1);
       e.update(opts.time);
@@ -145,8 +145,9 @@ export class Plates {
     const seal = easeInOutCubic(opts.seal);
     this.ring.visible = seal > 0.001 && opts.on > 0.01 && opts.open < 0.99;
     this.ring.scale.setScalar(3.2 + (1 - 3.2) * seal);
-    this.ringMat.opacity = seal * opts.on * (1 - opts.open);
-    this.ringMat.emissiveIntensity = Math.pow(Math.max(0, 1 - Math.abs(opts.seal - 0.9) * 8), 2) * 3 + close * 1.5;
+    this.ringMat.opacity = seal * opts.on * (1 - opts.open) * 0.85;
+    // момент «печати» — кольцо чуть плотнее, без свечения
+    this.ringMat.emissiveIntensity = Math.pow(Math.max(0, 1 - Math.abs(opts.seal - 0.9) * 8), 2) * 0.4 + close * 0.2;
     this.ring.rotation.z = opts.time * 0.1;
   }
 

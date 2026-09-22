@@ -10,21 +10,21 @@ export interface Props {
 const { lang } = Astro.props;
 const c = getContent(lang);
 const s7 = c.home.s7;
-const h2 = s7.h2.replace('движение', '<span class="chrome-text">движение</span>').replace('motion', '<span class="chrome-text">motion</span>');
+const h2 = s7.h2;
 const featured = s7.featured.map((id) => findCase(c, id)).filter(Boolean) as NonNullable<ReturnType<typeof findCase>>[];
 const tickerItems = [...TICKER, ...TICKER];
 ---
 
-<section class="screen screen--s7" data-screen="growth" data-dur="170" data-dur-mobile="130" data-exit="0.88" id="growth" data-theme="black" aria-labelledby="h-growth">
+<section class="screen screen--s7" data-screen="growth" data-dur="220" data-dur-mobile="160" id="growth" data-theme="ivory" aria-labelledby="h-growth">
   <div class="screen__pin">
     <div class="g container">
-      <p class="g__corner g__corner--tr t-micro">GROWTH · RINGS · {c.home.s7.counters[0].value}+</p>
-      <div class="g__head">
+      <p class="g__corner g__corner--tr t-micro" data-tw>GROWTH · RINGS · {c.home.s7.counters[0].value}+</p>
+      <div class="g__head" data-tw>
         <p class="t-micro g__label">{s7.label}</p>
         <h2 class="t-h1 g__h2" id="h-growth" set:html={h2} />
       </div>
 
-      <ul class="counters" data-counters>
+      <ul class="counters" data-counters data-tw>
         {s7.counters.map((k) => (
           <li class="counter">
             <p class="counter__value t-counter"><span data-count={k.value}>0</span>{k.suffix}</p>
@@ -33,7 +33,7 @@ const tickerItems = [...TICKER, ...TICKER];
         ))}
       </ul>
 
-      <div class="ribbon-wrap">
+      <div class="ribbon-wrap" data-tw>
         <div class="ribbon" data-ribbon>
           {featured.map((k, i) => (
             <a class="card" href={`${localePath(lang, '/cases/')}#${k.id}`}>
@@ -51,7 +51,7 @@ const tickerItems = [...TICKER, ...TICKER];
         </div>
       </div>
 
-      <div class="g__foot">
+      <div class="g__foot" data-tw>
         <Button href={localePath(lang, '/cases/')} variant="ghost" arrow>{s7.cta}</Button>
       </div>
     </div>
@@ -136,8 +136,7 @@ const tickerItems = [...TICKER, ...TICKER];
     min-height: 200px;
     padding: var(--space-4);
     border: 1px solid var(--hair);
-    background: rgba(5, 5, 5, 0.35);
-    backdrop-filter: blur(4px);
+    background: var(--paper);
     transition: border-color var(--dur-fast), transform var(--dur) var(--ease-out);
   }
   .card:hover {

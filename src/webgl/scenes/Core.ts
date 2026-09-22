@@ -11,7 +11,7 @@ import type { Rig } from '../Story';
 import type { SceneModule } from './types';
 import { getTarget } from '../objects/targets';
 import { POST_PAPER } from '../Post';
-import { SURFACE } from '../objects/LiquidChrome';
+import { SURFACE } from '../objects/Sphere';
 import { ORBIT_LINE } from '../objects/Orbits';
 import { range, smooth, easeInOutCubic, easeOutCubic, lerp, clamp01 } from '../math';
 import { state } from '../../lib/state';

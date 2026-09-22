@@ -1,10 +1,9 @@
 /**
- * Пост-эффекты (BRIEF-2 §4.5): без bloom и хроматической аберрации. Остаются очень мелкое зерно
- * (ощущение бумаги), едва заметная виньетка, тонмаппинг Khronos PBR Neutral и SMAA на high.
- * Параметры интерполируются по скроллу через apply().
+ * Пост-эффекты (BRIEF-3 §3.6): только на HIGH — SMAA и очень мелкое зерно (ощущение бумаги), едва заметная
+ * виньетка. Тонмаппинга здесь нет: PBR-материалы мапятся сами (patchNeutralToneMap), фон и линии остаются точными.
  */
 import * as THREE from 'three';
-import { EffectComposer, RenderPass, EffectPass, NoiseEffect, VignetteEffect, ToneMappingEffect, ToneMappingMode, SMAAEffect, SMAAPreset, BlendFunction } from 'postprocessing';
+import { EffectComposer, RenderPass, EffectPass, NoiseEffect, VignetteEffect, SMAAEffect, SMAAPreset, BlendFunction } from 'postprocessing';
 import type { TierSpec } from './tiers';
 
 export interface PostParams {
@@ -28,7 +27,6 @@ export class Post {
   readonly composer: EffectComposer;
   readonly noise: NoiseEffect | null;
   readonly vignette: VignetteEffect;
-  readonly tone: ToneMappingEffect;
   readonly smaa: SMAAEffect | null;
   private noiseBlend: { opacity: { value: number } } | null = null;
 
@@ -36,7 +34,7 @@ export class Post {
     this.composer = new EffectComposer(renderer, { frameBufferType: THREE.HalfFloatType, multisampling: 0, stencilBuffer: false });
     this.composer.addPass(new RenderPass(scene, camera));
 
-    this.tone = new ToneMappingEffect({ mode: ToneMappingMode.NEUTRAL });
+    // тонмаппинг — внутри PBR-материалов (patchNeutralToneMap), фон и линии не трогаем
     this.vignette = new VignetteEffect({ eskil: false, offset: POST_PAPER.vignetteOffset, darkness: POST_PAPER.vignette });
     // зерно поверх (multiply): на светлом фоне читается как фактура бумаги, а не как шум
     this.noise = tier.noise ? new NoiseEffect({ premultiply: true, blendFunction: BlendFunction.MULTIPLY }) : null;
@@ -45,7 +43,7 @@ export class Post {
       this.noiseBlend = this.noise.blendMode as unknown as { opacity: { value: number } };
     }
 
-    const effects = [this.tone, this.vignette, ...(this.noise ? [this.noise] : [])];
+    const effects = [this.vignette, ...(this.noise ? [this.noise] : [])];
     this.composer.addPass(new EffectPass(camera, ...effects));
 
     this.smaa = tier.smaa ? new SMAAEffect({ preset: SMAAPreset.HIGH }) : null;

@@ -4,10 +4,10 @@
  * из тёмных столбиков; тёмная линия-траектория с засечками (hover «Стратегия и roadmap»).
  */
 import * as THREE from 'three';
-import { CHROME_VERTEX_PARS } from './LiquidChrome';
-import type { LiquidChrome } from './LiquidChrome';
+import { CHROME_VERTEX_PARS } from './Sphere';
+import type { Sphere as LiquidChrome } from './Sphere';
 import { Polyline, samplePath } from './Polyline';
-import { PEARL, patchEnvBlend } from '../Environment';
+import { patchEnvBlend, patchNeutralToneMap } from '../Environment';
 
 const XRAY_VERT = /* glsl */ `
 uniform mat4 uAtomInv;
@@ -139,10 +139,6 @@ export class Scan {
         uNoiseAmp: cu.uNoiseAmp,
         uNoiseFreq: cu.uNoiseFreq,
         uNoiseSpeed: cu.uNoiseSpeed,
-        uWorleyAmp: cu.uWorleyAmp,
-        uWorleyFreq: cu.uWorleyFreq,
-        uMorph: cu.uMorph,
-        uTurb: cu.uTurb,
         uPointerDir: cu.uPointerDir,
         uPointerAmt: cu.uPointerAmt,
         uStretch: cu.uStretch,
@@ -155,7 +151,7 @@ export class Scan {
       premultipliedAlpha: true,
       wireframe: true,
       side: THREE.DoubleSide,
-      defines: core.material.defines?.CM_WORLEY !== undefined ? { CM_WORLEY: '' } : {},
+      defines: {},
     });
     this.xray = new THREE.Mesh(core.geometry, xm);
     this.xray.frustumCulled = false;
@@ -181,8 +177,9 @@ export class Scan {
     const bg = new THREE.BoxGeometry(0.045, 1, 0.045);
     bg.translate(0, 0.5, 0);
     // тёмные матовые столбики
-    this.barMat = new THREE.MeshPhysicalMaterial({ color: 0x3a3632, metalness: 0, roughness: 0.85, envMap: envDark, envMapIntensity: PEARL.envMapIntensity, transparent: true, opacity: 1 });
+    this.barMat = new THREE.MeshPhysicalMaterial({ color: 0x3a3632, metalness: 0, roughness: 0.85, envMap: envDark, envMapIntensity: 0.6, transparent: true, opacity: 1 });
     patchEnvBlend(this.barMat, envLight, { uEnvMix: envMix });
+    patchNeutralToneMap(this.barMat);
     this.bars = new THREE.InstancedMesh(bg, this.barMat, this.barsCount);
     this.bars.visible = false;
     this.bars.frustumCulled = false;

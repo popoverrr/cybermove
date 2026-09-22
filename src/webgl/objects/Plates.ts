@@ -5,7 +5,7 @@
  */
 import * as THREE from 'three';
 import { Polyline } from './Polyline';
-import { patchEnvBlend } from '../Environment';
+import { patchEnvBlend, patchNeutralToneMap } from '../Environment';
 
 const easeInOutCubic = (t: number) => {
   const x = Math.min(1, Math.max(0, t));
@@ -71,6 +71,7 @@ export class Plates {
     const g = new THREE.BoxGeometry(0.6, 0.76, 0.018);
     this.mat = new THREE.MeshPhysicalMaterial({ color: 0xfaf8f4, metalness: 0, roughness: 0.75, clearcoat: 0.05, clearcoatRoughness: 0.6, envMap: envDark, envMapIntensity: 0.6, transparent: true, opacity: 1, side: THREE.DoubleSide });
     patchEnvBlend(this.mat, envLight, { uEnvMix: envMix });
+    patchNeutralToneMap(this.mat);
     this.plates = new THREE.InstancedMesh(g, this.mat, this.count);
     this.plates.frustumCulled = false;
     this.plates.visible = false;
@@ -78,6 +79,7 @@ export class Plates {
 
     this.ringMat = new THREE.MeshPhysicalMaterial({ color: 0x5a544d, metalness: 0, roughness: 0.8, envMap: envDark, envMapIntensity: 0.6, emissive: new THREE.Color(0x1b1a18), emissiveIntensity: 0, transparent: true, opacity: 1 });
     patchEnvBlend(this.ringMat, envLight, { uEnvMix: envMix });
+    patchNeutralToneMap(this.ringMat);
     this.ring = new THREE.Mesh(new THREE.TorusGeometry(1.95, 0.006, 8, 160), this.ringMat);
     this.ring.rotation.x = Math.PI / 2 - 0.35;
     this.ring.visible = false;

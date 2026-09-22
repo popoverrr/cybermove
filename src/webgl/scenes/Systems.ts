@@ -8,7 +8,7 @@ import type { Rig } from '../Story';
 import type { SceneModule } from './types';
 import { getTarget } from '../objects/targets';
 import { POST_PAPER } from '../Post';
-import { SURFACE } from '../objects/LiquidChrome';
+import { SURFACE } from '../objects/Sphere';
 import { range, smooth, easeInOutCubic, lerp } from '../math';
 import { HoverMix } from './hover';
 import { NODE_IDS } from '../objects/Nodes';

@@ -25,6 +25,9 @@ export class Background {
     uBeamPos: THREE.IUniform<THREE.Vector2>;
     uLightX: THREE.IUniform<number>;
     uDetail: THREE.IUniform<number>;
+    uSpherePos: THREE.IUniform<THREE.Vector2>;
+    uSphereR: THREE.IUniform<number>;
+    uGrainSeed: THREE.IUniform<number>;
   };
 
   constructor(resolution: THREE.Vector2) {
@@ -41,6 +44,9 @@ export class Background {
       uBeamPos: { value: new THREE.Vector2(0.0, -1.0) },
       uLightX: { value: 0 },
       uDetail: { value: 1 },
+      uSpherePos: { value: new THREE.Vector2(0.6, 0) },
+      uSphereR: { value: 0 },
+      uGrainSeed: { value: 0 },
     };
     const mat = new THREE.ShaderMaterial({
       vertexShader: VERT,

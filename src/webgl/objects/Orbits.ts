@@ -21,6 +21,8 @@ uniform float uWobble;     // амплитуда дрожания
 uniform float uTime;
 varying float vT;
 varying float vDepth;
+varying float vSide;
+varying float vPx;
 
 vec3 ell(float t) {
   float ang = (t + uPhase) * 6.2831853;
@@ -45,11 +47,13 @@ void main() {
   vec2 nrm = vec2(-dir.y, dir.x);
   float w = uWidth;
   if (uTrail > 0.0) w *= (1.0 - aT) * (1.0 - aT) * 1.6 + 0.3;
-  vec2 off = nrm * aSide * w / uResolution.y * 2.0;
+  vec2 off = nrm * aSide * (w + 2.0) / uResolution.y;
   off /= aspect;
   cur.xy += off * cur.w;
   gl_Position = cur;
   vDepth = -(modelViewMatrix * vec4(p, 1.0)).z;
+  vSide = aSide;
+  vPx = w;
 }
 `;
 
@@ -62,8 +66,11 @@ uniform float uDepthNear;
 uniform float uDepthFar;
 varying float vT;
 varying float vDepth;
+varying float vSide;
+varying float vPx;
 void main() {
-  float a = uOpacity;
+  float dpx = abs(vSide) * (vPx * 0.5 + 1.0);
+  float a = uOpacity * clamp(vPx * 0.5 - dpx + 0.5, 0.0, 1.0);
   if (uTrail > 0.0) {
     float f = 1.0 - vT;
     a *= f * f;

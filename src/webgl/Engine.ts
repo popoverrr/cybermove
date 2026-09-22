@@ -7,7 +7,7 @@ import { PARAMS, type Tier } from './params';
 import { TIERS, detectTier, lowerTier, isSoftwareRenderer, type TierSpec } from './tiers';
 import { buildEnvironments, addStudioLights, type EnvironmentMaps } from './Environment';
 import { Background } from './backgrounds/Background';
-import { LiquidChrome } from './objects/LiquidChrome';
+import { Sphere, makeSurfaceMaps } from './objects/Sphere';
 import { ParticleField } from './objects/ParticleField';
 import { Orbit, CORE_ORBITS, GROWTH_ORBITS } from './objects/Orbits';
 import { Scan } from './objects/Scan';
@@ -32,7 +32,8 @@ export class Engine {
   readonly resolution = new THREE.Vector2(1, 1);
   readonly background: Background;
   readonly env: EnvironmentMaps;
-  readonly core: LiquidChrome;
+  readonly core: Sphere;
+  private maps: { normalMap: THREE.Texture; roughnessMap: THREE.Texture; dispose(): void };
   readonly particles: ParticleField;
   readonly orbits: Orbit[] = [];
   readonly atom = new THREE.Group();
@@ -56,14 +57,19 @@ export class Engine {
   private slowFrames = 0;
   private slowSince = 0;
   private frameTimes: number[] = [];
+  private frameIndex = 0;
   private onFirstFrame?: () => void;
-  readonly stats = { fps: 0, frameMs: 0, tier: 'high' as Tier, particles: 0, verts: 0 };
+  readonly stats = { fps: 0, frameMs: 0, tier: 'high' as Tier, particles: 0, verts: 0, renders: 0, calls: 0 };
+  readonly lights: { key: THREE.DirectionalLight; fill: THREE.DirectionalLight };
+  private renderCount = 0;
+  private renderCountAt = 0;
 
   constructor(opts: EngineOptions) {
     this.canvas = opts.canvas;
     this.onFirstFrame = opts.onFirstFrame;
 
-    const gl = this.canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: PARAMS.still });
+    // MSAA в контексте: на LOW/MID рендер идёт напрямую и сглаживается им (BRIEF-3 §3.6); на HIGH сглаживает SMAA композера
+    const gl = this.canvas.getContext('webgl2', { antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: PARAMS.still });
     if (!gl) throw new Error('WebGL2 недоступен');
     this.software = isSoftwareRenderer(gl);
 
@@ -71,7 +77,7 @@ export class Engine {
     this.tier = TIERS[tierName];
     this.stats.tier = tierName;
 
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, context: gl, antialias: false, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: PARAMS.still });
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, context: gl, antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: PARAMS.still });
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.renderer.toneMappingExposure = 1.0;
@@ -83,28 +89,26 @@ export class Engine {
 
     this.env = buildEnvironments(this.renderer, this.tier.envSize);
     this.scene.environment = this.env.warm;
-    this.scene.environmentIntensity = 1;
-    addStudioLights(this.scene);
+    this.scene.environmentIntensity = 0.7;
+    this.lights = addStudioLights(this.scene);
 
     this.background = new Background(this.resolution);
     this.background.uniforms.uDetail.value = this.tier.bgDetail;
     this.scene.add(this.background.mesh);
 
     const rng = mulberry32(20260921);
-    this.core = new LiquidChrome({ detail: this.tier.sphereDetail, worley: this.tier.worley, envWarm: this.env.warm, envCrisp: this.env.crisp });
+    this.maps = makeSurfaceMaps(this.renderer, this.tier.mapSize);
+    this.core = new Sphere({ detail: this.tier.sphereDetail, displace: this.tier.displace, envWarm: this.env.warm, envNight: this.env.night, maps: this.maps });
     this.particles = new ParticleField(TIERS.high.particles, rng, { curl: tierName !== 'low', dpr: 1 });
     this.particles.setDrawCount(this.tier.particles);
     for (const p of [...CORE_ORBITS, ...GROWTH_ORBITS]) this.orbits.push(new Orbit(p, this.resolution, this.tier.trailSegments));
 
     this.renderer.localClippingEnabled = true;
-    // «светлеет до paper» (S5, импульс формы): emissive цвета бумаги, интенсивность задаёт Story
-    this.core.material.emissive = new THREE.Color(0xfaf8f4);
-    this.core.material.emissiveIntensity = 0;
     const envMix = this.core.uniforms.uEnvMix;
-    this.scan = new Scan(this.core, this.resolution, this.env.warm, this.env.crisp, envMix);
-    this.nodes = new Nodes(this.resolution, this.env.warm, this.env.crisp, envMix);
+    this.scan = new Scan(this.core, this.resolution, this.env.warm, this.env.night, envMix);
+    this.nodes = new Nodes(this.resolution, this.env.warm, this.env.night, envMix);
     this.streams = new Streams(this.resolution);
-    this.plates = new Plates(this.resolution, this.env.warm, this.env.crisp, envMix);
+    this.plates = new Plates(this.resolution, this.env.warm, this.env.night, envMix);
 
     this.atom.add(this.core.mesh, this.particles.points, this.scan.group, this.nodes.group, this.streams.group, this.plates.group);
     for (const o of this.orbits) this.atom.add(o.group);
@@ -130,10 +134,9 @@ export class Engine {
     if (this.tier.post) {
       this.post = new Post(this.renderer, this.scene, this.camera, this.tier);
       this.post.apply(POST_PAPER);
-      this.renderer.toneMapping = THREE.NoToneMapping;
-    } else {
-      this.renderer.toneMapping = THREE.NeutralToneMapping;
     }
+    // тонмаппинг живёт внутри PBR-материалов (Environment.patchNeutralToneMap)
+    this.renderer.toneMapping = THREE.NoToneMapping;
     // материалы должны перекомпилироваться под смену тонмаппинга
     this.scene.traverse((o) => {
       const m = (o as THREE.Mesh).material as THREE.Material | undefined;
@@ -199,6 +202,8 @@ export class Engine {
 
     this.story.update(dt, this.time);
     this.background.update(this.time);
+    // зерно бумаги живёт: смена seed раз в 3 кадра (BRIEF-3 §8.2)
+    if (dt > 0 && (this.frameIndex++ % 3) === 0) this.background.uniforms.uGrainSeed.value = (this.frameIndex * 7919) % 1000;
     this.core.update(this.time);
     this.particles.update(this.time);
 
@@ -207,6 +212,13 @@ export class Engine {
 
     const ms = performance.now() - t0;
     this.stats.frameMs = ms;
+    this.stats.calls = this.renderer.info.render.calls;
+    this.renderCount++;
+    if (now - this.renderCountAt >= 1000) {
+      this.stats.renders = this.renderCount;
+      this.renderCount = 0;
+      this.renderCountAt = now;
+    }
     this.frameTimes.push(ms);
     if (this.frameTimes.length > 30) this.frameTimes.shift();
     this.stats.fps = dt > 0 ? Math.round(1 / dt) : 0;
@@ -270,6 +282,7 @@ export class Engine {
     document.removeEventListener('visibilitychange', this.onVisibility);
     this.post?.dispose();
     this.core.dispose();
+    this.maps.dispose();
     this.particles.dispose();
     this.orbits.forEach((o) => o.dispose());
     this.scan.dispose();

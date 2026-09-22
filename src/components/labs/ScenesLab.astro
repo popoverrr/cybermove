@@ -1,17 +1,76 @@
 ---
-/** /dev/scenes/ — лаборатория сцен WebGL (наполняется в Фазе 1–2). */
+/**
+ * /dev/scenes/ — лаборатория сферы и сцен (BRIEF-3 §10, фаза A): один экран с движком, без стейджа.
+ * Параметры: ?still&t=4 (снимок), ?debug (Tweakpane: материал, свет, окружение), ?tier=high|mid|low,
+ * ?screen=N (сцена N в удержании, local 0.45), ?night (тема night).
+ */
 ---
 
-<div class="lab">
-  <p class="t-micro">LAB · SCENES</p>
-  <h1 class="t-h3">Сцены</h1>
-  <p class="t-small">Появится в Фазе 1: движок, окружение, жидкий хром, частицы.</p>
+<div class="scenes-lab" data-scenes-lab>
+  <canvas id="gl" class="scenes-lab__gl"></canvas>
+  <div class="scenes-lab__text">
+    <p class="t-micro">LAB · SPHERE</p>
+    <h1 class="t-display scenes-lab__h1">Приводим бизнес<br />в движение —<br />от диагностики<br />до внедрения.</h1>
+    <p class="t-micro scenes-lab__hint">?debug · ?tier=high|mid|low · ?still&amp;t=4 · ?screen=N · ?night</p>
+  </div>
 </div>
 
+<script>
+  import { state } from '../../lib/state';
+  import { boot } from '../../webgl/boot';
+  const q = new URLSearchParams(location.search);
+  const screen = Number(q.get('screen') || 0);
+  const local = Number(q.get('local') || (screen === 0 ? 0.35 : 0.45));
+  state.reduced = false;
+  state.mobile = window.innerWidth < 900;
+  state.targets[screen] = local;
+  state.screens[screen] = local;
+  for (let i = 0; i < screen; i++) {
+    state.targets[i] = 1;
+    state.screens[i] = 1;
+  }
+  state.screen = screen;
+  document.body.dataset.themeNow = q.has('night') ? 'night' : 'ivory';
+  state.debugNight = q.has('night');
+  if (q.has('night')) document.documentElement.dataset.theme = 'night';
+  const canvas = document.querySelector<HTMLCanvasElement>('#gl')!;
+  boot(canvas, () => document.body.classList.add('gl-ready'));
+  window.addEventListener('pointermove', (e) => {
+    state.pointer.x = e.clientX;
+    state.pointer.y = e.clientY;
+    state.pointer.nx = (e.clientX / window.innerWidth) * 2 - 1;
+    state.pointer.ny = -((e.clientY / window.innerHeight) * 2 - 1);
+    state.pointer.active = true;
+  });
+</script>
+
 <style>
-  .lab {
-    padding: var(--space-12) var(--gutter);
+  .scenes-lab {
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    background: var(--ivory);
+  }
+  .scenes-lab__gl {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .scenes-lab__text {
+    position: absolute;
+    left: var(--gutter);
+    top: 50%;
+    transform: translateY(-50%);
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-4);
+    pointer-events: none;
+  }
+  .scenes-lab__h1 {
+    font-size: min(var(--fs-display), 9vh);
+  }
+  .scenes-lab__hint {
+    color: var(--umber);
   }
 </style>

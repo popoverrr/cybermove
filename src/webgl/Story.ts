@@ -98,13 +98,23 @@ export class Story {
 
   onResize(w: number, h: number) {
     const mobile = state.mobile;
-    // сцена по центру-справа на десктопе, сверху на мобильном
-    // атом справа, слегка заходит на текстовую колонку (ref-12)
-    this.layoutX = mobile ? 0 : 1.32 * Math.min(1, (w / h) / 1.6);
-    this.layoutY = mobile ? 1.0 : 0;
-    // на мобильном атом меньше и дальше: сцена занимает верхнюю треть
-    this.layoutScale = mobile ? 0.62 : Math.min(1, Math.max(0.8, (w / h) / 1.5));
-    this.camMul = mobile ? 1.12 : 1;
+    // BRIEF-3 §3.7: на десктопе центр сферы на 63 % ширины, радиус 18 % ширины (слегка заходит на текст);
+    // на мобильном радиус 30 % ширины, центр в верхней трети. Считаем от камеры S1 (z 7.6, fov 30).
+    const aspect = w / h;
+    const halfH = Math.tan((30 * Math.PI) / 360) * 7.6;
+    const halfW = halfH * aspect;
+    const baseAtom = 0.86; // rig.atomScale в удержании S1
+    if (mobile) {
+      this.layoutX = 0;
+      this.layoutY = halfH * (1 - 2 * 0.3); // центр на 30 % высоты сверху
+      this.layoutScale = (0.3 * 2 * halfW) / baseAtom;
+      this.camMul = 1;
+    } else {
+      this.layoutX = (0.63 * 2 - 1) * halfW;
+      this.layoutY = 0;
+      this.layoutScale = (0.18 * 2 * halfW) / baseAtom;
+      this.camMul = 1;
+    }
     this.scenes.forEach((s) => s.onResize?.(w, h, mobile));
   }
 
@@ -164,16 +174,22 @@ export class Story {
     this.atomRot.y = damp(this.atomRot.y, this.smoothPointer.x * 0.16 * par, 2.5, dt);
     e.atom.rotation.set(this.atomRot.x, this.atomRot.y + time * 0.02, 0);
 
-    // --- ядро
+    if (state.debugNight) {
+      rig.envMix = 1;
+      rig.bg.a = 'night';
+      rig.bg.b = 'night';
+      rig.bg.mix = 0;
+    }
+
+    // --- ядро (шов UV сзади: вокруг y не вращаем, только лёгкое покачивание)
     const core = e.core;
     core.mesh.visible = rig.coreVisible && rig.coreScale > 0.001;
     core.mesh.scale.setScalar(Math.max(rig.coreScale, 0.0001));
-    core.uniforms.uStretch.value.copy(rig.coreStretch);
     core.uniforms.uEnvMix.value = rig.envMix;
-    core.mesh.rotation.y = time * 0.05;
-    core.mesh.rotation.x = Math.sin(time * 0.11) * 0.08 * (1 - rig.coreUpright);
-    // светлеет к бумаге, а не раскаляется: emissive paper с небольшой интенсивностью
-    core.material.emissiveIntensity = rig.coreEmissive * 0.42;
+    core.mesh.rotation.y = Math.sin(time * 0.07) * 0.12;
+    core.mesh.rotation.x = Math.sin(time * 0.11) * 0.06 * (1 - rig.coreUpright);
+    // светлеет к бумаге, а не раскаляется (S5, импульс формы)
+    core.uniforms.uLift.value = rig.coreEmissive;
     // прогиб к курсору: направление в объектных координатах
     if (rig.pointerBulge > 0 && state.pointer.active && !state.reduced) {
       this.tmp.set(this.smoothPointer.x * 3.5, this.smoothPointer.y * 2.2, 2.5).sub(this.tmp2.copy(e.atom.position));
@@ -187,8 +203,8 @@ export class Story {
       core.uniforms.uPointerAmt.value = damp(core.uniforms.uPointerAmt.value, 0, 3, dt);
     }
 
-    // --- окружение: вращение бликов
-    e.scene.environmentRotation.set(0, rig.envRot + time * 0.035 + this.smoothPointer.x * 0.08, 0);
+    // --- окружение: блик медленно дрейфует, курсор поворачивает свет на ±6° (BRIEF-3 §8.3)
+    e.scene.environmentRotation.set(this.smoothPointer.y * -0.05, rig.envRot + time * 0.02 + this.smoothPointer.x * 0.105, 0);
     e.scene.environment = e.env.warm;
 
     // --- фон
@@ -196,9 +212,15 @@ export class Story {
     e.background.uniforms.uMouse.value.set(this.smoothPointer.x, this.smoothPointer.y);
     e.background.uniforms.uScroll.value = state.progress;
     e.background.uniforms.uBeam.value = rig.beam;
-    // луч — под атомом: экранная x-координата атома в координатах фона
+    // луч — под атомом: экранная x-координата атома в координатах фона; тень под сферой (§3.5)
     this.tmp.copy(e.atom.position).project(e.camera);
     e.background.uniforms.uBeamPos.value.set(this.tmp.x * (e.camera.aspect), -1.0);
+    const sx = this.tmp.x * e.camera.aspect;
+    const sy = this.tmp.y;
+    // радиус: проекция точки на краю сферы вдоль экранной оси x
+    this.tmp2.copy(e.atom.position).add(this.tmp.set(e.atom.scale.x * rig.coreScale, 0, 0)).project(e.camera);
+    e.background.uniforms.uSpherePos.value.set(sx, sy);
+    e.background.uniforms.uSphereR.value = core.mesh.visible ? Math.abs(this.tmp2.x * e.camera.aspect - sx) : 0;
 
     // --- орбиты
     const ob = rig.orbits;

@@ -1,14 +1,15 @@
 /**
- * Процедурное студийное окружение (BRIEF-2 §4.2): без HDRI-файлов и без синих панелей.
- * Сцена из emissive-плоскостей прогоняется через PMREMGenerator.fromScene(). Один тёплый пресет
- * (большой мягкий ключевой софтбокс сверху-слева, слабый заполняющий спереди, рефлекс цвета sand снизу,
- * светло-тёплые стены) и второй, чуть контрастнее, для экранов stone и clay.
- * Смешение пресетов — в шейдере материала (patchEnvBlend), движение бликов — scene.environmentRotation.
+ * Процедурное студийное окружение (BRIEF-3 §3.4): студия с одним главным источником.
+ * Ключевой софтбокс 3×1.2 сверху-слева (#FFFBF5, 5–7), большой слабый заполняющий градиент спереди (0.5),
+ * стены с вертикальным градиентом от светлого вверху к тёмному внизу (низ сферы отражает тёмное),
+ * справа-сзади узкая полоса контрового света (0.8). Пресет `night` — те же источники на тёмных стенах #2A2724.
+ * Сцена из emissive-плоскостей прогоняется через PMREMGenerator.fromScene(); смешение пресетов — в шейдере
+ * материала (patchEnvBlend), движение бликов — scene.environmentRotation (курсор ±6°).
  */
 import * as THREE from 'three';
 
 export interface StudioPreset {
-  key: 'warm' | 'crisp';
+  key: 'warm' | 'night';
   build(scene: THREE.Scene): void;
 }
 
@@ -22,45 +23,56 @@ function panel(scene: THREE.Scene, w: number, h: number, color: THREE.ColorRepre
   return mesh;
 }
 
-/** Стены студии: тёплая коробка, пол — рефлекс цвета sand, потолок светлее */
-function shell(scene: THREE.Scene, walls: THREE.ColorRepresentation, floor: number, ceil: number) {
-  const box = new THREE.Mesh(new THREE.BoxGeometry(40, 30, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(walls), side: THREE.BackSide, toneMapped: false }));
-  scene.add(box);
-  panel(scene, 40, 40, 0xe9e4dc, floor, new THREE.Vector3(0, -6, 0));
-  panel(scene, 40, 40, 0xfff7ec, ceil, new THREE.Vector3(0, 9, 0));
+/** Стены студии с вертикальным градиентом: цвет вершин по высоте */
+function walls(scene: THREE.Scene, top: THREE.ColorRepresentation, bottom: THREE.ColorRepresentation, size = 40) {
+  const geo = new THREE.BoxGeometry(size, size * 0.75, size, 1, 8, 1);
+  const pos = geo.attributes.position;
+  const colors = new Float32Array(pos.count * 3);
+  const ct = new THREE.Color(top);
+  const cb = new THREE.Color(bottom);
+  const c = new THREE.Color();
+  const half = size * 0.375;
+  for (let i = 0; i < pos.count; i++) {
+    const t = THREE.MathUtils.clamp((pos.getY(i) + half) / (2 * half), 0, 1);
+    c.copy(cb).lerp(ct, Math.pow(t, 0.8));
+    colors[i * 3] = c.r;
+    colors[i * 3 + 1] = c.g;
+    colors[i * 3 + 2] = c.b;
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, toneMapped: false }));
+  scene.add(mesh);
+}
+
+/** Общие источники: ключ сверху-слева, заполняющий спереди, контровой справа-сзади */
+function lights(scene: THREE.Scene, key: number, fill: number, rim: number) {
+  // ключевой софтбокс 3×1.2: полоса — в блике угадывается отражение софтбокса (чек-лист §3 п. 4)
+  panel(scene, 6.0, 1.3, 0xfffcf8, key, new THREE.Vector3(-3.2, 3.9, 4.2));
+  // большой слабый заполняющий спереди
+  panel(scene, 12, 8, 0xfaf8f4, fill, new THREE.Vector3(1.0, 0.5, 10.0));
+  // контровой: узкая полоса справа-сзади для светлой кромки
+  panel(scene, 0.8, 7, 0xfffaf4, rim, new THREE.Vector3(5.5, 1.5, -4.0));
 }
 
 export const WARM_STUDIO: StudioPreset = {
   key: 'warm',
   build(scene) {
-    scene.background = new THREE.Color(0x85817b);
-    shell(scene, 0x7d7973, 0.42, 0.7);
-    // ключевой софтбокс сверху-слева: большой и мягкий — освещённая сторона сферы сверху-слева
-    panel(scene, 9, 6, 0xfffaf4, 3.2, new THREE.Vector3(-5.5, 6.0, 4.0));
-    // заполняющий спереди, слабее
-    panel(scene, 8, 5, 0xf8f5f0, 0.6, new THREE.Vector3(1.5, 0.5, 9.0));
-    // рефлекс снизу цвета sand
-    panel(scene, 10, 3, 0xe9e4dc, 0.5, new THREE.Vector3(2.0, -5.5, 3.0));
-    // правая стена темнее: тень справа-снизу читается
-    panel(scene, 6, 12, 0x57534e, 0.8, new THREE.Vector3(9.0, -1.0, -2.0));
+    walls(scene, 0xf3f1ee, 0x4f4b47);
+    lights(scene, 12.0, 0.3, 1.2);
   },
 };
 
-export const CRISP_STUDIO: StudioPreset = {
-  key: 'crisp',
+export const NIGHT_STUDIO: StudioPreset = {
+  key: 'night',
   build(scene) {
-    scene.background = new THREE.Color(0x76726c);
-    shell(scene, 0x6b6762, 0.35, 0.55);
-    panel(scene, 8, 5, 0xfffaf4, 4.2, new THREE.Vector3(-5.5, 6.2, 4.0));
-    panel(scene, 7, 4, 0xf8f5f0, 0.4, new THREE.Vector3(1.5, 0.5, 9.0));
-    panel(scene, 10, 3, 0xe9e4dc, 0.45, new THREE.Vector3(2.0, -5.5, 3.0));
-    panel(scene, 6, 12, 0x46433f, 0.8, new THREE.Vector3(9.0, -1.0, -2.0));
+    walls(scene, 0x3a3631, 0x2a2724);
+    lights(scene, 12.0, 0.4, 1.4);
   },
 };
 
 export interface EnvironmentMaps {
   warm: THREE.Texture;
-  crisp: THREE.Texture;
+  night: THREE.Texture;
   dispose(): void;
 }
 
@@ -70,8 +82,8 @@ export function buildEnvironments(renderer: THREE.WebGLRenderer, size = 256): En
   const make = (preset: StudioPreset) => {
     const scene = new THREE.Scene();
     preset.build(scene);
-    // sigma даёт мягкость краям софтбоксов
-    const rt = pmrem.fromScene(scene, 0.06, 0.1, 100, { size });
+    // sigma даёт мягкость краям софтбокса
+    const rt = pmrem.fromScene(scene, 0.04, 0.1, 100, { size });
     scene.traverse((o) => {
       const m = o as THREE.Mesh;
       if (m.geometry) m.geometry.dispose();
@@ -80,14 +92,14 @@ export function buildEnvironments(renderer: THREE.WebGLRenderer, size = 256): En
     return rt;
   };
   const warmRt = make(WARM_STUDIO);
-  const crispRt = make(CRISP_STUDIO);
+  const nightRt = make(NIGHT_STUDIO);
   pmrem.dispose();
   return {
     warm: warmRt.texture,
-    crisp: crispRt.texture,
+    night: nightRt.texture,
     dispose() {
       warmRt.dispose();
-      crispRt.dispose();
+      nightRt.dispose();
     },
   };
 }
@@ -125,44 +137,71 @@ export function patchEnvBlend(material: THREE.MeshPhysicalMaterial | THREE.MeshS
   material.needsUpdate = true;
 }
 
-/** Матовый жемчуг / гипс (BRIEF-2 §4.1) — общий рецепт для ядра, узлов и пластин */
-export const PEARL = {
-  color: 0xd8d3cb,
-  metalness: 0.03,
-  roughness: 0.62,
-  clearcoat: 0.12,
-  clearcoatRoughness: 0.5,
-  sheen: 0.22,
-  sheenRoughness: 0.6,
-  sheenColor: 0xfffaf4,
-  envMapIntensity: 0.45,
-} as const;
+/**
+ * Тонмаппинг Khronos PBR Neutral внутри материала (BRIEF-3 §3.6 / DECISIONS): three выключает тонмаппинг
+ * при рендере в render target, а ToneMappingEffect композера искажал фон (сжимал светлое, «давил» тёмное).
+ * Поэтому renderer.toneMapping = NoToneMapping всегда, а жемчуг мапится сам; линии, точки и фон — точные цвета.
+ */
+export function patchNeutralToneMap(material: THREE.Material) {
+  const prev = material.onBeforeCompile;
+  material.onBeforeCompile = (shader, renderer) => {
+    prev?.(shader, renderer);
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        '#include <common>',
+        `#include <common>
+        vec3 cmNeutral(vec3 color) {
+          const float StartCompression = 0.8 - 0.04;
+          const float Desaturation = 0.15;
+          float x = min(color.r, min(color.g, color.b));
+          float offset = x < 0.08 ? x - 6.25 * x * x : 0.04;
+          color -= offset;
+          float peak = max(color.r, max(color.g, color.b));
+          if (peak < StartCompression) return color;
+          float d = 1.0 - StartCompression;
+          float newPeak = 1.0 - d * d / (peak + d - StartCompression);
+          color *= newPeak / peak;
+          float g = 1.0 - 1.0 / (Desaturation * (peak - newPeak) + 1.0);
+          return mix(color, vec3(newPeak), g);
+        }`,
+      )
+      .replace('#include <tonemapping_fragment>', 'gl_FragColor.rgb = cmNeutral(gl_FragColor.rgb);');
+  };
+  const prevKey = material.customProgramCacheKey;
+  material.customProgramCacheKey = () => `${prevKey.call(material)}|neutral`;
+  material.toneMapped = false;
+  material.needsUpdate = true;
+}
 
-export function pearlMaterial(envWarm: THREE.Texture, envCrisp: THREE.Texture, envMix: THREE.IUniform<number>, over: Partial<THREE.MeshPhysicalMaterialParameters> = {}) {
+/** Малые сферы-спутники S3 и листы S6 используют тот же жемчуг, но без карт и смещения */
+export function pearlMaterial(envWarm: THREE.Texture, envNight: THREE.Texture, envMix: THREE.IUniform<number>, over: Partial<THREE.MeshPhysicalMaterialParameters> = {}) {
   const mat = new THREE.MeshPhysicalMaterial({
-    color: PEARL.color,
-    metalness: PEARL.metalness,
-    roughness: PEARL.roughness,
-    clearcoat: PEARL.clearcoat,
-    clearcoatRoughness: PEARL.clearcoatRoughness,
-    sheen: PEARL.sheen,
-    sheenRoughness: PEARL.sheenRoughness,
-    sheenColor: new THREE.Color(PEARL.sheenColor),
+    color: 0xede7de,
+    metalness: 0,
+    roughness: 0.4,
+    clearcoat: 0.65,
+    clearcoatRoughness: 0.22,
+    sheen: 0.45,
+    sheenRoughness: 0.5,
+    sheenColor: new THREE.Color(0xfff6ea),
+    ior: 1.45,
+    specularIntensity: 0.9,
     envMap: envWarm,
-    envMapIntensity: PEARL.envMapIntensity,
+    envMapIntensity: 1.0,
     ...over,
   });
-  patchEnvBlend(mat, envCrisp, { uEnvMix: envMix });
+  patchEnvBlend(mat, envNight, { uEnvMix: envMix });
+  patchNeutralToneMap(mat);
   return mat;
 }
 
-/** Ключевой и заполняющий свет: направленная светотень сверху-слева, как на референсе (3:1) */
+/** Направленный ключевой свет: даёт читаемый терминатор и тень 1:3 вместе с окружением */
 export function addStudioLights(scene: THREE.Scene) {
-  const key = new THREE.DirectionalLight(0xfffaf4, 2.3);
-  key.position.set(-4.5, 6.5, 5.0);
-  const fill = new THREE.DirectionalLight(0xf6f2ec, 0.28);
+  const key = new THREE.DirectionalLight(0xfffcf8, 0.45);
+  key.position.set(-4.0, 6.0, 5.0);
+  // заполняющий направленный свет убран: он давал точечный блик на clearcoat справа; заполняет окружение
+  const fill = new THREE.DirectionalLight(0xfaf8f4, 0.0);
   fill.position.set(3.0, -1.0, 6.0);
-  const hemi = new THREE.HemisphereLight(0xf2efe9, 0x8a8177, 0.22);
-  scene.add(key, fill, hemi);
-  return { key, fill, hemi };
+  scene.add(key, fill);
+  return { key, fill };
 }

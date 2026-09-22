@@ -5,7 +5,7 @@
  */
 import { GLSL_HASH, GLSL_SIMPLEX } from '../shaders/noise';
 
-export const BG_MODES = { ivory: 0, sand: 1, stone: 2, clay: 3 } as const;
+export const BG_MODES = { ivory: 0, sand: 1, stone: 2, clay: 3, night: 4 } as const;
 export type BgMode = keyof typeof BG_MODES;
 export const MASK = { uniform: 0, radial: 1, top: 2, bottom: 3 } as const;
 
@@ -33,14 +33,31 @@ uniform float uBeam;
 uniform vec2 uBeamPos;
 uniform float uLightX;
 uniform float uDetail;   // 1 — полный шум, 0 — одна октава (LOW-тир)
+uniform vec2 uSpherePos; // центр сферы в координатах p (x с поправкой на aspect)
+uniform float uSphereR;  // радиус сферы в тех же единицах (0 — тени нет)
+uniform float uGrainSeed;
 ${GLSL_HASH}
 ${GLSL_SIMPLEX}
 
 vec3 srgb2lin(vec3 c) { return pow(c, vec3(2.2)); }
 
-// зерно бумаги: мелкий хэш-шум, независимый от времени, чтобы не «кипел»
+// зерно бумаги: мелкий хэш-шум; seed меняется раз в 3 кадра — едва заметная жизнь бумаги
 float grain(vec2 uv) {
-  return hash13(vec3(floor(uv * uRes * 0.5), 7.0)) - 0.5;
+  return hash13(vec3(floor(uv * uRes * 0.5), 7.0 + uGrainSeed)) - 0.5;
+}
+
+// глубина фона (BRIEF-3 §8.2): мягкий свет сверху-слева +4%, затемнение к правому нижнему углу −4%,
+// мягкая тень под сферой 7% радиусом 1.6R со смещением вниз-вправо
+float depth(vec2 p) {
+  float light = smoothstep(2.8, 0.0, length(p - vec2(-1.4, 1.1))) * 0.04;
+  float dark = smoothstep(2.6, 0.0, length(p - vec2(1.5, -1.2))) * 0.04;
+  float sh = 0.0;
+  if (uSphereR > 0.001) {
+    vec2 c = uSpherePos + vec2(0.18, -0.32) * uSphereR;
+    float d = length(p - c) / (uSphereR * 1.6);
+    sh = (1.0 - smoothstep(0.3, 1.0, d)) * 0.08;
+  }
+  return 1.0 + light - dark - sh;
 }
 
 // тёплое пятно света под монолитом (S4): не свечение, а мягкий свет на стене
@@ -58,7 +75,7 @@ vec3 bgIvory(vec2 uv, vec2 p) {
   vec2 c = vec2(0.55 + sin(uTime * 0.05) * 0.35 + uMouse.x * 0.1, 0.35 + cos(uTime * 0.037) * 0.25 + uMouse.y * 0.06);
   float spot = smoothstep(2.4, 0.0, length(p - c));
   float shade = snoise(vec3(p * 0.45, uTime * 0.015)) * 0.5 + 0.5;
-  vec3 col = base * (0.985 + spot * spot * 0.05 + (shade - 0.5) * 0.02 * uDetail);
+  vec3 col = base * (0.985 + spot * spot * 0.05 + (shade - 0.5) * 0.02 * uDetail) * depth(p);
   col += grain(uv) * 0.014;
   return col + beam(p);
 }
@@ -68,7 +85,7 @@ vec3 bgSand(vec2 uv, vec2 p) {
   vec3 base = srgb2lin(vec3(0.914, 0.894, 0.863)); // #E9E4DC
   float shade = snoise(vec3(p * 0.35 + 3.0, uTime * 0.012)) * 0.5 + 0.5;
   float top = smoothstep(-1.4, 1.2, p.y);
-  vec3 col = base * (0.975 + top * 0.03 + (shade - 0.5) * 0.02 * uDetail);
+  vec3 col = base * (0.975 + top * 0.03 + (shade - 0.5) * 0.02 * uDetail) * depth(p);
   col += grain(uv) * 0.016;
   return col + beam(p);
 }
@@ -80,7 +97,7 @@ vec3 bgStone(vec2 uv, vec2 p) {
   vec2 lc = vec2(-1.0 + uLightX * 0.2 + uMouse.x * 0.1, 0.9 + uMouse.y * 0.06);
   float light = smoothstep(2.6, 0.0, length(p - lc));
   vec3 base = srgb2lin(vec3(0.867, 0.843, 0.808)); // #DDD7CE
-  vec3 col = base * (0.955 + light * light * 0.06 + streak * 0.035 + (cloud - 0.5) * 0.03);
+  vec3 col = base * (0.955 + light * light * 0.06 + streak * 0.035 + (cloud - 0.5) * 0.03) * depth(p);
   col += grain(uv) * 0.012;
   return col + beam(p);
 }
@@ -96,16 +113,27 @@ vec3 bgClay(vec2 uv, vec2 p) {
   float band = smoothstep(0.55, 0.0, abs(p.x * 0.5 - p.y * 0.85 + 0.6 + sin(uTime * 0.04) * 0.15)) * 0.035;
   float textZone = smoothstep(0.5, -0.9, p.x);
   vec3 base = srgb2lin(vec3(0.812, 0.780, 0.733)); // #CFC7BB
-  vec3 col = base * (0.97 + (sun + band) * (1.0 - textZone * 0.6));
+  vec3 col = base * (0.97 + (sun + band) * (1.0 - textZone * 0.6)) * depth(p);
   col += grain(uv) * 0.012;
   return col + beam(p);
+}
+
+// тема night (S8): тёплый графит #23211E с тем же светом сверху-слева и тенью под сферой
+vec3 bgNight(vec2 uv, vec2 p) {
+  vec3 base = srgb2lin(vec3(0.137, 0.129, 0.118));
+  float shade = snoise(vec3(p * 0.35 + 11.0, uTime * 0.012)) * 0.5 + 0.5;
+  float light = smoothstep(3.0, 0.0, length(p - vec2(-1.2, 1.2))) * 0.10;
+  vec3 col = base * (0.96 + light + (shade - 0.5) * 0.03 * uDetail) * depth(p);
+  col += grain(uv) * 0.006;
+  return col;
 }
 
 vec3 modeColor(float mode, vec2 uv, vec2 p) {
   if (mode < 0.5) return bgIvory(uv, p);
   if (mode < 1.5) return bgSand(uv, p);
   if (mode < 2.5) return bgStone(uv, p);
-  return bgClay(uv, p);
+  if (mode < 3.5) return bgClay(uv, p);
+  return bgNight(uv, p);
 }
 
 void main() {

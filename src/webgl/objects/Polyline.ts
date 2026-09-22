@@ -15,6 +15,8 @@ uniform float uWidth;
 uniform float uTaper;     // 0 — постоянная толщина, 1 — сужение к концу
 varying float vT;
 varying float vDepth;
+varying float vSide;
+varying float vPx;
 void main() {
   vec4 cur = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   vec4 nxt = projectionMatrix * modelViewMatrix * vec4(aNext, 1.0);
@@ -28,11 +30,15 @@ void main() {
   vec2 dir = normalize(length(d1) > 1e-6 && length(d2) > 1e-6 ? normalize(d1) + normalize(d2) : (length(d1) > 1e-6 ? d1 : d2));
   vec2 nrm = vec2(-dir.y, dir.x);
   float w = uWidth * mix(1.0, 1.0 - aT, uTaper);
-  vec2 off = nrm * aSide * w / uResolution.y * 2.0;
+  // мягкая кромка (BRIEF-3 §3.6): геометрия шире на 1px с каждой стороны, покрытие считает фрагмент
+  float wpx = w + 2.0;
+  vec2 off = nrm * aSide * wpx / uResolution.y;
   off /= aspect;
   cur.xy += off * cur.w;
   gl_Position = cur;
   vT = aT;
+  vSide = aSide;
+  vPx = w;
   vDepth = -(modelViewMatrix * vec4(position, 1.0)).z;
 }
 `;
@@ -51,9 +57,14 @@ uniform float uAdditive;
 uniform float uFadeEnds;
 varying float vT;
 varying float vDepth;
+varying float vSide;
+varying float vPx;
 void main() {
   if (vT > uDraw) discard;
-  float a = uOpacity;
+  // покрытие пикселя линией: расстояние до оси в px против половины ширины, переход 1px
+  float dpx = abs(vSide) * (vPx * 0.5 + 1.0);
+  float cov = clamp(vPx * 0.5 - dpx + 0.5, 0.0, 1.0);
+  float a = uOpacity * cov;
   // кончик прорисовки чуть ярче
   a *= 1.0 + 0.8 * smoothstep(0.06, 0.0, uDraw - vT) * step(uDraw, 0.999);
   if (uDash > 0.0) {

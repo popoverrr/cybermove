@@ -61,6 +61,8 @@ export interface SceneState {
   reduced: boolean;
   /** интро S1 завершено */
   introDone: boolean;
+  /** отладка: принудительно тема night в WebGL (лаборатория /dev/scenes/?night) */
+  debugNight: boolean;
   /** экранные позиции подписей орбит (пишет WebGL, читает DOM) */
   orbitLabels: Array<{ x: number; y: number; visible: number }>;
   /** произвольные HTML-лейблы, привязанные к 3D-точкам: id → экранная позиция */
@@ -84,6 +86,7 @@ export const state: SceneState = {
   mobile: false,
   reduced: false,
   introDone: false,
+  debugNight: false,
   orbitLabels: Array.from({ length: 5 }, () => ({ x: 0, y: 0, visible: 0 })),
   anchors: {},
   events: new Emitter<SceneEvents>(),

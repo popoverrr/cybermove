@@ -52,6 +52,9 @@ export function mountLiteBackground(canvas: HTMLCanvasElement, mode: BgMode, opt
   gl.uniform2f(u('uBeamPos'), 0.4, -1.0);
   gl.uniform1f(u('uLightX'), 0);
   gl.uniform1f(u('uDetail'), 1);
+  gl.uniform2f(u('uSpherePos'), 0.0, 0.0);
+  gl.uniform1f(u('uSphereR'), 0.0);
+  gl.uniform1f(u('uGrainSeed'), 0.0);
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let mx = 0;

@@ -1,40 +1,43 @@
 {
   "title": "Кейсы",
   "h1": "34 проекта. 13 городов. 7 отраслей.",
-  "lead": "От личного бренда чемпиона мира до инженерных систем в Казахстане. Категории проставлены по смыслу проекта; детальные страницы и цифры результата появятся позже.",
+  "lead": "От личного бренда чемпиона мира до инженерных систем в Казахстане. Категории проставлены по смыслу проекта; цифры результата появятся позже.",
   "placeholderNote": "[PLACEHOLDER: цифры результатов по кейсам]",
   "categories": [
     {
-      "id": "politics",
-      "label": "Политика"
+      "id": "experts",
+      "label": "Личные бренды и эксперты",
+      "lead": "Спортсмены, блогеры, эксперты: позиционирование, контент, PR"
     },
     {
-      "id": "experts",
-      "label": "Блогеры и эксперты"
+      "id": "politics",
+      "label": "Политика, медиа и коммуникации",
+      "lead": "Партии, радио, агентства: кампании и публичные коммуникации"
     },
     {
       "id": "retail",
-      "label": "Fashion, retail и e-commerce"
+      "label": "Fashion, retail и e-commerce",
+      "lead": "Сети, бренды, маркетплейсы и интернет-магазины"
     },
     {
       "id": "horeca",
-      "label": "HoReCa, wellness и операционный консалтинг"
-    },
-    {
-      "id": "media",
-      "label": "Медиа, PR и события"
+      "label": "HoReCa, wellness и сервис",
+      "lead": "Рестораны, клубы, спа, фитнес, барбершопы"
     },
     {
       "id": "b2b",
-      "label": "B2B, инженерия и энергетика"
+      "label": "HVAC, инженерия и производство",
+      "lead": "Отопление, стройтехника, панели, мебель, медицина"
+    },
+    {
+      "id": "pro",
+      "label": "Недвижимость, право и образование",
+      "lead": "Юристы, инвестиции, обучающие проекты"
     },
     {
       "id": "tech",
-      "label": "Технологии и VR"
-    },
-    {
-      "id": "tbd",
-      "label": "Уточнить категорию"
+      "label": "Digital, VR и продукты",
+      "lead": "Игры, VR-платформы, продуктовые стартапы"
     }
   ],
   "items": [
@@ -55,6 +58,90 @@
     },
     {
       "n": 2,
+      "id": "oleg-baryshevsky",
+      "name": "OLEG BARYSHEVSKY",
+      "url": "https://instagram.com/oleg.baryshevsky",
+      "urlLabel": "instagram.com/oleg.baryshevsky",
+      "summary": "Три образовательных курса и чат-боты: консалтинг, запуски, техническое продюсирование",
+      "tags": [
+        "Consulting",
+        "Course Launch",
+        "Chatbots"
+      ],
+      "category": "experts"
+    },
+    {
+      "n": 3,
+      "id": "tsepukh",
+      "name": "TSEPUKH_P",
+      "url": "https://instagram.com/tsepukh_p",
+      "urlLabel": "instagram.com/tsepukh_p",
+      "summary": "Три курса и боты: консалтинг, запуски, техническое продюсирование",
+      "tags": [
+        "Consulting",
+        "Course Launch",
+        "Production"
+      ],
+      "category": "experts"
+    },
+    {
+      "n": 4,
+      "id": "kehhsha",
+      "name": "KEHHSHA",
+      "url": "https://instagram.com/kehhsha",
+      "urlLabel": "instagram.com/kehhsha",
+      "summary": "Полное продюсирование курса, консультации и продакшн",
+      "tags": [
+        "Production",
+        "Course Launch",
+        "Consulting"
+      ],
+      "category": "experts"
+    },
+    {
+      "n": 5,
+      "id": "olga-yankovskaya",
+      "name": "OLGA YANKOVSKAYA",
+      "url": "https://instagram.com/yankovskaya__olga",
+      "urlLabel": "instagram.com/yankovskaya__olga",
+      "summary": "Техническое продюсирование и консалтинг по запуску эксперта",
+      "tags": [
+        "Expert Launch",
+        "Production",
+        "Consulting"
+      ],
+      "category": "experts"
+    },
+    {
+      "n": 6,
+      "id": "miss-sverona",
+      "name": "MISS SVERONA",
+      "url": "https://instagram.com/misssverona",
+      "urlLabel": "instagram.com/misssverona",
+      "summary": "Полное продюсирование экспертного проекта: стратегия, позиционирование, запуск",
+      "tags": [
+        "Production",
+        "Consulting",
+        "Strategy"
+      ],
+      "category": "experts"
+    },
+    {
+      "n": 7,
+      "id": "meshtiish",
+      "name": "MESHTIISH",
+      "url": "https://instagram.com/meshtiish",
+      "urlLabel": "instagram.com/meshtiish",
+      "summary": "Два курса от идеи до запуска, техническое продюсирование",
+      "tags": [
+        "Consulting",
+        "Course Launch",
+        "Production"
+      ],
+      "category": "experts"
+    },
+    {
+      "n": 8,
       "id": "udar",
       "name": "Политическая партия «УДАР»",
       "url": "https://udar.party",
@@ -68,49 +155,21 @@
       "category": "politics"
     },
     {
-      "n": 3,
-      "id": "apicapsules",
-      "name": "APICAPSULES",
-      "url": "",
-      "urlLabel": "",
-      "summary": "Стартап от идеи до оформленной продуктовой концепции",
+      "n": 9,
+      "id": "ukrainian-radio",
+      "name": "Українське радіо",
+      "url": "https://ukr.radio",
+      "urlLabel": "ukr.radio",
+      "summary": "Личные бренды радиоведущих, YouTube-проекты и digital-присутствие",
       "tags": [
-        "Startup",
-        "Product Development",
-        "Business Development"
+        "Personal Branding",
+        "Digital",
+        "YouTube"
       ],
-      "category": "tbd"
+      "category": "politics"
     },
     {
-      "n": 4,
-      "id": "medical-protective-equipment",
-      "name": "MEDICAL PROTECTIVE EQUIPMENT",
-      "url": "",
-      "urlLabel": "",
-      "summary": "Производство медицинских средств защиты, работа с крупными государственными и корпоративными заказчиками",
-      "tags": [
-        "Production",
-        "B2B",
-        "Tender Support"
-      ],
-      "category": "b2b"
-    },
-    {
-      "n": 5,
-      "id": "maharadj",
-      "name": "MAHARADJ",
-      "url": "https://maharadj-yoga.club",
-      "urlLabel": "maharadj-yoga.club",
-      "summary": "Комплексный wellness и lifestyle проект с экосистемой услуг",
-      "tags": [
-        "Wellness",
-        "Operations",
-        "Digital"
-      ],
-      "category": "horeca"
-    },
-    {
-      "n": 6,
+      "n": 10,
       "id": "van-dog-agency",
       "name": "VAN DOG AGENCY",
       "url": "https://vandog.agency",
@@ -121,10 +180,25 @@
         "Creative",
         "Production"
       ],
-      "category": "media"
+      "category": "politics"
     },
     {
-      "n": 7,
+      "n": 11,
+      "id": "intertop",
+      "name": "INTERTOP / SPEX / Єврооптика",
+      "url": "https://intertop.ua",
+      "urlLabel": "intertop.ua",
+      "summary": "Реклама и маркетинг для крупных fashion, eyewear и retail брендов",
+      "tags": [
+        "Fashion",
+        "Retail",
+        "Creative"
+      ],
+      "category": "retail",
+      "featured": true
+    },
+    {
+      "n": 12,
       "id": "sii-concept",
       "name": "SII.CONCEPT / MILAN",
       "url": "https://instagram.com/sii.concept",
@@ -138,7 +212,7 @@
       "category": "retail"
     },
     {
-      "n": 8,
+      "n": 13,
       "id": "ukrainian-fashion-week",
       "name": "UKRAINIAN FASHION WEEK",
       "url": "https://fashionweek.ua",
@@ -149,91 +223,22 @@
         "Production",
         "Fashion"
       ],
-      "category": "media",
+      "category": "retail",
       "featured": true
     },
     {
-      "n": 9,
-      "id": "education",
-      "name": "Образовательные проекты",
+      "n": 14,
+      "id": "good-market",
+      "name": "Good Market",
       "url": "",
       "urlLabel": "",
-      "summary": "Продюсирование образовательных продуктов совместно с блогерами",
+      "summary": "Маркетинг и реклама сети супермаркетов при АЗК",
       "tags": [
-        "Production",
-        "Digital",
-        "Operations"
-      ],
-      "category": "experts"
-    },
-    {
-      "n": 10,
-      "id": "ecommerce",
-      "name": "E-commerce проекты",
-      "url": "",
-      "urlLabel": "",
-      "summary": "Множество e-commerce проектов в разных товарных категориях",
-      "tags": [
-        "E-commerce",
-        "Digital",
-        "Marketing"
+        "Retail Marketing",
+        "Advertising",
+        "Brand Communications"
       ],
       "category": "retail"
-    },
-    {
-      "n": 11,
-      "id": "tpk",
-      "name": "ТПК",
-      "url": "https://tpk.ua",
-      "urlLabel": "tpk.ua",
-      "summary": "Производитель сэндвич-панелей, профнастила, фасадных кассет и панелей",
-      "tags": [
-        "B2B",
-        "Marketing",
-        "Digital"
-      ],
-      "category": "b2b"
-    },
-    {
-      "n": 12,
-      "id": "art-mango-production",
-      "name": "ART MANGO PRODUCTION",
-      "url": "https://ilpgroup.uk",
-      "urlLabel": "ilpgroup.uk",
-      "summary": "Международная выставка в Каннах об элитной недвижимости и иммиграции",
-      "tags": [
-        "Events",
-        "Production",
-        "Consulting"
-      ],
-      "category": "media"
-    },
-    {
-      "n": 13,
-      "id": "spa-maharadj",
-      "name": "SPA MAHARADJ",
-      "url": "https://maharadj-yoga.club/spa",
-      "urlLabel": "maharadj-yoga.club/spa",
-      "summary": "SPA-направление внутри крупного wellness-бизнеса",
-      "tags": [
-        "Wellness",
-        "Marketing"
-      ],
-      "category": "horeca"
-    },
-    {
-      "n": 14,
-      "id": "toscana-wine",
-      "name": "Toscana Wine Shop & Wine Bar",
-      "url": "",
-      "urlLabel": "",
-      "summary": "Маркетинг проекта из двух винных баров и интернет-магазина вина в Киеве",
-      "tags": [
-        "E-commerce",
-        "Marketing",
-        "HoReCa"
-      ],
-      "category": "horeca"
     },
     {
       "n": 15,
@@ -252,49 +257,89 @@
     },
     {
       "n": 16,
-      "id": "good-market",
-      "name": "Good Market",
+      "id": "ecommerce",
+      "name": "E-commerce проекты",
       "url": "",
       "urlLabel": "",
-      "summary": "Маркетинг и реклама сети супермаркетов при АЗК",
+      "summary": "Множество e-commerce проектов в разных товарных категориях",
       "tags": [
-        "Retail Marketing",
-        "Advertising",
-        "Brand Communications"
+        "E-commerce",
+        "Digital",
+        "Marketing"
       ],
       "category": "retail"
     },
     {
       "n": 17,
-      "id": "intertop",
-      "name": "INTERTOP / SPEX / Єврооптика",
-      "url": "https://intertop.ua",
-      "urlLabel": "intertop.ua",
-      "summary": "Реклама и маркетинг для крупных fashion, eyewear и retail брендов",
+      "id": "maharadj",
+      "name": "MAHARADJ",
+      "url": "https://maharadj-yoga.club",
+      "urlLabel": "maharadj-yoga.club",
+      "summary": "Комплексный wellness и lifestyle проект с экосистемой услуг",
       "tags": [
-        "Fashion",
-        "Retail",
-        "Creative"
+        "Wellness",
+        "Operations",
+        "Digital"
       ],
-      "category": "retail",
-      "featured": true
+      "category": "horeca"
     },
     {
       "n": 18,
-      "id": "ukrainian-radio",
-      "name": "Українське радіо",
-      "url": "https://ukr.radio",
-      "urlLabel": "ukr.radio",
-      "summary": "Личные бренды радиоведущих, YouTube-проекты и digital-присутствие",
+      "id": "spa-maharadj",
+      "name": "SPA MAHARADJ",
+      "url": "https://maharadj-yoga.club/spa",
+      "urlLabel": "maharadj-yoga.club/spa",
+      "summary": "SPA-направление внутри крупного wellness-бизнеса",
       "tags": [
-        "Personal Branding",
-        "Digital",
-        "YouTube"
+        "Wellness",
+        "Marketing"
       ],
-      "category": "media"
+      "category": "horeca"
     },
     {
       "n": 19,
+      "id": "toscana-wine",
+      "name": "Toscana Wine Shop & Wine Bar",
+      "url": "",
+      "urlLabel": "",
+      "summary": "Маркетинг проекта из двух винных баров и интернет-магазина вина в Киеве",
+      "tags": [
+        "E-commerce",
+        "Marketing",
+        "HoReCa"
+      ],
+      "category": "horeca"
+    },
+    {
+      "n": 20,
+      "id": "gaia",
+      "name": "GAIA",
+      "url": "https://instagram.com/gaia.od",
+      "urlLabel": "instagram.com/gaia.od",
+      "summary": "Ресторан в Одессе: бренд, маркетинг, digital и коммуникация",
+      "tags": [
+        "HoReCa",
+        "Marketing",
+        "Brand Development"
+      ],
+      "category": "horeca"
+    },
+    {
+      "n": 21,
+      "id": "barbershops-kyiv",
+      "name": "Сеть барбершопов / Киев",
+      "url": "",
+      "urlLabel": "",
+      "summary": "Долгосрочное операционное управление сетью из четырёх барбершопов",
+      "tags": [
+        "Operations",
+        "Business Development",
+        "Expansion"
+      ],
+      "category": "horeca"
+    },
+    {
+      "n": 22,
       "id": "fitness-room-menden",
       "name": "FITNESS ROOM MENDEN",
       "url": "https://instagram.com/fitnessroommenden",
@@ -308,21 +353,7 @@
       "category": "horeca"
     },
     {
-      "n": 20,
-      "id": "cybermove-games",
-      "name": "CYBERMOVE GAMES",
-      "url": "https://cybermovegames.com",
-      "urlLabel": "cybermovegames.com",
-      "summary": "VR-проект с платформой физического перемещения: движение телом вместо контроллеров",
-      "tags": [
-        "VR",
-        "Immersive Tech",
-        "Brand Launch"
-      ],
-      "category": "tech"
-    },
-    {
-      "n": 21,
+      "n": 23,
       "id": "hydrosta-kazakhstan",
       "name": "HYDROSTA KAZAKHSTAN",
       "url": "https://hydrosta.asia",
@@ -337,7 +368,7 @@
       "featured": true
     },
     {
-      "n": 22,
+      "n": 24,
       "id": "hsta-group",
       "name": "HSTA GROUP",
       "url": "https://hstagroup.asia",
@@ -351,7 +382,7 @@
       "category": "b2b"
     },
     {
-      "n": 23,
+      "n": 25,
       "id": "hydrosta-service",
       "name": "HYDROSTA SERVICE KAZAKHSTAN",
       "url": "https://hydrostaservice.asia",
@@ -365,7 +396,7 @@
       "category": "b2b"
     },
     {
-      "n": 24,
+      "n": 26,
       "id": "building-time",
       "name": "BUILDING TIME",
       "url": "https://buildingtime.asia",
@@ -379,133 +410,21 @@
       "category": "b2b"
     },
     {
-      "n": 25,
-      "id": "oleg-baryshevsky",
-      "name": "OLEG BARYSHEVSKY",
-      "url": "https://instagram.com/oleg.baryshevsky",
-      "urlLabel": "instagram.com/oleg.baryshevsky",
-      "summary": "Три образовательных курса и чат-боты: консалтинг, запуски, техническое продюсирование",
-      "tags": [
-        "Consulting",
-        "Course Launch",
-        "Chatbots"
-      ],
-      "category": "experts"
-    },
-    {
-      "n": 26,
-      "id": "tsepukh",
-      "name": "TSEPUKH_P",
-      "url": "https://instagram.com/tsepukh_p",
-      "urlLabel": "instagram.com/tsepukh_p",
-      "summary": "Три курса и боты: консалтинг, запуски, техническое продюсирование",
-      "tags": [
-        "Consulting",
-        "Course Launch",
-        "Production"
-      ],
-      "category": "experts"
-    },
-    {
       "n": 27,
-      "id": "kehhsha",
-      "name": "KEHHSHA",
-      "url": "https://instagram.com/kehhsha",
-      "urlLabel": "instagram.com/kehhsha",
-      "summary": "Полное продюсирование курса, консультации и продакшн",
+      "id": "tpk",
+      "name": "ТПК",
+      "url": "https://tpk.ua",
+      "urlLabel": "tpk.ua",
+      "summary": "Производитель сэндвич-панелей, профнастила, фасадных кассет и панелей",
       "tags": [
-        "Production",
-        "Course Launch",
-        "Consulting"
-      ],
-      "category": "experts"
-    },
-    {
-      "n": 28,
-      "id": "olga-yankovskaya",
-      "name": "OLGA YANKOVSKAYA",
-      "url": "https://instagram.com/yankovskaya__olga",
-      "urlLabel": "instagram.com/yankovskaya__olga",
-      "summary": "Техническое продюсирование и консалтинг по запуску эксперта",
-      "tags": [
-        "Expert Launch",
-        "Production",
-        "Consulting"
-      ],
-      "category": "experts"
-    },
-    {
-      "n": 29,
-      "id": "miss-sverona",
-      "name": "MISS SVERONA",
-      "url": "https://instagram.com/misssverona",
-      "urlLabel": "instagram.com/misssverona",
-      "summary": "Полное продюсирование экспертного проекта: стратегия, позиционирование, запуск",
-      "tags": [
-        "Production",
-        "Consulting",
-        "Strategy"
-      ],
-      "category": "experts"
-    },
-    {
-      "n": 30,
-      "id": "meshtiish",
-      "name": "MESHTIISH",
-      "url": "https://instagram.com/meshtiish",
-      "urlLabel": "instagram.com/meshtiish",
-      "summary": "Два курса от идеи до запуска, техническое продюсирование",
-      "tags": [
-        "Consulting",
-        "Course Launch",
-        "Production"
-      ],
-      "category": "experts"
-    },
-    {
-      "n": 31,
-      "id": "gaia",
-      "name": "GAIA",
-      "url": "https://instagram.com/gaia.od",
-      "urlLabel": "instagram.com/gaia.od",
-      "summary": "Ресторан в Одессе: бренд, маркетинг, digital и коммуникация",
-      "tags": [
-        "HoReCa",
+        "B2B",
         "Marketing",
-        "Brand Development"
-      ],
-      "category": "horeca"
-    },
-    {
-      "n": 32,
-      "id": "barbershops-kyiv",
-      "name": "Сеть барбершопов / Киев",
-      "url": "",
-      "urlLabel": "",
-      "summary": "Долгосрочное операционное управление сетью из четырёх барбершопов",
-      "tags": [
-        "Operations",
-        "Business Development",
-        "Expansion"
-      ],
-      "category": "horeca"
-    },
-    {
-      "n": 33,
-      "id": "morris-group",
-      "name": "MORIS (Moris Group)",
-      "url": "",
-      "urlLabel": "",
-      "summary": "Маркетинг и PR юридической компании",
-      "tags": [
-        "PR",
-        "Marketing",
-        "B2B Communications"
+        "Digital"
       ],
       "category": "b2b"
     },
     {
-      "n": 34,
+      "n": 28,
       "id": "furniture-factory",
       "name": "Фабрика мебели",
       "url": "",
@@ -517,6 +436,90 @@
         "Advertising"
       ],
       "category": "b2b"
+    },
+    {
+      "n": 29,
+      "id": "medical-protective-equipment",
+      "name": "MEDICAL PROTECTIVE EQUIPMENT",
+      "url": "",
+      "urlLabel": "",
+      "summary": "Производство медицинских средств защиты, работа с крупными государственными и корпоративными заказчиками",
+      "tags": [
+        "Production",
+        "B2B",
+        "Tender Support"
+      ],
+      "category": "b2b"
+    },
+    {
+      "n": 30,
+      "id": "art-mango-production",
+      "name": "ART MANGO PRODUCTION",
+      "url": "https://ilpgroup.uk",
+      "urlLabel": "ilpgroup.uk",
+      "summary": "Международная выставка в Каннах об элитной недвижимости и иммиграции",
+      "tags": [
+        "Events",
+        "Production",
+        "Consulting"
+      ],
+      "category": "pro"
+    },
+    {
+      "n": 31,
+      "id": "morris-group",
+      "name": "MORIS (Moris Group)",
+      "url": "",
+      "urlLabel": "",
+      "summary": "Маркетинг и PR юридической компании",
+      "tags": [
+        "PR",
+        "Marketing",
+        "B2B Communications"
+      ],
+      "category": "pro"
+    },
+    {
+      "n": 32,
+      "id": "education",
+      "name": "Образовательные проекты",
+      "url": "",
+      "urlLabel": "",
+      "summary": "Продюсирование образовательных продуктов совместно с блогерами",
+      "tags": [
+        "Production",
+        "Digital",
+        "Operations"
+      ],
+      "category": "pro"
+    },
+    {
+      "n": 33,
+      "id": "cybermove-games",
+      "name": "CYBERMOVE GAMES",
+      "url": "https://cybermovegames.com",
+      "urlLabel": "cybermovegames.com",
+      "summary": "VR-проект с платформой физического перемещения: движение телом вместо контроллеров",
+      "tags": [
+        "VR",
+        "Immersive Tech",
+        "Brand Launch"
+      ],
+      "category": "tech"
+    },
+    {
+      "n": 34,
+      "id": "apicapsules",
+      "name": "APICAPSULES",
+      "url": "",
+      "urlLabel": "",
+      "summary": "Стартап от идеи до оформленной продуктовой концепции",
+      "tags": [
+        "Startup",
+        "Product Development",
+        "Business Development"
+      ],
+      "category": "tech"
     }
   ],
   "resultPlaceholder": "[PLACEHOLDER: цифры результата]"

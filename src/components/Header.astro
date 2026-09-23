@@ -99,6 +99,14 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
   .header.is-scrolled::after {
     opacity: 1;
   }
+  /* BRIEF-5 §3: под шапкой внутренних страниц теперь проезжают яркие кадры — при прокрутке
+     она получает полупрозрачную подложку, чтобы меню оставалось читаемым.
+     На главной сцена остаётся чистой: там полосу шапки держит свободной сам кадр (BRIEF-4 §1.2). */
+  :global(body:not(.is-home)) .header.is-scrolled {
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
   .header.is-hidden {
     transform: translateY(-100%);
   }

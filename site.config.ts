@@ -3,7 +3,7 @@
  * Параметры формы (почта, Telegram, вебхук) — в public/api/config.php (см. config.sample.php).
  */
 
-export const SITE_URL = 'https://cybermove.example'; // боевой домен появится позже
+export const SITE_URL = 'https://cybermove.asia';
 export const SITE_NAME = 'CYBERMOVE';
 export const SITE_LEGAL_NAME = 'Cyber Move Consulting';
 

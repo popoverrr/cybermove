@@ -58,6 +58,12 @@
   "placeholder": "Уточняется",
   "filterAll": "Все",
   "casesCount": "проектов",
+  "caseUnit": {
+    "one": "кейс",
+    "few": "кейса",
+    "many": "кейсов"
+  },
+  "sections": "Разделы",
   "footer": {
     "rights": "Все права защищены.",
     "privacy": "Политика конфиденциальности",

@@ -1,0 +1,57 @@
+---
+/**
+ * Плитка кейса (BRIEF-5 §3): кадр с логотипом и именем, под ним одна строка дисциплин.
+ * Вся плитка — ссылка на страницу кейса; ссылка на сайт клиента живёт на самой странице.
+ */
+import CaseFrame from './CaseFrame.astro';
+import { localePath, type CaseItem, type LangCode } from '../lib/i18n';
+
+export interface Props {
+  lang: LangCode;
+  item: CaseItem;
+  sizes?: string;
+  /** первые плитки страницы грузятся сразу, остальные лениво */
+  eager?: boolean;
+  /** уменьшенный вариант для связанных кейсов в drawer и на странице направления */
+  compact?: boolean;
+  /** ставить id кейса якорем (только на /cases/ — иначе на странице будут дубли id) */
+  anchor?: boolean;
+}
+const {
+  lang,
+  item,
+  sizes = '(max-width: 720px) 45vw, (max-width: 1100px) 30vw, 23vw',
+  eager = false,
+  compact = false,
+  anchor = false,
+} = Astro.props;
+---
+
+<a class:list={['tile', { 'tile--compact': compact }]} href={localePath(lang, `/cases/${item.id}/`)} id={anchor ? item.id : undefined}>
+  <CaseFrame id={`cases-${item.id}`} name={item.name} ratio="4:3" sizes={sizes} eager={eager} />
+  <span class="t-micro tile__tags">{item.tags.join(' · ')}</span>
+</a>
+
+<style>
+  .tile {
+    display: block;
+    color: inherit;
+    scroll-margin-top: calc(var(--header-h) + 5rem);
+  }
+  .tile__tags {
+    display: block;
+    margin-top: 9px;
+    color: var(--fg-3);
+    /* дисциплины — одна строка, длинный хвост обрезается */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tile--compact {
+    /* мелкая плитка: имя меньше, иначе оно занимает весь кадр */
+    --frame-name-fs: clamp(11px, 0.85vw, 13px);
+  }
+  .tile--compact .tile__tags {
+    margin-top: 7px;
+  }
+</style>

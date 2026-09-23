@@ -13,7 +13,8 @@
     "logo": "node scripts/build-logo.mjs",
     "shots": "node scripts/shots.mjs",
     "posters": "node scripts/posters.mjs",
-    "audit": "node scripts/audit-dist.mjs"
+    "audit": "node scripts/audit-dist.mjs",
+    "deploy": "npm run build && node deploy/deploy-ftp.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",
@@ -30,6 +31,7 @@
     "@tweakpane/core": "^2.0.5",
     "@types/three": "^0.186.0",
     "astro": "^7.3.3",
+    "basic-ftp": "^6.2.1",
     "cross-env": "^10.1.0",
     "fontkit": "^2.0.4",
     "lighthouse": "^13.5.0",

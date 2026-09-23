@@ -1,0 +1,43 @@
+From fc3586073adeeebcb28838214cd770ac3ad3cffa Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 23 Sep 2026 12:03:39 +0500
+Subject: [PATCH] =?UTF-8?q?=D0=91=D0=BE=D0=B5=D0=B2=D0=BE=D0=B9=20=D0=B4?=
+ =?UTF-8?q?=D0=BE=D0=BC=D0=B5=D0=BD=20cybermove.asia:=20SITE=5FURL=20?=
+ =?UTF-8?q?=D0=B8=20sitemap=20=D0=B2=20robots.txt?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011ebfFiiEvaLuKQy98PYuyi
+---
+ public/robots.txt | 2 +-
+ site.config.ts    | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/public/robots.txt b/public/robots.txt
+index dd657f8..21f4d13 100644
+--- a/public/robots.txt
++++ b/public/robots.txt
+@@ -3,4 +3,4 @@ Allow: /
+ Disallow: /api/
+ Disallow: /dev/
+ 
+-Sitemap: https://cybermove.example/sitemap-index.xml
++Sitemap: https://cybermove.asia/sitemap-index.xml
+diff --git a/site.config.ts b/site.config.ts
+index 6ecc4f3..96f77b8 100644
+--- a/site.config.ts
++++ b/site.config.ts
+@@ -3,7 +3,7 @@
+  * Параметры формы (почта, Telegram, вебхук) — в public/api/config.php (см. config.sample.php).
+  */
+ 
+-export const SITE_URL = 'https://cybermove.example'; // боевой домен появится позже
++export const SITE_URL = 'https://cybermove.asia';
+ export const SITE_NAME = 'CYBERMOVE';
+ export const SITE_LEGAL_NAME = 'Cyber Move Consulting';
+ 
+-- 
+2.43.0
+

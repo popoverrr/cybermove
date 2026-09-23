@@ -4,6 +4,7 @@ import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
 import CtaBlock from '../../../components/CtaBlock.astro';
 import Button from '../../../components/Button.astro';
+import CaseTile from '../../../components/CaseTile.astro';
 import { getContent, localePath, findCase, type LangCode } from '../../../lib/i18n';
 import { LANGS } from '../../../../site.config';
 import { breadcrumbLd, serviceLd } from '../../../lib/seo';
@@ -78,17 +79,12 @@ const jsonLd = [
             {s.cases.length > 0 && (
               <div class="svcp__block">
                 <p class="t-micro">{c.ui.relatedCases}</p>
-                <ul class="svcp__cases">
+                <div class="svcp__cases">
                   {s.cases.map((id) => {
                     const k = findCase(c, id);
-                    return k ? (
-                      <li>
-                        <a href={localePath(lang, `/cases/${k.id}/`)}>{k.name}</a>
-                        <span class="t-small">{k.summary}</span>
-                      </li>
-                    ) : null;
+                    return k ? <CaseTile lang={lang} item={k} compact sizes="(max-width: 720px) 45vw, 220px" /> : null;
                   })}
-                </ul>
+                </div>
               </div>
             )}
             <div class="svcp__cta">
@@ -215,23 +211,17 @@ const jsonLd = [
     letter-spacing: -0.01em;
     max-width: 48ch;
   }
+  /* BRIEF-5 §4: связанные кейсы — плитки 4:3, три в ряд */
   .svcp__cases {
     display: grid;
-    gap: var(--space-3);
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4) var(--space-3);
+    max-width: 760px;
   }
-  .svcp__cases li {
-    display: grid;
-    gap: 0.2rem;
-  }
-  .svcp__cases a {
-    font-weight: 540;
-    text-decoration: underline;
-    text-decoration-color: var(--hair-strong);
-    text-underline-offset: 3px;
-  }
-  .svcp__cases a:hover {
-    text-decoration-color: var(--fg);
+  @media (max-width: 720px) {
+    .svcp__cases {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
   .others {
     border-top: 1px solid var(--hair);

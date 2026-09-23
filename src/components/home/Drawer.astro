@@ -4,6 +4,7 @@
  * Открывается кликом по ServiceRow; закрытие — кнопка, Esc, клик по подложке. aria-modal, фокус-ловушка в home.ts.
  */
 import Button from '../Button.astro';
+import CaseTile from '../CaseTile.astro';
 import { getContent, localePath, findCase, type LangCode } from '../../lib/i18n';
 
 export interface Props {
@@ -49,17 +50,12 @@ const c = getContent(lang);
           {s.cases && s.cases.length > 0 && (
             <div class="drawer__block">
               <p class="t-micro">{c.ui.relatedCases}</p>
-              <ul class="drawer__cases">
+              <div class="drawer__cases">
                 {s.cases.map((id) => {
                   const k = findCase(c, id);
-                  return k ? (
-                    <li>
-                      <a href={localePath(lang, `/cases/${k.id}/`)}>{k.name}</a>
-                      <span class="t-small">{k.summary}</span>
-                    </li>
-                  ) : null;
+                  return k ? <CaseTile lang={lang} item={k} compact sizes="(max-width: 520px) 30vw, 150px" /> : null;
                 })}
-              </ul>
+              </div>
             </div>
           )}
           <div class="drawer__actions">
@@ -193,22 +189,16 @@ const c = getContent(lang);
     line-height: 1.35;
     letter-spacing: -0.01em;
   }
+  /* BRIEF-5 §4: связанные кейсы — те же плитки 4:3, три в ряд в панели */
   .drawer__cases {
     display: grid;
-    gap: var(--space-2);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3) 10px;
   }
-  .drawer__cases li {
-    display: grid;
-    gap: 0.15rem;
-  }
-  .drawer__cases a {
-    font-weight: 540;
-    text-decoration: underline;
-    text-decoration-color: var(--hair-strong);
-    text-underline-offset: 3px;
-  }
-  .drawer__cases a:hover {
-    text-decoration-color: var(--fg);
+  @media (max-width: 420px) {
+    .drawer__cases {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
   .drawer__actions {
     display: flex;

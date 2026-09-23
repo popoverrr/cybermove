@@ -1,10 +1,13 @@
 ---
-/** /cases/ — все 34 проекта, фильтр по категориям (все карточки в DOM, JS показывает/скрывает). */
+/**
+ * /cases/ — 34 проекта в семи разделах (BRIEF-5 §2). Фильтра нет: разделы явные, с заголовками,
+ * сверху липкая навигация по якорям. Порядок разделов и кейсов внутри — из `cases.json`.
+ */
 import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
-import ImageSlot from '../../../components/ImageSlot.astro';
+import CaseTile from '../../../components/CaseTile.astro';
 import CtaBlock from '../../../components/CtaBlock.astro';
-import { getContent, localePath, langStaticPaths } from '../../../lib/i18n';
+import { getContent, langStaticPaths, plural } from '../../../lib/i18n';
 import { breadcrumbLd } from '../../../lib/seo';
 
 export function getStaticPaths() {
@@ -13,191 +16,215 @@ export function getStaticPaths() {
 const { lang } = Astro.props;
 const c = getContent(lang);
 const k = c.cases;
-const counts = Object.fromEntries(k.categories.map((cat) => [cat.id, k.items.filter((i) => i.category === cat.id).length]));
+/** разделы в порядке cases.json; внутри раздела порядок кейсов тоже из cases.json */
+const sections = k.categories
+  .map((cat) => ({ ...cat, items: k.items.filter((i) => i.category === cat.id) }))
+  .filter((cat) => cat.items.length > 0);
 const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: k.title, path: '/cases/' }])];
+/** первые восемь кадров страницы грузятся сразу — остальные лениво (BRIEF-5 §3) */
+let shown = 0;
 ---
 
 <Base lang={lang} path="/cases/" title={c.ui.meta.cases.title} description={c.ui.meta.cases.description} theme="ivory" jsonLd={jsonLd} ogImage="/posters/og-cases.jpg">
   <PageHero theme="ivory" label={`${k.title} · ${k.items.length}`} title={k.h1} lead={k.lead} size="md" />
 
-  <section class="cases">
-    <div class="container cases__inner">
-      <div class="filter" role="group" aria-label={k.title} data-filter>
-        <button class="filter__btn is-active" type="button" data-filter-cat="all" aria-pressed="true">
-          <span>{c.ui.filterAll}</span><span class="t-micro">{k.items.length}</span>
-        </button>
-        {k.categories.filter((cat) => counts[cat.id] > 0).map((cat) => (
-          <button class="filter__btn" type="button" data-filter-cat={cat.id} aria-pressed="false">
-            <span>{cat.label}</span><span class="t-micro">{counts[cat.id]}</span>
-          </button>
-        ))}
-      </div>
-      <p class="t-micro cases__note">{k.placeholderNote}</p>
-
-      <ul class="grid-cases" data-cases-grid>
-        {k.items.map((it) => {
-          const cat = k.categories.find((x) => x.id === it.category);
-          return (
-            <li class="case" id={it.id} data-category={it.category}>
-              <article class="case__inner">
-                {/* плитка и название ведут на страницу кейса, ссылка на сайт клиента — отдельной строкой */}
-                <a class="case__link" href={localePath(lang, `/cases/${it.id}/`)}>
-                  <ImageSlot id={`cases-${it.id}`} ratio="4:3" sizes="(max-width: 899px) 100vw, (max-width: 1279px) 50vw, 33vw" class="case__photo" />
-                  <p class="t-micro case__meta">
-                    <span>{String(it.n).padStart(2, '0')}</span>
-                    <span>{cat?.label}</span>
-                  </p>
-                  <h2 class="t-h4 case__name">{it.name}</h2>
-                  <p class="t-small case__sum">{it.summary}</p>
-                </a>
-                <p class="t-micro case__tags">{it.tags.join(' · ')}</p>
-                {it.url && (
-                  <p class="t-micro case__url">
-                    <a href={it.url} target="_blank" rel="noopener nofollow">{it.urlLabel || it.url} <span class="case__ext" aria-hidden="true">↗</span></a>
-                  </p>
-                )}
-              </article>
-            </li>
-          );
-        })}
-      </ul>
-      <p class="t-micro cases__empty" data-cases-empty hidden>—</p>
+  <nav class="catnav" aria-label={c.ui.sections} data-catnav>
+    <div class="container catnav__inner">
+      {sections.map((cat) => (
+        <a class="catnav__chip" href={`#${cat.id}`} data-catnav-link={cat.id}>
+          <span class="catnav__name">{cat.label}</span>
+          <span class="t-micro catnav__n">{cat.items.length}</span>
+        </a>
+      ))}
     </div>
-  </section>
+  </nav>
+
+  {sections.map((cat, i) => (
+    <section class:list={['cat', { 'cat--first': i === 0, 'cat--last': i === sections.length - 1 }]} id={cat.id} data-cat={cat.id}>
+      <div class="container cat__inner">
+        <header class="cat__head">
+          <p class="t-micro cat__idx">{String(i + 1).padStart(2, '0')} · {cat.items.length} {plural(lang, cat.items.length, c.ui.caseUnit)}</p>
+          <h2 class="t-h2 cat__title">{cat.label}</h2>
+          <p class="t-small cat__lead">{cat.lead}</p>
+        </header>
+        <div class="grid-tiles">
+          {cat.items.map((item) => <CaseTile lang={lang} item={item} eager={shown++ < 8} anchor />)}
+        </div>
+      </div>
+    </section>
+  ))}
 
   <CtaBlock lang={lang} />
 
   <script>
-    const btns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-filter-cat]'));
-    const items = Array.from(document.querySelectorAll<HTMLElement>('[data-cases-grid] > li'));
-    const apply = (cat: string) => {
-      btns.forEach((b) => {
-        const on = b.dataset.filterCat === cat;
-        b.classList.toggle('is-active', on);
-        b.setAttribute('aria-pressed', String(on));
-      });
-      items.forEach((li) => {
-        const show = cat === 'all' || li.dataset.category === cat;
-        li.hidden = !show;
-      });
-      if (cat === 'all') history.replaceState(null, '', location.pathname);
-      else history.replaceState(null, '', `${location.pathname}?category=${cat}`);
-    };
-    btns.forEach((b) => b.addEventListener('click', () => apply(b.dataset.filterCat!)));
-    const initial = new URLSearchParams(location.search).get('category');
-    if (initial && btns.some((b) => b.dataset.filterCat === initial)) apply(initial);
-    // якорь #id кейса — подсветка карточки
-    if (location.hash) {
-      const el = document.getElementById(location.hash.slice(1));
-      el?.classList.add('is-target');
+    // Липкая навигация: плавный переход к разделу и подсветка активного чипа (BRIEF-5 §2).
+    const nav = document.querySelector<HTMLElement>('[data-catnav]');
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-catnav-link]'));
+    const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-cat]'));
+    if (nav && links.length && sections.length) {
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const headerH = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 72;
+      const offset = () => headerH() + nav.offsetHeight;
+
+      let current = '';
+      const setActive = (id: string) => {
+        if (id === current) return;
+        current = id;
+        for (const a of links) {
+          const on = a.dataset.catnavLink === id;
+          a.classList.toggle('is-active', on);
+          if (on) {
+            a.setAttribute('aria-current', 'true');
+            // держим активный чип в видимой части ленты, не двигая страницу
+            const box = a.getBoundingClientRect();
+            const wrap = nav.firstElementChild as HTMLElement;
+            const wrapBox = wrap.getBoundingClientRect();
+            if (box.left < wrapBox.left + 8) wrap.scrollBy({ left: box.left - wrapBox.left - 16, behavior: reduced ? 'auto' : 'smooth' });
+            else if (box.right > wrapBox.right - 8) wrap.scrollBy({ left: box.right - wrapBox.right + 16, behavior: reduced ? 'auto' : 'smooth' });
+          } else {
+            a.removeAttribute('aria-current');
+          }
+        }
+      };
+
+      for (const a of links) {
+        a.addEventListener('click', (e) => {
+          const id = a.dataset.catnavLink!;
+          const el = document.getElementById(id);
+          if (!el) return;
+          e.preventDefault();
+          const y = el.getBoundingClientRect().top + window.scrollY - offset() + 1;
+          window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
+          history.replaceState(null, '', `#${id}`);
+          setActive(id);
+        });
+      }
+
+      const visible = new Set<string>();
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            const id = (e.target as HTMLElement).dataset.cat!;
+            if (e.isIntersecting) visible.add(id);
+            else visible.delete(id);
+          }
+          // активен первый по порядку из видимых; если не видно ни одного — оставляем прежний
+          const first = sections.find((s) => visible.has(s.dataset.cat!));
+          if (first) setActive(first.dataset.cat!);
+        },
+        { rootMargin: `-${Math.round(offset())}px 0px -55% 0px`, threshold: 0 },
+      );
+      sections.forEach((s) => io.observe(s));
+
+      const hash = location.hash.slice(1);
+      if (hash && links.some((a) => a.dataset.catnavLink === hash)) setActive(hash);
+      else setActive(sections[0].dataset.cat!);
     }
   </script>
 </Base>
 
 <style>
-  .cases__inner {
-    padding-top: var(--space-8);
-    padding-bottom: var(--section-pad);
-    display: grid;
-    gap: var(--space-6);
-    max-width: none;
-  }
-  .filter {
-    display: flex;
-    flex-wrap: wrap;
-    /* BRIEF-4 §1.7: на телефоне чипы переносятся в три строки — между строками 6 px воздуха */
-    gap: 6px 0.5rem;
-  }
-  .filter__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.55rem 0.9rem;
-    border: 1px solid var(--hair-strong);
-    font-size: 0.875rem;
-    color: var(--fg-2);
-    transition: color var(--dur-fast), border-color var(--dur-fast), background-color var(--dur-fast);
-  }
-  .filter__btn .t-micro {
-    color: var(--fg-3);
-  }
-  .filter__btn:hover {
-    color: var(--fg);
-    border-color: var(--fg);
-  }
-  .filter__btn.is-active {
-    background: var(--btn-fill);
-    color: var(--btn-fill-fg);
-    border-color: var(--btn-fill);
-  }
-  .filter__btn.is-active .t-micro {
-    color: inherit;
-    opacity: 0.7;
-  }
-  .cases__note {
-    color: var(--fg-3);
-  }
-  .grid-cases {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  /* Навигация по разделам: липкая под шапкой, на телефоне — лента с горизонтальной прокруткой */
+  .catnav {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 5;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid var(--hair);
-    border-left: 1px solid var(--hair);
-  }
-  .case {
-    border-right: 1px solid var(--hair);
     border-bottom: 1px solid var(--hair);
-    scroll-margin-top: calc(var(--header-h) + 1rem);
   }
-  .case[hidden] {
+  .catnav__inner {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    max-width: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    overscroll-behavior-x: contain;
+    /* обрезанный чип у края читается как продолжение ленты, а не как ошибка */
+    mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 40px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 40px), transparent 100%);
+  }
+  .catnav__inner::-webkit-scrollbar {
     display: none;
   }
-  .case__link {
-    display: grid;
-    gap: var(--space-3);
-    color: inherit;
+  .catnav__chip {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border: 1px solid var(--hair);
+    border-radius: 999px;
+    color: var(--fg);
+    font-size: 0.875rem;
+    transition: border-color var(--dur-fast), background-color var(--dur-fast);
   }
-  .case__link:hover .case__name,
-  .case__link:focus-visible .case__name {
-    color: var(--accent);
+  .catnav__n {
+    color: var(--fg-3);
   }
-  .case__inner {
-    display: grid;
-    gap: var(--space-3);
-    padding: var(--space-6);
-    min-height: 220px;
-    height: 100%;
-    align-content: start;
-    transition: background-color var(--dur-fast);
-  }
-  .case:hover .case__inner,
-  .case.is-target .case__inner {
+  .catnav__chip:hover,
+  .catnav__chip:focus-visible {
+    border-color: var(--fg);
     background: var(--paper);
   }
-  .case__inner :global(.case__photo) {
-    margin-bottom: var(--space-2);
+  .catnav__chip.is-active {
+    border-color: var(--fg);
   }
-  .case__meta {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-4);
-    color: var(--fg-3);
+
+  .cat {
+    scroll-margin-top: calc(var(--header-h) + 5rem);
   }
-  .case__url a:hover {
-    color: var(--accent);
+  .cat__inner {
+    max-width: none;
+    padding-top: 56px;
+    padding-bottom: 8px;
+    border-top: 1px solid var(--hair);
+    margin-top: 40px;
   }
-  .case__ext {
-    font-size: 0.8em;
-    color: var(--fg-3);
+  .cat--first .cat__inner {
+    border-top: 0;
+    margin-top: 8px;
   }
-  .case__sum {
-    color: var(--fg-2);
+  .cat--last .cat__inner {
+    padding-bottom: var(--section-pad);
   }
-  .case__tags {
-    margin-top: auto;
-    padding-top: var(--space-3);
-    color: var(--fg-3);
+  .cat__head {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 26px;
   }
-  .case__url {
-    color: var(--fg-3);
+  .cat__title {
+    max-width: 22ch;
+  }
+  .cat__lead {
+    max-width: 64ch;
+  }
+  .grid-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px 20px;
+  }
+  @media (max-width: 1100px) {
+    .grid-tiles {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 720px) {
+    .grid-tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 12px;
+    }
+    .cat__inner {
+      padding-top: 40px;
+      margin-top: 28px;
+    }
+    .cat__head {
+      margin-bottom: 20px;
+    }
   }
 </style>

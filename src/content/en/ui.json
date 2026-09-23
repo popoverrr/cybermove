@@ -58,6 +58,12 @@
   "placeholder": "To be confirmed",
   "filterAll": "All",
   "casesCount": "projects",
+  "caseUnit": {
+    "one": "case",
+    "few": "cases",
+    "many": "cases"
+  },
+  "sections": "Sections",
   "footer": {
     "rights": "All rights reserved.",
     "privacy": "Privacy policy",

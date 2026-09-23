@@ -1,0 +1,182 @@
+---
+/**
+ * Кадр кейса (BRIEF-5 §3): живое фото, градиент снизу, белый логотип бренда в углу и имя кейса.
+ * Один компонент на три места: плитка на `/cases/`, карточка S7 «Рост» и шапка страницы кейса.
+ * Кадр не перекрашивается и не тонируется — палитра сайта остаётся в бумаге вокруг него.
+ */
+import { Image } from 'astro:assets';
+import { getSlot, loadImage, widthsFor } from '../lib/media';
+
+export interface Props {
+  /** слот в media.json: `cases-<id>` для 4:3 и 16:9, `case-<ключ>` для 4:5 */
+  id: string;
+  /** имя кейса — текстом поверх кадра, поэтому переводится вместе с контентом */
+  name: string;
+  ratio?: '4:3' | '16:9' | '4:5';
+  /** какой файл брать: основной кадр или 16:9 для шапки */
+  use?: 'src' | 'hero';
+  sizes?: string;
+  widths?: number[];
+  /** ширина логотипа в долях кадра (0.3 — плитка, 0.18 — шапка страницы) */
+  logoWidth?: number;
+  /** имя рядом уже есть заголовком — на кадре его не печатаем */
+  hideName?: boolean;
+  /** приближение кадра при наведении и в центре экрана на тач (в шапке страницы не нужно) */
+  zoom?: boolean;
+  eager?: boolean;
+  class?: string;
+}
+const {
+  id,
+  name,
+  ratio = '4:3',
+  use = 'src',
+  sizes = '100vw',
+  widths = [480, 720, 960, 1440],
+  logoWidth = 0.3,
+  hideName = false,
+  zoom = true,
+  eager = false,
+  class: cls = '',
+} = Astro.props;
+
+const entry = getSlot(id);
+const image = await loadImage(use === 'hero' ? (entry?.hero ?? entry?.src) : entry?.src);
+const logo = await loadImage(entry?.logo);
+const alt = entry?.alt || name;
+const [rw, rh] = ratio.split(':').map(Number);
+---
+
+<figure
+  class:list={['frame', { 'frame--plain': hideName }, cls]}
+  style={`--ratio:${rw}/${rh};--logo-w:${Math.round(logoWidth * 1000) / 10}%`}
+  data-slot={id}
+  data-lift={zoom ? '' : undefined}
+>
+  {image && (
+    <Image
+      src={image}
+      alt={alt}
+      widths={widthsFor(image, widths)}
+      sizes={sizes}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : undefined}
+      decoding="async"
+      class="frame__img"
+    />
+  )}
+  {logo && (
+    <Image
+      src={logo}
+      alt=""
+      widths={widthsFor(logo, [220, 440])}
+      sizes="(max-width: 720px) 45vw, 22vw"
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+      class="frame__logo"
+    />
+  )}
+  {!hideName && <figcaption class="frame__name">{name}</figcaption>}
+</figure>
+
+<style>
+  .frame {
+    position: relative;
+    display: block;
+    margin: 0;
+    aspect-ratio: var(--ratio);
+    overflow: hidden;
+    background: var(--sand);
+    contain: paint;
+  }
+  .frame__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 1.001 — чтобы у края не просвечивал фон при субпиксельном масштабе */
+    transform: scale(1.001);
+    transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* Подложка под именем. Основной градиент (::after) — как в референсе; на самых светлых кадрах
+     (Toscana, Meshtiish, Building Time) его одного не хватает: худший пиксель под текстом давал 3.1:1
+     вместо 4.5:1, поэтому в полосе имени добавлена вторая, более плотная подложка (::before).
+     На тёмных кадрах она незаметна, в шапке страницы кейса (без имени) выключена. */
+  .frame::before {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 34%;
+    background: linear-gradient(180deg, rgba(27, 26, 24, 0) 0%, rgba(27, 26, 24, 0.5) 55%, rgba(27, 26, 24, 0.5) 100%);
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .frame--plain::before {
+    content: none;
+  }
+  .frame::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 58%;
+    background: linear-gradient(180deg, rgba(27, 26, 24, 0) 0%, rgba(27, 26, 24, 0.72) 100%);
+    opacity: 0.9;
+    transition: opacity 0.7s var(--ease-out);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .frame__logo {
+    position: absolute;
+    left: 5%;
+    top: 6%;
+    width: var(--logo-w);
+    height: auto;
+    max-height: 22%;
+    object-fit: contain;
+    object-position: left top;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.55));
+    z-index: 2;
+  }
+  .frame__name {
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    bottom: 6%;
+    z-index: 2;
+    color: var(--paper);
+    font-weight: 400;
+    /* размер можно уменьшить снаружи — например, у мелких плиток связанных кейсов */
+    font-size: var(--frame-name-fs, clamp(14px, 1.25vw, 19px));
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* наведение: кадр медленно приближается, градиент чуть плотнее. Ничего больше — ни тени, ни подъёма.
+     На тач-устройствах то же состояние даёт `initTileLift` (site.ts) плитке в центре экрана. */
+  :global(a:hover) .frame__img,
+  :global(a:focus-visible) .frame__img,
+  .frame.is-lifted .frame__img {
+    transform: scale(1.045);
+  }
+  :global(a:hover) .frame::after,
+  :global(a:focus-visible) .frame::after,
+  .frame.is-lifted::after {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .frame__img {
+      transition: none;
+    }
+    :global(a:hover) .frame__img,
+    :global(a:focus-visible) .frame__img,
+    .frame.is-lifted .frame__img {
+      transform: scale(1.001);
+    }
+  }
+</style>

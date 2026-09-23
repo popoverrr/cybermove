@@ -116,6 +116,17 @@ export function findCaseDetails(content: Content, id: string): CaseDetails | und
   return content.caseDetails.find((c) => c.id === id);
 }
 
+/**
+ * Склонение счётчика (BRIEF-5 §2): формы берутся из ui.json, правило — из Intl.PluralRules языка.
+ * ru: 1 кейс / 2 кейса / 7 кейсов; en: 1 case / 2 cases.
+ */
+export function plural(lang: LangCode, n: number, forms: { one: string; few: string; many: string }): string {
+  const rule = new Intl.PluralRules(lang).select(n);
+  if (rule === 'one') return forms.one;
+  if (rule === 'few') return forms.few;
+  return forms.many;
+}
+
 export function findCase(content: Content, id: string): CaseItem | undefined {
   return content.cases.items.find((c) => c.id === id);
 }

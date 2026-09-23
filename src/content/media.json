@@ -1,315 +1,310 @@
 {
   "cases-usyk": {
-    "src": "media/cases/usyk-4x3-color.webp",
-    "mono": "media/cases/usyk-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": null,
+    "src": "media/cases/usyk-4x3.webp",
+    "hero": "media/cases/usyk-16x9.webp",
+    "logo": "media/logos/usyk.png",
+    "kind": "photo",
+    "hover": "zoom",
     "alt": "USYK / Александр Усик"
-  },
-  "case-usyk": {
-    "src": "media/cases/usyk-4x5-color.webp",
-    "mono": null,
-    "kind": "logo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "USYK / Александр Усик"
-  },
-  "cases-udar": {
-    "src": "media/cases/udar-4x3-color.webp",
-    "mono": "media/cases/udar-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#CD0000",
-    "alt": "Політична партія «УДАР»"
-  },
-  "cases-apicapsules": {
-    "src": "media/cases/apicapsules-4x3-color.webp",
-    "mono": null,
-    "kind": "photo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "APICAPSULES"
-  },
-  "cases-medical-protective-equipment": {
-    "src": "media/cases/medical-protective-equipment-4x3-color.webp",
-    "mono": null,
-    "kind": "photo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "Medical Protective Equipment"
-  },
-  "cases-maharadj": {
-    "src": "media/cases/maharadj-4x3-color.webp",
-    "mono": "media/cases/maharadj-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#D8B66D",
-    "alt": "MAHARADJ"
-  },
-  "cases-van-dog-agency": {
-    "src": "media/cases/van-dog-agency-4x3-color.webp",
-    "mono": "media/cases/van-dog-agency-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#0055FF",
-    "alt": "Vandog Agency"
-  },
-  "cases-sii-concept": {
-    "src": "media/cases/sii-concept-4x3-color.webp",
-    "mono": "media/cases/sii-concept-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "SII CONCEPT / Milan"
-  },
-  "cases-ukrainian-fashion-week": {
-    "src": "media/cases/ukrainian-fashion-week-4x3-color.webp",
-    "mono": "media/cases/ukrainian-fashion-week-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "Ukrainian Fashion Week"
-  },
-  "case-ufw": {
-    "src": "media/cases/ukrainian-fashion-week-4x5-color.webp",
-    "mono": null,
-    "kind": "logo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "Ukrainian Fashion Week"
-  },
-  "cases-education": {
-    "src": "media/cases/education-4x3-color.webp",
-    "mono": null,
-    "kind": "photo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "Образовательные проекты"
-  },
-  "cases-ecommerce": {
-    "src": "media/cases/ecommerce-4x3-mono.webp",
-    "mono": "media/cases/ecommerce-4x3-mono.webp",
-    "kind": "monogram",
-    "hover": "lift",
-    "brand": null,
-    "alt": "E-commerce проекты"
-  },
-  "cases-tpk": {
-    "src": "media/cases/tpk-4x3-color.webp",
-    "mono": "media/cases/tpk-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "ТПК"
-  },
-  "cases-art-mango-production": {
-    "src": "media/cases/art-mango-production-4x3-color.webp",
-    "mono": "media/cases/art-mango-production-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#0E2F52",
-    "alt": "ILP Group / Art Mango Production"
-  },
-  "cases-spa-maharadj": {
-    "src": "media/cases/spa-maharadj-4x3-color.webp",
-    "mono": null,
-    "kind": "photo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "SPA Maharadj"
-  },
-  "cases-toscana-wine": {
-    "src": "media/cases/toscana-wine-4x3-color.webp",
-    "mono": "media/cases/toscana-wine-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "Toscana Wine Bar"
-  },
-  "cases-brsm-nafta": {
-    "src": "media/cases/brsm-nafta-4x3-color.webp",
-    "mono": "media/cases/brsm-nafta-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#97682B",
-    "alt": "БРСМ-Нафта"
-  },
-  "case-brsm": {
-    "src": "media/cases/brsm-nafta-4x5-color.webp",
-    "mono": null,
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#97682B",
-    "alt": "БРСМ-Нафта"
-  },
-  "cases-good-market": {
-    "src": "media/cases/good-market-4x3-color.webp",
-    "mono": "media/cases/good-market-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#F2BD12",
-    "alt": "Good Market"
-  },
-  "cases-intertop": {
-    "src": "media/cases/intertop-4x3-color.webp",
-    "mono": "media/cases/intertop-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "INTERTOP"
-  },
-  "case-intertop": {
-    "src": "media/cases/intertop-4x5-color.webp",
-    "mono": null,
-    "kind": "logo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "INTERTOP"
-  },
-  "cases-ukrainian-radio": {
-    "src": "media/cases/ukrainian-radio-4x3-color.webp",
-    "mono": "media/cases/ukrainian-radio-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#ED294F",
-    "alt": "Українське радіо"
-  },
-  "cases-fitness-room-menden": {
-    "src": "media/cases/fitness-room-menden-4x3-color.webp",
-    "mono": "media/cases/fitness-room-menden-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#79AC17",
-    "alt": "Fitness Room Menden"
-  },
-  "cases-cybermove-games": {
-    "src": "media/cases/cybermove-games-4x3-color.webp",
-    "mono": null,
-    "kind": "photo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "Cybermove Games"
-  },
-  "cases-hydrosta-kazakhstan": {
-    "src": "media/cases/hydrosta-kazakhstan-4x3-color.webp",
-    "mono": "media/cases/hydrosta-kazakhstan-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#062070",
-    "alt": "Hydrosta Kazakhstan"
-  },
-  "case-hydrosta": {
-    "src": "media/cases/hydrosta-kazakhstan-4x5-color.webp",
-    "mono": null,
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#062070",
-    "alt": "Hydrosta Kazakhstan"
-  },
-  "cases-hsta-group": {
-    "src": "media/cases/hsta-group-4x3-color.webp",
-    "mono": "media/cases/hsta-group-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#E70B1C",
-    "alt": "HSTA Group"
-  },
-  "cases-hydrosta-service": {
-    "src": "media/cases/hydrosta-service-4x3-color.webp",
-    "mono": "media/cases/hydrosta-service-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#0F3B66",
-    "alt": "Hydrosta Service Kazakhstan"
-  },
-  "cases-building-time": {
-    "src": "media/cases/building-time-4x3-color.webp",
-    "mono": "media/cases/building-time-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#07A4AE",
-    "alt": "Building Time"
   },
   "cases-oleg-baryshevsky": {
-    "src": "media/cases/oleg-baryshevsky-4x3-color.webp",
-    "mono": null,
-    "kind": "avatar",
-    "hover": "lift",
-    "brand": null,
+    "src": "media/cases/oleg-baryshevsky-4x3.webp",
+    "hero": "media/cases/oleg-baryshevsky-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
     "alt": "Oleg Baryshevsky"
   },
   "cases-tsepukh": {
-    "src": "media/cases/tsepukh-4x3-color.webp",
-    "mono": null,
-    "kind": "avatar",
-    "hover": "lift",
-    "brand": null,
+    "src": "media/cases/tsepukh-4x3.webp",
+    "hero": "media/cases/tsepukh-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
     "alt": "TSEPUKH_P"
   },
   "cases-kehhsha": {
-    "src": "media/cases/kehhsha-4x3-color.webp",
-    "mono": null,
-    "kind": "avatar",
-    "hover": "lift",
-    "brand": "#996E58",
+    "src": "media/cases/kehhsha-4x3.webp",
+    "hero": "media/cases/kehhsha-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
     "alt": "KEHHSHA"
   },
   "cases-olga-yankovskaya": {
-    "src": "media/cases/olga-yankovskaya-4x3-color.webp",
-    "mono": null,
-    "kind": "avatar",
-    "hover": "lift",
-    "brand": "#693E27",
+    "src": "media/cases/olga-yankovskaya-4x3.webp",
+    "hero": "media/cases/olga-yankovskaya-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
     "alt": "Olga Yankovskaya"
   },
   "cases-miss-sverona": {
-    "src": "media/cases/miss-sverona-4x3-color.webp",
-    "mono": null,
-    "kind": "avatar",
-    "hover": "lift",
-    "brand": "#7A5443",
+    "src": "media/cases/miss-sverona-4x3.webp",
+    "hero": "media/cases/miss-sverona-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
     "alt": "Miss Sverona"
   },
   "cases-meshtiish": {
-    "src": "media/cases/meshtiish-4x3-color.webp",
-    "mono": null,
-    "kind": "avatar",
-    "hover": "lift",
-    "brand": null,
+    "src": "media/cases/meshtiish-4x3.webp",
+    "hero": "media/cases/meshtiish-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
     "alt": "Meshtiish"
   },
+  "cases-udar": {
+    "src": "media/cases/udar-4x3.webp",
+    "hero": "media/cases/udar-16x9.webp",
+    "logo": "media/logos/udar.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Політична партія «УДАР»"
+  },
+  "cases-ukrainian-radio": {
+    "src": "media/cases/ukrainian-radio-4x3.webp",
+    "hero": "media/cases/ukrainian-radio-16x9.webp",
+    "logo": "media/logos/ukrainian-radio.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Українське радіо"
+  },
+  "cases-van-dog-agency": {
+    "src": "media/cases/van-dog-agency-4x3.webp",
+    "hero": "media/cases/van-dog-agency-16x9.webp",
+    "logo": "media/logos/van-dog-agency.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Vandog Agency"
+  },
+  "cases-intertop": {
+    "src": "media/cases/intertop-4x3.webp",
+    "hero": "media/cases/intertop-16x9.webp",
+    "logo": "media/logos/intertop.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "INTERTOP"
+  },
+  "cases-sii-concept": {
+    "src": "media/cases/sii-concept-4x3.webp",
+    "hero": "media/cases/sii-concept-16x9.webp",
+    "logo": "media/logos/sii-concept.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "SII CONCEPT / Milan"
+  },
+  "cases-ukrainian-fashion-week": {
+    "src": "media/cases/ukrainian-fashion-week-4x3.webp",
+    "hero": "media/cases/ukrainian-fashion-week-16x9.webp",
+    "logo": "media/logos/ukrainian-fashion-week.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Ukrainian Fashion Week"
+  },
+  "cases-good-market": {
+    "src": "media/cases/good-market-4x3.webp",
+    "hero": "media/cases/good-market-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Good Market"
+  },
+  "cases-brsm-nafta": {
+    "src": "media/cases/brsm-nafta-4x3.webp",
+    "hero": "media/cases/brsm-nafta-16x9.webp",
+    "logo": "media/logos/brsm-nafta.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "БРСМ-Нафта"
+  },
+  "cases-ecommerce": {
+    "src": "media/cases/ecommerce-4x3.webp",
+    "hero": "media/cases/ecommerce-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "E-commerce проекты"
+  },
+  "cases-maharadj": {
+    "src": "media/cases/maharadj-4x3.webp",
+    "hero": "media/cases/maharadj-16x9.webp",
+    "logo": "media/logos/maharadj.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "MAHARADJ"
+  },
+  "cases-spa-maharadj": {
+    "src": "media/cases/spa-maharadj-4x3.webp",
+    "hero": "media/cases/spa-maharadj-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "SPA Maharadj"
+  },
+  "cases-toscana-wine": {
+    "src": "media/cases/toscana-wine-4x3.webp",
+    "hero": "media/cases/toscana-wine-16x9.webp",
+    "logo": "media/logos/toscana-wine.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Toscana Wine Bar"
+  },
   "cases-gaia": {
-    "src": "media/cases/gaia-4x3-color.webp",
-    "mono": "media/cases/gaia-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": "#B58C4A",
+    "src": "media/cases/gaia-4x3.webp",
+    "hero": "media/cases/gaia-16x9.webp",
+    "logo": "media/logos/gaia.png",
+    "kind": "photo",
+    "hover": "zoom",
     "alt": "GAIA · ресторан, Одесса"
   },
   "cases-barbershops-kyiv": {
-    "src": "media/cases/barbershops-kyiv-4x3-color.webp",
-    "mono": null,
+    "src": "media/cases/barbershops-kyiv-4x3.webp",
+    "hero": "media/cases/barbershops-kyiv-16x9.webp",
+    "logo": null,
     "kind": "photo",
-    "hover": "lift",
-    "brand": null,
+    "hover": "zoom",
     "alt": "Сеть барбершопов / Киев"
   },
-  "cases-morris-group": {
-    "src": "media/cases/morris-group-4x3-color.webp",
-    "mono": "media/cases/morris-group-4x3-mono.webp",
-    "kind": "logo",
-    "hover": "lift",
-    "brand": null,
-    "alt": "MORIS (Moris Group)"
+  "cases-fitness-room-menden": {
+    "src": "media/cases/fitness-room-menden-4x3.webp",
+    "hero": "media/cases/fitness-room-menden-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Fitness Room Menden"
+  },
+  "cases-hydrosta-kazakhstan": {
+    "src": "media/cases/hydrosta-kazakhstan-4x3.webp",
+    "hero": "media/cases/hydrosta-kazakhstan-16x9.webp",
+    "logo": "media/logos/hydrosta-kazakhstan.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Hydrosta Kazakhstan"
+  },
+  "cases-hsta-group": {
+    "src": "media/cases/hsta-group-4x3.webp",
+    "hero": "media/cases/hsta-group-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "HSTA Group"
+  },
+  "cases-hydrosta-service": {
+    "src": "media/cases/hydrosta-service-4x3.webp",
+    "hero": "media/cases/hydrosta-service-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Hydrosta Service Kazakhstan"
+  },
+  "cases-building-time": {
+    "src": "media/cases/building-time-4x3.webp",
+    "hero": "media/cases/building-time-16x9.webp",
+    "logo": "media/logos/building-time.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Building Time"
+  },
+  "cases-tpk": {
+    "src": "media/cases/tpk-4x3.webp",
+    "hero": "media/cases/tpk-16x9.webp",
+    "logo": "media/logos/tpk.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "ТПК"
   },
   "cases-furniture-factory": {
-    "src": "media/cases/furniture-factory-4x3-color.webp",
-    "mono": null,
+    "src": "media/cases/furniture-factory-4x3.webp",
+    "hero": "media/cases/furniture-factory-16x9.webp",
+    "logo": null,
     "kind": "photo",
-    "hover": "lift",
-    "brand": null,
+    "hover": "zoom",
     "alt": "Фабрика мебели"
+  },
+  "cases-medical-protective-equipment": {
+    "src": "media/cases/medical-protective-equipment-4x3.webp",
+    "hero": "media/cases/medical-protective-equipment-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Medical Protective Equipment"
+  },
+  "cases-art-mango-production": {
+    "src": "media/cases/art-mango-production-4x3.webp",
+    "hero": "media/cases/art-mango-production-16x9.webp",
+    "logo": "media/logos/art-mango-production.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "ILP Group / Art Mango Production"
+  },
+  "cases-morris-group": {
+    "src": "media/cases/morris-group-4x3.webp",
+    "hero": "media/cases/morris-group-16x9.webp",
+    "logo": "media/logos/morris-group.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "MORIS (Moris Group)"
+  },
+  "cases-education": {
+    "src": "media/cases/education-4x3.webp",
+    "hero": "media/cases/education-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Образовательные проекты"
+  },
+  "cases-cybermove-games": {
+    "src": "media/cases/cybermove-games-4x3.webp",
+    "hero": "media/cases/cybermove-games-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Cybermove Games"
+  },
+  "cases-apicapsules": {
+    "src": "media/cases/apicapsules-4x3.webp",
+    "hero": "media/cases/apicapsules-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "APICAPSULES"
+  },
+  "case-usyk": {
+    "src": "media/cases/usyk-4x5.webp",
+    "logo": "media/logos/usyk.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "USYK / Александр Усик"
+  },
+  "case-ufw": {
+    "src": "media/cases/ukrainian-fashion-week-4x5.webp",
+    "logo": "media/logos/ukrainian-fashion-week.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Ukrainian Fashion Week"
+  },
+  "case-intertop": {
+    "src": "media/cases/intertop-4x5.webp",
+    "logo": "media/logos/intertop.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "INTERTOP"
+  },
+  "case-brsm": {
+    "src": "media/cases/brsm-nafta-4x5.webp",
+    "logo": "media/logos/brsm-nafta.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "БРСМ-Нафта"
+  },
+  "case-hydrosta": {
+    "src": "media/cases/hydrosta-kazakhstan-4x5.webp",
+    "logo": "media/logos/hydrosta-kazakhstan.png",
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Hydrosta Kazakhstan"
   },
   "about-home": {
     "src": "media/about/about-home-3x4.webp",

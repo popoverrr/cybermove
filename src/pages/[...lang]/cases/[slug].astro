@@ -7,7 +7,7 @@
 import Base from '../../../layouts/Base.astro';
 import CtaBlock from '../../../components/CtaBlock.astro';
 import Button from '../../../components/Button.astro';
-import ImageSlot from '../../../components/ImageSlot.astro';
+import CaseFrame from '../../../components/CaseFrame.astro';
 import { getContent, localePath, findCase, findCaseDetails, type LangCode } from '../../../lib/i18n';
 import { LANGS } from '../../../../site.config';
 import { breadcrumbLd, canonical } from '../../../lib/seo';
@@ -59,6 +59,19 @@ const jsonLd = [
   <article class="case-page">
     <header class="chead">
       <div class="container chead__inner">
+        <CaseFrame
+          id={`cases-${slug}`}
+          name={item.name}
+          ratio="16:9"
+          use="hero"
+          logoWidth={0.18}
+          sizes="(max-width: 899px) 100vw, 88vw"
+          widths={[640, 960, 1280, 1440]}
+          hideName
+          zoom={false}
+          eager
+          class="chead__frame"
+        />
         <div class="chead__text">
           <p class="t-micro chead__meta">
             <a href={localePath(lang, '/cases/')}>{c.cases.title}</a>
@@ -74,9 +87,6 @@ const jsonLd = [
               <a href={item.url} target="_blank" rel="noopener nofollow">{item.urlLabel || item.url} ↗</a>
             </p>
           )}
-        </div>
-        <div class="chead__tile">
-          <ImageSlot id={`cases-${slug}`} ratio="4:3" sizes="(max-width: 899px) 100vw, 44vw" eager />
         </div>
       </div>
     </header>
@@ -165,14 +175,19 @@ const jsonLd = [
     background: var(--bg);
     padding-top: var(--header-h);
   }
+  /* BRIEF-5 §4: кадр 16:9 с логотипом в углу, заголовок под ним */
   .chead__inner {
     display: grid;
-    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
     gap: var(--space-8);
-    align-items: center;
-    padding-top: var(--section-pad);
-    padding-bottom: var(--section-pad);
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-8);
     max-width: none;
+  }
+  /* класс уезжает внутрь компонента, поэтому :global; высота — чтобы заголовок оставался в первом экране */
+  .chead__inner :global(.chead__frame) {
+    /* ширина по контейнеру, высота ограничена — кадр кадрируется по cover, заголовок остаётся в первом экране */
+    width: 100%;
+    max-height: min(52vh, 480px);
   }
   .chead__text {
     display: grid;
@@ -202,9 +217,6 @@ const jsonLd = [
   }
   .chead__link a:hover {
     color: var(--accent);
-  }
-  .chead__tile :global(.slot) {
-    border: 1px solid var(--hair);
   }
   .cbody {
     display: grid;
@@ -268,11 +280,7 @@ const jsonLd = [
   }
   @media (max-width: 899px) {
     .chead__inner {
-      grid-template-columns: 1fr;
       gap: var(--space-6);
-    }
-    .chead__tile {
-      order: -1;
     }
     .cblock {
       grid-template-columns: 1fr;

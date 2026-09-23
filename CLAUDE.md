@@ -1,7 +1,7 @@
 # CYBERMOVE — контекст для Claude Code
 
-Сайт консалтинговой компании CYBERMOVE (Cyber Move Consulting). Полное ТЗ: `docs/BRIEF.md`, итерация 2 (палитра, скролл, плейсхолдеры): `docs/BRIEF-2.md`, итерация 3 (жемчужная сфера, линии туши, модель движения): `docs/BRIEF-3.md`, итерация 4 (исправления v3, медиа, звук, подсказки, выбор языка): `docs/BRIEF-4.md` + `docs/MEDIA-INTEGRATION.md` — где противоречат, действует более поздний. Тексты: `docs/CONTENT.md`. Референс стилистики: `reference/ref-12.jpg`.
-Если сессия начата заново или контекст сжат: прочитай `docs/BRIEF-4.md`, `docs/PROGRESS-4.md`, `docs/DECISIONS.md` и продолжай с первого незакрытого пункта `PROGRESS-4.md`. Закрытое не переделывай.
+Сайт консалтинговой компании CYBERMOVE (Cyber Move Consulting). Полное ТЗ: `docs/BRIEF.md`, итерация 2 (палитра, скролл, плейсхолдеры): `docs/BRIEF-2.md`, итерация 3 (жемчужная сфера, линии туши, модель движения): `docs/BRIEF-3.md`, итерация 4 (исправления v3, медиа, звук, подсказки, выбор языка): `docs/BRIEF-4.md` + `docs/MEDIA-INTEGRATION.md`, итерация 5 (кейсы разделами, живые кадры, логотипы, деплой): `docs/BRIEF-5.md` — где противоречат, действует более поздний. Тексты: `docs/CONTENT.md`. Референс стилистики: `reference/ref-12.jpg`.
+Если сессия начата заново или контекст сжат: прочитай `docs/BRIEF-5.md`, `docs/PROGRESS-5.md`, `docs/DECISIONS.md` и продолжай с первого незакрытого пункта `PROGRESS-5.md`. Закрытое не переделывай.
 `docs/` и `reference/` не публикуются: они в `.gitignore`, живут только на диске (решение заказчика, репозиторий публичный).
 
 ## Стек
@@ -22,6 +22,7 @@ npm run build        # боевая сборка в dist/ (страницы /dev
 npm run build:labs   # сборка с лабораториями /dev/*
 # превью GitHub Pages: CYBERMOVE_BASE=/<репо>/ CYBERMOVE_SITE=https://<логин>.github.io PUBLIC_PREVIEW=1 npm run build (см. docs/DEPLOY.md)
 npm run preview      # предпросмотр dist/ (preview_start "cybermove-preview", порт 4331)
+npm run deploy       # боевая сборка + выкладка dist/ на cybermove.asia по FTPS (реквизиты в deploy/ftp.env, вне git)
 npm run check        # astro check
 python scripts/build-logo.py [--active a|b|c]   # пересобрать логотип и favicon (активен a)
 node scripts/posters.mjs http://127.0.0.1:4330   # постеры экранов, рендеры направлений, OG
@@ -33,6 +34,7 @@ node scripts/test-frame.mjs --base http://127.0.0.1:4331 [--suffix v3]   # вр�
 node scripts/test-overlap.mjs --base http://127.0.0.1:4331 [--shots docs/screens/v4]   # S7 и полоса шапки на семи размерах
 node scripts/test-audio.mjs --base http://127.0.0.1:4331    # автозапуск, жест, память, перенос позиции
 node scripts/test-hints.mjs --base http://127.0.0.1:4331    # карточка языка и подсказка прокрутки
+node scripts/test-cases.mjs --base http://127.0.0.1:4331    # /cases/: разделы, кадры, логотипы, липкая лента, зум, контраст имени
 ```
 
 PHP локально: портативный `php.exe` (см. `docs/DECISIONS.md`), `php -l public/api/lead.php`.
@@ -57,7 +59,7 @@ docs/                   BRIEF, CONTENT, PROGRESS, DECISIONS, TODO-CONTENT, DEPLO
 - Палитра BRIEF-2 §3: тёплая светлая шкала ivory / sand / stone / clay, текст ink, единственный акцент — `--ink`; тёмная зона — S8 «Контакт» (BRIEF-3 §8.1, один атрибут `data-theme`), футер и меню-оверлей (`--night`). Синего, хрома, свечения, bloom и хроматической аберрации нет. Запрещены фиолетовые градиенты, glassmorphism, тени-облака, скругления 16px+, эмодзи, стоковые иконки.
 - Микрометки: JetBrains Mono 11px, трекинг +0.12em, `--umber` (на stone/clay — `--bark`). Контраст: основной ≥ 4.5:1, микрометки ≥ 3:1 — проверять цифрами.
 - Все открытые решения — одной строкой в `docs/DECISIONS.md`. После каждой фазы — коммит и отметка в `docs/PROGRESS.md`.
-- Медиа: значение слота в `src/content/media.json` — строка или объект (`src`, `mono`, `kind`, `hover`, `brand`, `alt`); `hover: "lift"` — подъём плитки, `kind: "render"` — рендер без кейлайна. Плитки кейсов цветные в покое.
+- Медиа: значение слота в `src/content/media.json` — строка или объект (`src`, `hero`, `logo`, `mono`, `kind`, `hover`, `brand`, `alt`); разбор — `src/lib/media.ts`. Кадры кейсов рисует `CaseFrame.astro` (кадр + градиент + белый логотип слоем + имя текстом), плитку — `CaseTile.astro`; `ImageSlot.astro` остался для команды, «О компании» и рендеров направлений. Кадры не тонируются и не перекрашиваются, при наведении только медленный зум.
 - Параметры отладки главной: `?screen=N&local=0.45` (экран и его прогресс), `?progress=0.37`, `?still&t=4` (стоп-кадр: таймлайн текущей фазы на секунде t; `&te=0.4` — время выхода), `?hover=<service-id>`, `?tier=high|mid|low`, `?debug` (Tweakpane), `?stats` (fps / мс / тир / DPR / draw calls), `?nogl` (постер-фолбэк).
 - Скриншоты и тесты — только через Playwright (`scripts/*.mjs`): во встроенном браузере rAF стоит, пока вкладка не на переднем плане. Под SwiftShader композитор иногда отдаёт пустой кадр — `shots.mjs` повторяет снимок.
 - В Bash-хередоках на этой машине ломаются `\\` — файлы с бэкслэшами писать через Write.

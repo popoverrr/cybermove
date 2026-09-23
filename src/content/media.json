@@ -315,30 +315,6 @@
     "hover": "none",
     "alt": "Рабочее место CYBERMOVE: стол, ноутбуки, блокнот, утренний свет"
   },
-  "team-1": {
-    "src": "media/team/team-1-1x1.webp",
-    "kind": "photo",
-    "hover": "none",
-    "alt": "Yana Petechuk"
-  },
-  "team-2": {
-    "src": "media/team/team-2-1x1.webp",
-    "kind": "photo",
-    "hover": "none",
-    "alt": "Andrii Kravets"
-  },
-  "team-3": {
-    "src": "media/team/team-3-1x1.webp",
-    "kind": "photo",
-    "hover": "none",
-    "alt": "Daniel Rakhimov"
-  },
-  "team-4": {
-    "src": "media/team/team-4-1x1.webp",
-    "kind": "photo",
-    "hover": "none",
-    "alt": "Alina Moroz"
-  },
   "dir-audit": {
     "src": "media/dir/dir-audit.webp",
     "kind": "render",
@@ -368,17 +344,5 @@
     "kind": "render",
     "hover": "none",
     "alt": ""
-  },
-  "team-5": {
-    "src": "media/team/team-5-1x1.webp",
-    "kind": "photo",
-    "hover": "none",
-    "alt": "Marat Suleimenov"
-  },
-  "team-6": {
-    "src": "media/team/team-6-1x1.webp",
-    "kind": "photo",
-    "hover": "none",
-    "alt": "Olena Bondar"
   }
 }

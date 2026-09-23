@@ -6,12 +6,15 @@
  */
 import { Image } from 'astro:assets';
 import { getSlot, loadImage, widthsFor } from '../lib/media';
+import type { LangCode } from '../lib/i18n';
 
 export interface Props {
   /** слот в media.json: `cases-<id>` для 4:3 и 16:9, `case-<ключ>` для 4:5 */
   id: string;
   /** имя кейса — текстом поверх кадра, поэтому переводится вместе с контентом */
   name: string;
+  /** язык страницы: на нём берётся описание кадра для alt */
+  lang?: LangCode;
   ratio?: '4:3' | '16:9' | '4:5';
   /** какой файл брать: основной кадр или 16:9 для шапки */
   use?: 'src' | 'hero';
@@ -29,6 +32,7 @@ export interface Props {
 const {
   id,
   name,
+  lang = 'ru',
   ratio = '4:3',
   use = 'src',
   sizes = '100vw',
@@ -43,13 +47,13 @@ const {
 const entry = getSlot(id);
 const image = await loadImage(use === 'hero' ? (entry?.hero ?? entry?.src) : entry?.src);
 const logo = await loadImage(entry?.logo);
-const alt = entry?.alt || name;
+const alt = (lang === 'en' && entry?.altEn) || entry?.alt || name;
 const [rw, rh] = ratio.split(':').map(Number);
 ---
 
 <figure
   class:list={['frame', { 'frame--plain': hideName }, cls]}
-  style={`--ratio:${rw}/${rh};--logo-w:${Math.round(logoWidth * 1000) / 10}%`}
+  style={`--ratio:${rw}/${rh};--logo-w:${Math.round(logoWidth * 1000) / 10}%${entry?.scrim ? `;--frame-scrim:${entry.scrim}` : ''}`}
   data-slot={id}
   data-lift={zoom ? '' : undefined}
 >
@@ -108,7 +112,12 @@ const [rw, rh] = ratio.split(':').map(Number);
     position: absolute;
     inset: auto 0 0 0;
     height: 34%;
-    background: linear-gradient(180deg, rgba(27, 26, 24, 0) 0%, rgba(27, 26, 24, 0.5) 55%, rgba(27, 26, 24, 0.5) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(27, 26, 24, 0) 0%,
+      rgba(27, 26, 24, var(--frame-scrim, 0.5)) 55%,
+      rgba(27, 26, 24, var(--frame-scrim, 0.5)) 100%
+    );
     opacity: 0.9;
     pointer-events: none;
     z-index: 1;

@@ -17,6 +17,8 @@ const get = (k, d) => {
 };
 const base = get('--base', 'http://127.0.0.1:4331');
 const dist = get('--dist', 'dist');
+/** куда сложить вырезанные участки подложки под именем (для разбора замера контраста) */
+const crops = get('--crops', '');
 
 let fails = 0;
 const check = (ok, line) => {
@@ -142,6 +144,10 @@ for (const [lang, url] of [
 
 
     // Контраст имени на самых светлых кадрах: прячем текст и меряем то, что под ним (кадр + градиент).
+    // Уводим курсор: после проверки наведения он остаётся над плиткой, и при прокрутке под ним
+    // оказывается другая — её кадр приближен, и замер получается не от спокойного состояния.
+    await page.mouse.move(2, 2);
+    await page.waitForTimeout(1500);
     await page.evaluate(() => {
       document.querySelectorAll('.frame__name').forEach((n) => (n.style.visibility = 'hidden'));
     });
@@ -150,26 +156,84 @@ for (const [lang, url] of [
       return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
     };
     const PAPER = 0.2126 * lin(250) + 0.7152 * lin(248) + 0.0722 * lin(244);
-    for (const id of ['meshtiish', 'toscana-wine', 'building-time']) {
+    // светлые кадры: три из итерации 5 и два новых из итерации 5a
+    for (const id of ['meshtiish', 'toscana-wine', 'building-time', 'gaia', 'barbershops-kyiv']) {
       const el = await page.$(`#${id} .frame__name`);
       if (!el) {
         check(false, `контраст имени: плитка ${id} не найдена`);
         continue;
       }
       await el.scrollIntoViewIfNeeded();
+      // ждём, пока ленивый кадр догрузится: иначе меряем пустую плитку на бумажном фоне
+      await page.waitForFunction(
+        (sel) => {
+          const img = document.querySelector(sel);
+          return !!img && img.complete && img.naturalWidth > 0;
+        },
+        `#${id} .frame__img`,
+        { timeout: 15000 },
+      );
+      // элемент не должен оказаться под липкой лентой: она светлая и портит замер
+      await page.evaluate(
+        (sel) => {
+          const name = document.querySelector(sel);
+          const nav = document.querySelector('[data-catnav]');
+          const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 72;
+          const min = headerH + nav.offsetHeight + 12;
+          const top = name.getBoundingClientRect().top;
+          if (top < min) window.scrollBy(0, top - min);
+        },
+        `#${id} .frame__name`,
+      );
       await page.waitForTimeout(400);
-      const box = await el.boundingBox();
-      const buf = await page.screenshot({ clip: box });
-      const { data, info } = await sharp(buf).raw().toBuffer({ resolveWithObject: true });
+      // Меряем не всю строку-контейнер, а прямоугольники самого текста (Range.getClientRects):
+      // имя занимает не всю ширину кадра, и блик в пустой части полосы к читаемости отношения не имеет.
+      // Снимаем сам кадр (element screenshot — Playwright сам доводит его до вида) и режем по смещениям
+      // внутри кадра: координаты вьюпорта при прокрутке давали чужой участок страницы.
+      const geom = await page.evaluate(
+        (sel) => {
+          const name = document.querySelector(sel);
+          const frame = name.closest('.frame');
+          const fb = frame.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(name);
+          return {
+            frame: { width: fb.width, height: fb.height },
+            rects: Array.from(range.getClientRects())
+              .filter((r) => r.width > 4 && r.height > 4)
+              .map((r) => ({ x: r.left - fb.left, y: r.top - fb.top, width: r.width, height: r.height })),
+          };
+        },
+        `#${id} .frame__name`,
+      );
+      const frameEl = await page.$(`#${id} .frame`);
+      const shot = await frameEl.screenshot();
+      const meta = await sharp(shot).metadata();
+      const k = meta.width / geom.frame.width; // на случай, если снимок в других пикселях
       let worst = 0;
-      let n = 0;
       let sum = 0;
-      for (let i = 0; i < data.length; i += info.channels) {
-        const L = 0.2126 * lin(data[i]) + 0.7152 * lin(data[i + 1]) + 0.0722 * lin(data[i + 2]);
-        const ratio = (Math.max(L, PAPER) + 0.05) / (Math.min(L, PAPER) + 0.05);
-        sum += ratio;
-        n++;
-        if (worst === 0 || ratio < worst) worst = ratio;
+      let n = 0;
+      for (const [j, r] of geom.rects.entries()) {
+        const box = {
+          left: Math.max(0, Math.round(r.x * k)),
+          top: Math.max(0, Math.round(r.y * k)),
+          width: Math.round(r.width * k),
+          height: Math.round(r.height * k),
+        };
+        box.width = Math.min(box.width, meta.width - box.left);
+        box.height = Math.min(box.height, meta.height - box.top);
+        const { data, info } = await sharp(shot).extract(box).raw().toBuffer({ resolveWithObject: true });
+        if (crops) {
+          await sharp(shot).toFile(`${crops}/frame-${id}.png`);
+          await sharp(shot).extract(box).toFile(`${crops}/contrast-${id}-${j + 1}.png`);
+        }
+        for (let i = 0; i < data.length; i += info.channels) {
+          const L = 0.2126 * lin(data[i]) + 0.7152 * lin(data[i + 1]) + 0.0722 * lin(data[i + 2]);
+          const ratio = (Math.max(L, PAPER) + 0.05) / (Math.min(L, PAPER) + 0.05);
+          sum += ratio;
+          n++;
+          if (worst === 0 || ratio < worst) worst = ratio;
+        }
       }
       check(worst >= 4.5, `контраст имени на кадре ${id}: худший пиксель ${worst.toFixed(2)}:1, средний ${(sum / n).toFixed(2)}:1 (нужно ≥ 4.5)`);
     }

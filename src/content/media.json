@@ -133,7 +133,8 @@
     "logo": "media/logos/maharadj.png",
     "kind": "photo",
     "hover": "zoom",
-    "alt": "MAHARADJ"
+    "alt": "MAHARADJ: групповая йога-практика на открытой террасе клуба",
+    "altEn": "MAHARADJ: a group yoga practice on the club's open terrace"
   },
   "cases-spa-maharadj": {
     "src": "media/cases/spa-maharadj-4x3.webp",
@@ -157,7 +158,8 @@
     "logo": "media/logos/gaia.png",
     "kind": "photo",
     "hover": "zoom",
-    "alt": "GAIA · ресторан, Одесса"
+    "alt": "GAIA: авторское блюдо ресторана, рыба с ризотто и печёным лимоном на синей тарелке",
+    "altEn": "GAIA: the restaurant’s signature dish — fish with risotto and roasted lemon on a blue plate"
   },
   "cases-barbershops-kyiv": {
     "src": "media/cases/barbershops-kyiv-4x3.webp",
@@ -165,7 +167,8 @@
     "logo": null,
     "kind": "photo",
     "hover": "zoom",
-    "alt": "Сеть барбершопов / Киев"
+    "alt": "Сеть барбершопов: интерьер с кожаными креслами",
+    "altEn": "Barbershop chain: interior with leather chairs"
   },
   "cases-fitness-room-menden": {
     "src": "media/cases/fitness-room-menden-4x3.webp",

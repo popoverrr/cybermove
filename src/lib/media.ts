@@ -7,7 +7,9 @@
  *   mono   — вариант кадра без цвета (итерация 4, сейчас не используется)
  *   kind   — logo | avatar | photo | monogram | render (на вёрстку влияет только render)
  *   hover  — zoom (медленное приближение кадра) | lift (подъём плитки, итерация 4) | none
- *   alt    — подпись для доступности
+ *   scrim  — плотность подложки под именем (по умолчанию 0.5): поднимается для кадров, у которых
+ *            в полосе имени светлый объект и градиента не хватает на 4.5:1
+ *   alt    — подпись для доступности (RU), altEn — она же по-английски
  * Файлы берутся из `src/assets/media/**`, оптимизацией занимается `astro:assets`.
  */
 import media from '../content/media.json';
@@ -19,8 +21,10 @@ export interface SlotEntry {
   mono?: string | null;
   kind?: 'logo' | 'avatar' | 'photo' | 'monogram' | 'render';
   hover?: 'zoom' | 'lift' | 'none';
+  scrim?: number;
   brand?: string | null;
   alt?: string;
+  altEn?: string;
 }
 
 const files = import.meta.glob<{ default: ImageMetadata }>('/src/assets/media/**/*.{jpg,jpeg,png,webp,avif}');

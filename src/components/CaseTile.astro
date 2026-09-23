@@ -28,7 +28,7 @@ const {
 ---
 
 <a class:list={['tile', { 'tile--compact': compact }]} href={localePath(lang, `/cases/${item.id}/`)} id={anchor ? item.id : undefined}>
-  <CaseFrame id={`cases-${item.id}`} name={item.name} ratio="4:3" sizes={sizes} eager={eager} />
+  <CaseFrame id={`cases-${item.id}`} name={item.name} lang={lang} ratio="4:3" sizes={sizes} eager={eager} />
   <span class="t-micro tile__tags">{item.tags.join(' · ')}</span>
 </a>
 

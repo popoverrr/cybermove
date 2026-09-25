@@ -3,11 +3,36 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { SITE_URL, LANGS, DEFAULT_LANG } from './site.config.ts';
 
+import fs from 'node:fs';
+import path from 'node:path';
+
 const LABS = process.env.CYBERMOVE_LABS === '1';
 
 // Превью на GitHub Pages: CYBERMOVE_SITE=https://<логин>.github.io CYBERMOVE_BASE=/<репозиторий>/ (см. .github/workflows/pages.yml)
 const SITE = process.env.CYBERMOVE_SITE || SITE_URL;
 const BASE = process.env.CYBERMOVE_BASE || '/';
+
+/** BRIEF-SEO §6: lastmod в sitemap у статей — из frontmatter (updated или date) */
+function insightDates() {
+  const map = new Map();
+  const root = path.resolve('src/content/insights');
+  if (!fs.existsSync(root)) return map;
+  for (const l of LANGS) {
+    const dir = path.join(root, l.code);
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.md'))) {
+      const fm = fs.readFileSync(path.join(dir, f), 'utf8').split(/^---\s*$/m)[1] || '';
+      const get = (k) => (fm.match(new RegExp(`^${k}:[ \\t]*['"]?([^'"\\r\\n]+)`, 'm')) || [])[1]?.trim();
+      const direction = get('direction');
+      const date = get('updated') || get('date');
+      if (!direction || !date) continue;
+      const prefix = l.prefix ? `/${l.prefix}` : '';
+      map.set(`${prefix}/insights/${direction}/${f.replace(/\.md$/, '')}/`, new Date(date).toISOString());
+    }
+  }
+  return map;
+}
+const INSIGHT_DATES = insightDates();
 
 export default defineConfig({
   site: SITE,
@@ -27,6 +52,12 @@ export default defineConfig({
         locales: Object.fromEntries(LANGS.map((l) => [l.code, l.hreflang])),
       },
       filter: (page) => !page.includes('/404') && !page.includes('/dev/'),
+      serialize(item) {
+        const u = new URL(item.url);
+        const p = BASE !== '/' ? u.pathname.replace(BASE.replace(/\/+$/, ''), '') : u.pathname;
+        const lastmod = INSIGHT_DATES.get(p);
+        return lastmod ? { ...item, lastmod } : item;
+      },
     }),
   ],
   prefetch: {

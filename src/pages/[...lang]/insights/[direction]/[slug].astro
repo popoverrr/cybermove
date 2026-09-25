@@ -1,0 +1,530 @@
+---
+/**
+ * /insights/<направление>/<slug>/ — статья (BRIEF-SEO §2): крошки, H1, дата и время чтения, оглавление из H2,
+ * текст колонкой 68ch, врезка «Что с этим делает CYBERMOVE» со ссылками на услуги, 2 кейса, FAQ (FAQPage),
+ * ещё разборы направления, Article JSON-LD (автор — организация), og:type=article.
+ */
+import { render } from 'astro:content';
+import Base from '../../../../layouts/Base.astro';
+import CtaBlock from '../../../../components/CtaBlock.astro';
+import Button from '../../../../components/Button.astro';
+import CaseTile from '../../../../components/CaseTile.astro';
+import InsightCard from '../../../../components/InsightCard.astro';
+import { getContent, localePath, findCase, type LangCode } from '../../../../lib/i18n';
+import { getInsights, formatDate, isoDate, type InsightItem } from '../../../../lib/insights';
+import { breadcrumbLd, faqLd, canonical, absolute, ogFor } from '../../../../lib/seo';
+import { LANGS, SITE_URL } from '../../../../../site.config';
+
+export async function getStaticPaths() {
+  const out: Array<{ params: { lang: string | undefined; direction: string; slug: string }; props: { lang: LangCode; item: InsightItem } }> = [];
+  for (const l of LANGS) {
+    for (const item of await getInsights(l.code)) {
+      out.push({ params: { lang: l.prefix || undefined, direction: item.entry.data.direction, slug: item.slug }, props: { lang: l.code, item } });
+    }
+  }
+  return out;
+}
+
+const { lang, item } = Astro.props;
+const c = getContent(lang);
+const data = item.entry.data;
+const { Content, headings } = await render(item.entry);
+const toc = headings.filter((h) => h.depth === 2);
+const d = c.services.directions.find((x) => x.id === data.direction)!;
+const services = data.services
+  .map((id) => {
+    for (const dir of c.services.directions) {
+      const s = dir.services.find((x) => x.id === id);
+      if (s) return { dir, s, href: localePath(lang, `/services/${dir.slug}/${s.id}/`) };
+    }
+    return null;
+  })
+  .filter((x): x is NonNullable<typeof x> => Boolean(x));
+const lead = services[0];
+const cases = data.cases.map((id) => findCase(c, id)).filter((k): k is NonNullable<typeof k> => Boolean(k)).slice(0, 2);
+const all = await getInsights(lang);
+const more = [
+  ...all.filter((x) => x.slug !== item.slug && x.entry.data.direction === data.direction),
+  ...all.filter((x) => x.slug !== item.slug && x.entry.data.direction !== data.direction && x.entry.data.services.some((s) => data.services.includes(s))),
+].slice(0, 3);
+
+const path = item.path;
+const title = data.seoTitle ?? `${data.title} — CYBERMOVE`;
+const crumbs = [
+  { name: c.ui.home, path: '/' },
+  { name: c.ui.insights, path: '/insights/' },
+  { name: d.name, path: `/insights/${d.id}/` },
+  { name: data.title, path },
+];
+const published = isoDate(data.date);
+const modified = isoDate(data.updated ?? data.date);
+const jsonLd = [
+  breadcrumbLd(lang, crumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    '@id': `${canonical(lang, path)}#article`,
+    headline: data.title.length > 110 ? `${data.title.slice(0, 107)}…` : data.title,
+    description: data.description,
+    url: canonical(lang, path),
+    mainEntityOfPage: canonical(lang, path),
+    inLanguage: lang,
+    datePublished: published,
+    dateModified: modified,
+    articleSection: d.nameFull,
+    image: absolute(ogFor(lang, path)),
+    wordCount: (item.entry.body ?? '').split(/\s+/).filter(Boolean).length,
+    // людей на сайте нет (решение руководства): автор и издатель — организация
+    author: { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    about: services.map((x) => ({ '@type': 'Service', name: x.s.name, url: canonical(lang, `/services/${x.dir.slug}/${x.s.id}/`) })),
+  },
+  ...(data.faq.length ? [faqLd(data.faq)] : []),
+];
+---
+
+<Base lang={lang} path={path} title={title} description={data.description} theme="ivory" jsonLd={jsonLd} ogType="article" publishedTime={published} modifiedTime={modified}>
+  <article class="art">
+    <header class="art__head container">
+      <nav class="art__crumbs t-micro" aria-label={c.ui.crumbs}>
+        <ol>
+          {crumbs.slice(0, -1).map((x) => (
+            <li><a href={localePath(lang, x.path)}>{x.name}</a></li>
+          ))}
+        </ol>
+      </nav>
+      <p class="t-micro art__meta">
+        <span>{d.index} · {d.nameFull}</span>
+        <span aria-hidden="true">·</span>
+        <time datetime={published}>{formatDate(data.date, lang)}</time>
+        {data.updated && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>{c.ui.updatedLabel} <time datetime={modified}>{formatDate(data.updated, lang)}</time></span>
+          </>
+        )}
+        <span aria-hidden="true">·</span>
+        <span>{c.ui.readingTime.replace('{n}', String(item.minutes))}</span>
+      </p>
+      <h1 class="t-h2 art__title">{data.title}</h1>
+      <p class="t-lead art__lead">{data.description}</p>
+    </header>
+
+    <div class="art__grid container">
+      {toc.length > 1 && (
+        <aside class="art__toc">
+          <details class="toc" open>
+            <summary class="t-micro toc__head">{c.ui.toc}</summary>
+            <ol class="toc__list">
+              {toc.map((h) => (
+                <li><a href={`#${h.slug}`}>{h.text}</a></li>
+              ))}
+            </ol>
+          </details>
+        </aside>
+      )}
+
+      <div class="art__body">
+        <div class="prose">
+          <Content />
+        </div>
+
+        {lead && (
+          <aside class="callout" aria-labelledby="art-callout">
+            <p class="t-micro callout__label">{d.index} · {d.nameFull}</p>
+            <h2 class="t-h4 callout__title" id="art-callout">{c.ui.whatWeDo}</h2>
+            <p class="callout__text">{lead.s.seo.lead}</p>
+            <ul class="callout__links">
+              {services.map((x) => (
+                <li><a href={x.href}>{x.s.name} →</a></li>
+              ))}
+            </ul>
+            <Button href={`${localePath(lang, '/contact/')}?service=${lead.s.id}`} variant="fill" magnetic={false}>{c.ui.serviceCta}</Button>
+          </aside>
+        )}
+
+        {cases.length > 0 && (
+          <section class="art__sec" aria-labelledby="art-cases">
+            <h2 class="t-micro art__secTitle" id="art-cases">{c.ui.relatedCases}</h2>
+            <div class="art__cases">
+              {cases.map((k) => <CaseTile lang={lang} item={k} compact sizes="(max-width: 720px) 45vw, 320px" />)}
+            </div>
+          </section>
+        )}
+
+        {data.faq.length > 0 && (
+          <section class="art__sec" aria-labelledby="art-faq">
+            <h2 class="t-micro art__secTitle" id="art-faq">{c.ui.faq}</h2>
+            <div class="faqs">
+              {data.faq.map((x, i) => (
+                <details class="faq" open={i === 0}>
+                  <summary class="faq__q"><span class="t-h4">{x.q}</span><span class="faq__mark" aria-hidden="true"></span></summary>
+                  <p class="faq__a">{x.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    </div>
+  </article>
+
+  {more.length > 0 && (
+    <section class="more" aria-labelledby="art-more">
+      <div class="container more__inner">
+        <div class="more__head">
+          <h2 class="t-micro" id="art-more">{c.ui.moreInsights}</h2>
+          <a class="t-micro more__all" href={localePath(lang, '/insights/')}>{c.ui.allInsights} →</a>
+        </div>
+        <ul class="more__grid">
+          {more.map((x) => <li><InsightCard lang={lang} item={x} level={3} /></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <CtaBlock lang={lang} service={lead?.s.id} />
+</Base>
+
+<script>
+  // оглавление на телефоне свёрнуто, на широком экране — открыто и липкое
+  const toc = document.querySelector<HTMLDetailsElement>('.toc');
+  if (toc && window.matchMedia('(max-width: 899px)').matches) toc.open = false;
+</script>
+
+<style>
+  .art__head {
+    display: grid;
+    gap: var(--space-4);
+    padding-top: calc(var(--header-h) + var(--space-12));
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--hair);
+    max-width: none;
+  }
+  .art__crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+    color: var(--fg-2);
+  }
+  .art__crumbs li + li::before {
+    content: '/';
+    margin-right: 0.6rem;
+    color: var(--fg-3);
+  }
+  .art__crumbs a:hover {
+    color: var(--accent);
+  }
+  .art__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    color: var(--fg-3);
+  }
+  .art__title {
+    max-width: 24ch;
+  }
+  .art__lead {
+    max-width: 60ch;
+  }
+  .art__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    gap: var(--space-8) var(--space-12);
+    padding-top: var(--space-12);
+    padding-bottom: var(--section-pad);
+    max-width: none;
+  }
+  .art__toc {
+    grid-column: 1;
+  }
+  .art__body {
+    grid-column: 2;
+    display: grid;
+    gap: var(--space-12);
+    align-content: start;
+    min-width: 0;
+  }
+  .toc {
+    position: sticky;
+    top: calc(var(--header-h) + 1rem);
+  }
+  .toc__head {
+    color: var(--fg-3);
+    list-style: none;
+    margin-bottom: var(--space-3);
+  }
+  .toc__head::-webkit-details-marker {
+    display: none;
+  }
+  .toc__list {
+    display: grid;
+    gap: var(--space-2);
+    counter-reset: toc;
+  }
+  .toc__list li {
+    counter-increment: toc;
+    display: grid;
+    grid-template-columns: 1.6rem 1fr;
+    font-size: var(--fs-small);
+    line-height: 1.4;
+  }
+  .toc__list li::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    color: var(--fg-3);
+    padding-top: 0.2em;
+  }
+  .toc__list a {
+    color: var(--fg-2);
+  }
+  .toc__list a:hover {
+    color: var(--fg);
+  }
+
+  /* текст статьи: колонка 68ch, типографика сайта */
+  .prose {
+    max-width: 68ch;
+    font-size: var(--fs-body);
+    line-height: 1.65;
+    color: var(--fg);
+  }
+  .prose :global(> * + *) {
+    margin-top: 1em;
+  }
+  .prose :global(h2) {
+    font-size: var(--fs-h3);
+    font-weight: 350;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-top: 2.2em;
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+  .prose :global(h3) {
+    font-size: var(--fs-h4);
+    font-weight: 460;
+    line-height: 1.25;
+    margin-top: 1.8em;
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+  .prose :global(h2 + *),
+  .prose :global(h3 + *) {
+    margin-top: 0.6em;
+  }
+  .prose :global(ul),
+  .prose :global(ol) {
+    display: grid;
+    gap: 0.45em;
+    padding-left: 1.3em;
+  }
+  .prose :global(ul) {
+    list-style: none;
+  }
+  .prose :global(ul > li) {
+    position: relative;
+  }
+  .prose :global(ul > li)::before {
+    content: '';
+    position: absolute;
+    left: -1.1em;
+    top: 0.8em;
+    width: 7px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .prose :global(ol) {
+    list-style: decimal;
+  }
+  .prose :global(ol > li)::marker {
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    color: var(--fg-3);
+  }
+  .prose :global(a) {
+    text-decoration: underline;
+    text-decoration-color: var(--hair-strong);
+    text-underline-offset: 3px;
+  }
+  .prose :global(a:hover) {
+    text-decoration-color: currentColor;
+  }
+  .prose :global(strong) {
+    font-weight: 560;
+  }
+  .prose :global(blockquote) {
+    border-left: 1px solid var(--accent);
+    padding-left: 1.2em;
+    color: var(--fg-2);
+  }
+  .prose :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--hair);
+    margin: 2em 0;
+  }
+  .prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-small);
+    display: block;
+    overflow-x: auto;
+  }
+  .prose :global(th),
+  .prose :global(td) {
+    text-align: left;
+    padding: 0.6em 0.8em 0.6em 0;
+    border-bottom: 1px solid var(--hair);
+    vertical-align: top;
+  }
+  .prose :global(th) {
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--ls-micro);
+    text-transform: uppercase;
+    font-weight: 400;
+    color: var(--fg-3);
+  }
+  .prose :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+  }
+
+  .callout {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: start;
+    max-width: 68ch;
+    padding: var(--space-6);
+    border: 1px solid var(--hair-strong);
+    background: var(--paper);
+  }
+  .callout__label {
+    color: var(--fg-3);
+  }
+  .callout__text {
+    color: var(--fg-2);
+    line-height: 1.55;
+  }
+  .callout__links {
+    display: grid;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+  .callout__links a:hover {
+    color: var(--accent);
+  }
+  .art__sec {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 68ch;
+  }
+  .art__secTitle {
+    color: var(--fg-3);
+  }
+  .art__cases {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4) var(--space-3);
+  }
+  .faq {
+    border-top: 1px solid var(--hair);
+  }
+  .faq:last-child {
+    border-bottom: 1px solid var(--hair);
+  }
+  .faq__q {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-6);
+    padding: var(--space-4) 0;
+    cursor: pointer;
+    list-style: none;
+  }
+  .faq__q::-webkit-details-marker {
+    display: none;
+  }
+  .faq__q:hover .t-h4 {
+    color: var(--accent);
+  }
+  .faq__mark {
+    position: relative;
+    flex: none;
+    width: 12px;
+    height: 12px;
+  }
+  .faq__mark::before,
+  .faq__mark::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: currentColor;
+    transition: transform var(--dur-fast);
+  }
+  .faq__mark::after {
+    transform: rotate(90deg);
+  }
+  .faq[open] .faq__mark::after {
+    transform: rotate(0deg);
+  }
+  .faq__a {
+    padding-bottom: var(--space-6);
+    color: var(--fg-2);
+    line-height: 1.55;
+  }
+  .more {
+    border-top: 1px solid var(--hair);
+  }
+  .more__inner {
+    display: grid;
+    gap: var(--space-6);
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+    max-width: none;
+  }
+  .more__head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+  .more__head h2 {
+    color: var(--fg-3);
+  }
+  .more__all:hover {
+    color: var(--accent);
+  }
+  .more__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: var(--space-4);
+  }
+  @media (max-width: 899px) {
+    .art__grid {
+      grid-template-columns: 1fr;
+    }
+    .art__toc,
+    .art__body {
+      grid-column: 1;
+    }
+    .toc {
+      position: static;
+      border: 1px solid var(--hair);
+      padding: var(--space-4);
+    }
+    .toc__head {
+      cursor: pointer;
+      margin-bottom: 0;
+    }
+    .toc[open] .toc__head {
+      margin-bottom: var(--space-3);
+    }
+  }
+  @media (max-width: 559px) {
+    .art__cases {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,0 +1,45 @@
+---
+/** /insights/<направление>/ — разборы одного направления (фильтр ссылками, BRIEF-SEO §2). */
+import InsightsList from '../../../../components/InsightsList.astro';
+import { getContent, type LangCode } from '../../../../lib/i18n';
+import { getInsights } from '../../../../lib/insights';
+import { LANGS } from '../../../../../site.config';
+
+export async function getStaticPaths() {
+  const out: Array<{ params: { lang: string | undefined; direction: string }; props: { lang: LangCode; direction: string } }> = [];
+  for (const l of LANGS) {
+    const all = await getInsights(l.code);
+    for (const dir of new Set(all.map((x) => x.entry.data.direction))) {
+      out.push({ params: { lang: l.prefix || undefined, direction: dir }, props: { lang: l.code, direction: dir } });
+    }
+  }
+  return out;
+}
+const { lang, direction } = Astro.props;
+const c = getContent(lang);
+const d = c.services.directions.find((x) => x.id === direction)!;
+const all = await getInsights(lang);
+const items = all.filter((x) => x.entry.data.direction === direction);
+const directions = [...new Set(all.map((x) => x.entry.data.direction))];
+const path = `/insights/${direction}/`;
+const fill = (s: string) => s.replace('{name}', d.nameFull).replace('{kicker}', d.seo.kicker).replace('{phrase}', d.phrase);
+---
+
+<InsightsList
+  lang={lang}
+  path={path}
+  title={fill(c.ui.meta.insightsDirection.title)}
+  description={fill(c.ui.meta.insightsDirection.description)}
+  h1={`${c.ui.insights}: ${d.nameFull}`}
+  lead={d.seo.intro}
+  label={`${d.index} · ${d.stage} · ${items.length}`}
+  items={items}
+  directions={directions}
+  active={direction}
+  theme={d.theme as never}
+  crumbs={[
+    { name: c.ui.home, path: '/' },
+    { name: c.ui.insights, path: '/insights/' },
+    { name: d.name, path },
+  ]}
+/>

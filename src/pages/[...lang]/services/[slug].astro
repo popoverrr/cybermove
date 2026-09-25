@@ -10,6 +10,8 @@ import CaseTile from '../../../components/CaseTile.astro';
 import { getContent, localePath, findCase, type LangCode } from '../../../lib/i18n';
 import { LANGS } from '../../../../site.config';
 import { breadcrumbLd, serviceLd } from '../../../lib/seo';
+import InsightCard from '../../../components/InsightCard.astro';
+import { getInsights } from '../../../lib/insights';
 
 export function getStaticPaths() {
   const out: Array<{ params: { lang: string | undefined; slug: string }; props: { lang: LangCode; slug: string } }> = [];
@@ -45,6 +47,7 @@ const jsonLd = [
     services: d.services.map((s) => ({ name: s.seo.h1, description: s.seo.description, path: svcPath(s.id) })),
   }),
 ];
+const articles = (await getInsights(lang)).filter((x) => x.entry.data.direction === d.id).slice(0, 3);
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
@@ -103,6 +106,21 @@ const pad = (n: number) => String(n).padStart(2, '0');
         <div class="hub__cases">
           {cases.map((k) => <CaseTile lang={lang} item={k} compact sizes="(max-width: 720px) 45vw, 260px" />)}
         </div>
+      </div>
+    </section>
+  )}
+
+  {articles.length > 0 && (
+    <section class="hub" aria-labelledby="hub-articles">
+      <div class="container hub__inner">
+        <header class="hub__head">
+          <p class="t-micro hub__idx">{d.index} · {c.ui.insights}</p>
+          <h2 class="t-h3" id="hub-articles">{c.ui.insightsByDirection}</h2>
+          <a class="t-micro hub__all" href={localePath(lang, `/insights/${d.id}/`)}>{c.ui.allInsights} →</a>
+        </header>
+        <ul class="hub__articles">
+          {articles.map((x) => <li><InsightCard lang={lang} item={x} level={3} /></li>)}
+        </ul>
       </div>
     </section>
   )}
@@ -243,6 +261,18 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
   .card__more:hover {
     color: var(--accent);
+  }
+  .hub__all {
+    color: var(--fg-2);
+    justify-self: start;
+  }
+  .hub__all:hover {
+    color: var(--accent);
+  }
+  .hub__articles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: var(--space-4);
   }
   .hub__cases {
     display: grid;

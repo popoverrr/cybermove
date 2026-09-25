@@ -106,6 +106,14 @@
       "title": "{name} — CYBERMOVE case",
       "description": "{summary}. What we did, the CYBERMOVE role and project disciplines.",
       "titleCat": "{name}: {category} — CYBERMOVE case"
+    },
+    "insights": {
+      "title": "Business Insights and Guides — CYBERMOVE",
+      "description": "Business insights and guides from CYBERMOVE: audits and unit economics, CRM and AI, positioning, ads and SEO, public procurement and contracts."
+    },
+    "insightsDirection": {
+      "title": "Insights: {name} — CYBERMOVE",
+      "description": "{kicker} insights: {phrase}"
     }
   },
   "notFound": {
@@ -159,5 +167,21 @@
   "stepsNote": "Timelines are indicative: exact ones depend on scope and are set after the initial review.",
   "caseServices": "Services in this project",
   "caseSimilar": "Similar cases",
-  "aboutLink": "How we work and measure results"
+  "aboutLink": "How we work and measure results",
+  "insights": "Insights",
+  "insightsH1": "Business insights and guides",
+  "insightsLead": "Practical guides for owners and managers: audits and unit economics, CRM and AI, positioning, advertising and SEO, public procurement and contracts. No fluff, no ranking promises.",
+  "insightsAll": "All",
+  "readingTime": "{n} min read",
+  "toc": "Contents",
+  "whatWeDo": "What CYBERMOVE does about it",
+  "moreInsights": "More on this topic",
+  "published": "Published",
+  "updatedLabel": "Updated",
+  "pageLabel": "Page",
+  "prev": "Previous",
+  "next": "Next",
+  "allInsights": "All insights",
+  "insightsByDirection": "Insights in this area",
+  "insightsCount": "insights"
 }

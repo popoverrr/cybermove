@@ -9,7 +9,8 @@ export interface Props {
 }
 const { lang, path } = Astro.props;
 const c = getContent(lang);
-const alts = alternates(path);
+// у 404 нет языковых версий — переключатель ведёт на главную
+const alts = alternates(path === '/404/' ? '/' : path);
 const current = (href: string) => path !== '/' && href !== '/' && path.startsWith(href);
 ---
 

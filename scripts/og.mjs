@@ -39,6 +39,25 @@ const readJson = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 const content = (lang, name) => readJson(`src/content/${lang}/${name}.json`);
 const media = readJson('src/content/media.json');
 
+/** «Разборы»: верхние скалярные поля frontmatter (title, description, direction, cover) */
+function readInsights(lang) {
+  const dir = path.join(ROOT, 'src', 'content', 'insights', lang);
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => {
+      const fm = fs.readFileSync(path.join(dir, f), 'utf8').split(/^---\s*$/m)[1] || '';
+      const get = (k) => {
+        const m = fm.match(new RegExp(`^${k}:[ \t]*(.+)$`, 'm'));
+        if (!m) return '';
+        const v = m[1].trim();
+        return /^["']/.test(v) ? v.slice(1, -1).replace(/\\"/g, '"') : v;
+      };
+      return { slug: f.replace(/\.md$/, ''), title: get('title'), description: get('description'), direction: get('direction'), cover: get('cover'), date: get('date') };
+    });
+}
+
 /** Список страниц: { lang, key (путь без слэшей, 'home' для главной), theme, label, title, sub?, photo? } */
 export function ogPages() {
   const pages = [];
@@ -76,6 +95,34 @@ export function ogPages() {
     pages.push({ lang, key: 'about', theme: 'sand', label: about.kicker, title: about.h1, sub: about.lead });
     pages.push({ lang, key: 'contact', theme: 'ivory', label: contact.title, title: contact.h1, sub: contact.lead });
     pages.push({ lang, key: 'privacy', theme: 'ivory', label: ui.brand, title: ui.privacy.title });
+
+    const insights = readInsights(lang);
+    if (insights.length) {
+      pages.push({ lang, key: 'insights', theme: 'ivory', label: `${ui.insights} · ${insights.length}`, title: ui.insightsH1, sub: ui.insightsLead });
+      const PAGE = 12;
+      for (let n = 2; n <= Math.ceil(insights.length / PAGE); n++) {
+        pages.push({ lang, key: `insights/page/${n}`, theme: 'ivory', label: `${ui.insights} · ${ui.pageLabel} ${n}`, title: ui.insightsH1, sub: ui.insightsLead });
+      }
+      for (const d of services.directions) {
+        const list = insights.filter((x) => x.direction === d.id);
+        if (!list.length) continue;
+        pages.push({ lang, key: `insights/${d.id}`, theme: d.theme, label: `${ui.insights} · ${d.index} · ${d.stage}`, title: `${ui.insights}: ${d.nameFull}`, sub: d.phrase });
+      }
+      for (const a of insights) {
+        const d = services.directions.find((x) => x.id === a.direction);
+        const slot = a.cover ? media[a.cover] : null;
+        const photo = slot && typeof slot === 'object' ? slot.hero || slot.src : typeof slot === 'string' ? slot : null;
+        pages.push({
+          lang,
+          key: `insights/${a.direction}/${a.slug}`,
+          theme: d?.theme || 'ivory',
+          label: `${ui.insights} · ${d ? d.nameFull : a.direction}`,
+          title: a.title,
+          sub: a.description,
+          photo: photo ? path.join('src', 'assets', photo) : null,
+        });
+      }
+    }
   }
   return pages;
 }

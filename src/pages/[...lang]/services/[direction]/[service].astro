@@ -12,6 +12,8 @@ import CaseTile from '../../../../components/CaseTile.astro';
 import { getContent, localePath, findCase, type LangCode } from '../../../../lib/i18n';
 import { LANGS } from '../../../../../site.config';
 import { breadcrumbLd, serviceItemLd, faqLd } from '../../../../lib/seo';
+import InsightCard from '../../../../components/InsightCard.astro';
+import { getInsights } from '../../../../lib/insights';
 
 export function getStaticPaths() {
   const out: Array<{
@@ -55,6 +57,8 @@ const jsonLd = [
   serviceItemLd(lang, { name: seo.h1, serviceType: s.name, description: seo.description, path, category: d.nameFull }),
   faqLd(seo.faq),
 ];
+// BRIEF-SEO §2: 1–2 разбора, где услуга указана в services[] статьи
+const articles = (await getInsights(lang)).filter((x) => x.entry.data.services.includes(s.id)).slice(0, 2);
 const pad = (n: number) => String(n).padStart(2, '0');
 let n = 0;
 const num = () => pad(++n);
@@ -182,6 +186,21 @@ const num = () => pad(++n);
       </div>
     </div>
   </section>
+
+  {articles.length > 0 && (
+    <section class="sp" aria-labelledby="sp-articles">
+      <div class="container sp__inner">
+        <header class="sp__head">
+          <p class="t-micro sp__idx">{num()}</p>
+          <h2 class="t-h3" id="sp-articles">{c.ui.articlesTitle}</h2>
+          <a class="t-micro sp__all" href={localePath(lang, `/insights/${d.id}/`)}>{c.ui.allInsights} →</a>
+        </header>
+        <ul class="sp__articles">
+          {articles.map((x) => <li><InsightCard lang={lang} item={x} level={3} /></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
 
   <section class="sp" aria-labelledby="sp-siblings">
     <div class="container sp__inner">
@@ -397,6 +416,18 @@ const num = () => pad(++n);
     color: var(--fg-2);
     line-height: 1.5;
     max-width: 64ch;
+  }
+  .sp__all {
+    color: var(--fg-2);
+    justify-self: start;
+  }
+  .sp__all:hover {
+    color: var(--accent);
+  }
+  .sp__articles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: var(--space-4);
   }
   .sib {
     display: grid;

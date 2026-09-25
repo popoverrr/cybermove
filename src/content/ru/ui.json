@@ -106,6 +106,14 @@
       "title": "{name} — кейс CYBERMOVE",
       "description": "{summary}. Что делали, роль CYBERMOVE и дисциплины проекта.",
       "titleCat": "{name}: {category} — кейс CYBERMOVE"
+    },
+    "insights": {
+      "title": "Разборы для бизнеса — CYBERMOVE",
+      "description": "Разборы для бизнеса от CYBERMOVE: аудит и юнит-экономика, CRM и AI, позиционирование, реклама и SEO, госзакупки и договоры. Практика без воды."
+    },
+    "insightsDirection": {
+      "title": "Разборы: {name} — CYBERMOVE",
+      "description": "Разборы: {name}. {phrase}"
     }
   },
   "notFound": {
@@ -159,5 +167,21 @@
   "stepsNote": "Сроки ориентировочные: точные зависят от объёма и называются после первичного разбора.",
   "caseServices": "Услуги в проекте",
   "caseSimilar": "Похожие кейсы",
-  "aboutLink": "Как мы работаем и считаем результат"
+  "aboutLink": "Как мы работаем и считаем результат",
+  "insights": "Разборы",
+  "insightsH1": "Разборы для бизнеса",
+  "insightsLead": "Практические разборы для собственников и руководителей: аудит и юнит-экономика, CRM и AI, позиционирование, реклама и SEO, госзакупки и договоры. Без воды и обещаний позиций.",
+  "insightsAll": "Все",
+  "readingTime": "{n} мин чтения",
+  "toc": "Содержание",
+  "whatWeDo": "Что с этим делает CYBERMOVE",
+  "moreInsights": "Ещё по теме",
+  "published": "Опубликовано",
+  "updatedLabel": "Обновлено",
+  "pageLabel": "Страница",
+  "prev": "Назад",
+  "next": "Дальше",
+  "allInsights": "Все разборы",
+  "insightsByDirection": "Разборы направления",
+  "insightsCount": "разборов"
 }

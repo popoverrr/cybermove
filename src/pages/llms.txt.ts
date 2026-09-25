@@ -5,8 +5,9 @@
 import type { APIRoute } from 'astro';
 import { getContent, localePath } from '../lib/i18n';
 import { absolute } from '../lib/seo';
+import { getInsights } from '../lib/insights';
 
-export const GET: APIRoute = () => {
+export const GET: APIRoute = async () => {
   const ru = getContent('ru');
   const en = getContent('en');
   const url = (lang: 'ru' | 'en', path: string) => absolute(localePath(lang, path));
@@ -26,6 +27,13 @@ export const GET: APIRoute = () => {
   }
   lines.push('');
 
+  const ruInsights = await getInsights('ru');
+  if (ruInsights.length) {
+    lines.push('## Разборы', '');
+    for (const it of ruInsights) lines.push(`- [${it.entry.data.title}](${url('ru', it.path)}): ${it.entry.data.description}`);
+    lines.push('');
+  }
+
   lines.push('## Кейсы', '');
   lines.push(`- [${ru.cases.h1}](${url('ru', '/cases/')}): ${ru.cases.items.length} проектов в семи разделах`);
   lines.push('');
@@ -41,6 +49,7 @@ export const GET: APIRoute = () => {
     lines.push(`- [${d.nameFull}](${url('en', `/services/${d.slug}/`)}): ${d.phrase}`);
     for (const s of d.services) lines.push(`  - [${s.seo.h1}](${url('en', `/services/${d.slug}/${s.id}/`)}): ${s.line}`);
   }
+  for (const it of await getInsights('en')) lines.push(`- [${it.entry.data.title}](${url('en', it.path)})`);
   lines.push(`- [Case studies](${url('en', '/cases/')})`);
   lines.push(`- [Contact](${url('en', '/contact/')})`);
   lines.push('');

@@ -1,0 +1,66 @@
+---
+/** Карточка разбора в списках (BRIEF-SEO §2): дата · направление · время чтения, заголовок-ссылка, описание. */
+import { getContent, localePath, type LangCode } from '../lib/i18n';
+import { formatDate, isoDate, type InsightItem } from '../lib/insights';
+
+export interface Props {
+  lang: LangCode;
+  item: InsightItem;
+  /** уровень заголовка карточки: 2 на страницах списка, 3 внутри секций */
+  level?: 2 | 3;
+}
+const { lang, item, level = 2 } = Astro.props;
+const c = getContent(lang);
+const d = c.services.directions.find((x) => x.id === item.entry.data.direction);
+const Tag = level === 2 ? 'h2' : 'h3';
+const href = localePath(lang, item.path);
+---
+
+<article class="icard">
+  <p class="t-micro icard__meta">
+    <time datetime={isoDate(item.entry.data.date)}>{formatDate(item.entry.data.date, lang)}</time>
+    {d && <><span aria-hidden="true">·</span><span>{d.name}</span></>}
+    <span aria-hidden="true">·</span>
+    <span>{c.ui.readingTime.replace('{n}', String(item.minutes))}</span>
+  </p>
+  <Tag class="t-h4 icard__title"><a href={href}>{item.entry.data.title}</a></Tag>
+  <p class="icard__desc">{item.entry.data.description}</p>
+  <a class="t-micro icard__more" href={href} tabindex="-1" aria-hidden="true">{c.ui.readMore} →</a>
+</article>
+
+<style>
+  .icard {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    border: 1px solid var(--hair);
+    height: 100%;
+    transition: border-color var(--dur-fast);
+  }
+  .icard:hover,
+  .icard:focus-within {
+    border-color: var(--hair-strong);
+  }
+  .icard__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    color: var(--fg-3);
+  }
+  .icard__title a {
+    transition: color var(--dur-fast);
+  }
+  .icard__title a:hover {
+    color: var(--accent);
+  }
+  .icard__desc {
+    color: var(--fg-2);
+    line-height: 1.5;
+    font-size: var(--fs-small);
+  }
+  .icard__more {
+    justify-self: start;
+    color: var(--fg);
+  }
+</style>

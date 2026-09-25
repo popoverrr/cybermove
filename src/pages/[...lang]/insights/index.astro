@@ -1,0 +1,33 @@
+---
+/** /insights/ — «Разборы», первая страница списка (BRIEF-SEO §2). */
+import InsightsList from '../../../components/InsightsList.astro';
+import { getContent, langStaticPaths } from '../../../lib/i18n';
+import { getInsights, PAGE_SIZE } from '../../../lib/insights';
+
+export function getStaticPaths() {
+  return langStaticPaths();
+}
+const { lang } = Astro.props;
+const c = getContent(lang);
+const all = await getInsights(lang);
+const pages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
+const directions = [...new Set(all.map((x) => x.entry.data.direction))];
+---
+
+<InsightsList
+  lang={lang}
+  path="/insights/"
+  title={c.ui.meta.insights.title}
+  description={c.ui.meta.insights.description}
+  h1={c.ui.insightsH1}
+  lead={c.ui.insightsLead}
+  label={`${c.ui.insights} · ${all.length}`}
+  items={all.slice(0, PAGE_SIZE)}
+  directions={directions}
+  page={1}
+  pages={pages}
+  crumbs={[
+    { name: c.ui.home, path: '/' },
+    { name: c.ui.insights, path: '/insights/' },
+  ]}
+/>

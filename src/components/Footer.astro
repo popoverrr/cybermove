@@ -20,7 +20,7 @@ const year = new Date().getFullYear();
 const email = filled(c.ui.footer.email) ? c.ui.footer.email : '';
 const telegram = filled(c.ui.footer.telegram) ? c.ui.footer.telegram : '';
 const address = filled(c.ui.footer.address) ? c.ui.footer.address : '';
-const langs = alternates(path);
+const langs = alternates(path === '/404/' ? '/' : path);
 ---
 
 <footer class:list={['footer', { 'footer--compact': compact }]} data-theme="night">
@@ -40,6 +40,7 @@ const langs = alternates(path);
           {c.ui.nav.map((item) => (
             <li><a href={localePath(lang, item.href)}>{item.label}</a></li>
           ))}
+          <li><a href={localePath(lang, '/insights/')}>{c.ui.insights}</a></li>
           <li><a href={localePath(lang, '/privacy/')}>{c.ui.footer.privacy}</a></li>
         </ul>
       </nav>

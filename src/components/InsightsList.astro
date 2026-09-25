@@ -1,0 +1,136 @@
+---
+/**
+ * Страница списка «Разборов» (BRIEF-SEO §2): шапка, фильтр по направлению ссылками (/insights/<направление>/),
+ * карточки, пагинация по 12. Используют /insights/, /insights/page/<n>/ и /insights/<направление>/.
+ */
+import Base from '../layouts/Base.astro';
+import PageHero from './PageHero.astro';
+import CtaBlock from './CtaBlock.astro';
+import InsightCard from './InsightCard.astro';
+import { getContent, localePath, type LangCode } from '../lib/i18n';
+import { breadcrumbLd, canonical } from '../lib/seo';
+import type { InsightItem } from '../lib/insights';
+
+export interface Props {
+  lang: LangCode;
+  /** путь страницы без языкового префикса */
+  path: string;
+  title: string;
+  description: string;
+  h1: string;
+  lead: string;
+  label: string;
+  items: InsightItem[];
+  /** направления, у которых есть разборы (для фильтра) */
+  directions: string[];
+  active?: string;
+  page?: number;
+  pages?: number;
+  crumbs: Array<{ name: string; path: string }>;
+  theme?: 'ivory' | 'sand' | 'stone' | 'clay';
+}
+const { lang, path, title, description, h1, lead, label, items, directions, active, page = 1, pages = 1, crumbs, theme = 'ivory' } = Astro.props;
+const c = getContent(lang);
+const pageHref = (n: number) => localePath(lang, n === 1 ? '/insights/' : `/insights/page/${n}/`);
+const jsonLd = [
+  breadcrumbLd(lang, crumbs),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: h1,
+    description,
+    url: canonical(lang, path),
+    inLanguage: lang,
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, url: canonical(lang, it.path), name: it.entry.data.title })),
+    },
+  },
+];
+---
+
+<Base lang={lang} path={path} title={title} description={description} theme={theme} jsonLd={jsonLd}>
+  <PageHero
+    theme={theme}
+    label={label}
+    title={h1}
+    lead={lead}
+    size="md"
+    wide
+    crumbs={crumbs.map((x) => ({ name: x.name, href: localePath(lang, x.path) }))}
+    ariaCrumbs={c.ui.crumbs}
+  />
+
+  <nav class="ifilter container" aria-label={c.ui.directions}>
+    <ul class="ifilter__list">
+      <li><a class="t-micro" href={localePath(lang, '/insights/')} aria-current={!active ? 'page' : undefined}>{c.ui.insightsAll}</a></li>
+      {c.services.directions.filter((d) => directions.includes(d.id)).map((d) => (
+        <li><a class="t-micro" href={localePath(lang, `/insights/${d.id}/`)} aria-current={active === d.id ? 'page' : undefined}>{d.name}</a></li>
+      ))}
+    </ul>
+  </nav>
+
+  <section class="ilist container">
+    <ul class="ilist__grid">
+      {items.map((it) => (
+        <li><InsightCard lang={lang} item={it} /></li>
+      ))}
+    </ul>
+
+    {pages > 1 && (
+      <nav class="ipager" aria-label={c.ui.pageLabel}>
+        {page > 1 && <a class="t-micro" href={pageHref(page - 1)} rel="prev">← {c.ui.prev}</a>}
+        <span class="t-micro">{c.ui.pageLabel} {page} / {pages}</span>
+        {page < pages && <a class="t-micro" href={pageHref(page + 1)} rel="next">{c.ui.next} →</a>}
+      </nav>
+    )}
+  </section>
+
+  <CtaBlock lang={lang} />
+</Base>
+
+<style>
+  .ifilter {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--hair);
+    max-width: none;
+  }
+  .ifilter__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+  }
+  .ifilter a {
+    color: var(--fg-2);
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+  }
+  .ifilter a:hover {
+    color: var(--fg);
+  }
+  .ifilter a[aria-current] {
+    color: var(--fg);
+    border-bottom-color: currentColor;
+  }
+  .ilist {
+    padding-top: var(--space-12);
+    padding-bottom: var(--section-pad);
+    max-width: none;
+    display: grid;
+    gap: var(--space-8);
+  }
+  .ilist__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: var(--space-4);
+  }
+  .ipager {
+    display: flex;
+    gap: var(--space-6);
+    align-items: center;
+  }
+  .ipager a:hover {
+    color: var(--accent);
+  }
+</style>

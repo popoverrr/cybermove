@@ -44,6 +44,16 @@ export const ANALYTICS = {
   tiktokPixel: '', // 'XXXXXXXXXXXXXXXXXX'
 };
 
+/**
+ * Подтверждение прав в панелях поисковиков (BRIEF-SEO §6): значение атрибута content из meta-кода.
+ * Пустая строка — тег не выводится. Google Search Console удобнее подтвердить DNS-записью (см. ДЛЯ_ЧЕЛОВЕКА).
+ */
+export const VERIFICATION = {
+  google: '', // <meta name="google-site-verification" content="…">
+  bing: '', // <meta name="msvalidate.01" content="…">
+  yandex: '', // <meta name="yandex-verification" content="…">
+};
+
 /** Куда уходит форма. Относительный путь от корня сайта. */
 export const LEAD_ENDPOINT = '/api/lead.php';
 

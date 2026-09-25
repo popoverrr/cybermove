@@ -596,9 +596,12 @@ export function initHome() {
     initHeroText();
   } else {
     initHeroText();
+    // BRIEF-SEO §6: 3D грузится после load и первого простоя браузера — LCP остаётся за текстом H1
     const start = () => loadEngine(canvas!);
-    if (document.readyState === 'complete') start();
-    else window.addEventListener('load', () => setTimeout(start, 60), { once: true });
+    const whenIdle = () =>
+      'requestIdleCallback' in window ? window.requestIdleCallback(start, { timeout: 1500 }) : setTimeout(start, 200);
+    if (document.readyState === 'complete') whenIdle();
+    else window.addEventListener('load', whenIdle, { once: true });
   }
 
   requestAnimationFrame(() => {

@@ -1,85 +1,86 @@
-# CYBERMOVE — Apache (Plesk shared hosting)
-# Сжатие, кеш, безопасность, https + единый www, страница 404. Nginx-эквивалент — в docs/DEPLOY.md.
+# CYBERMOVE — Apache на хостинге Plesk (итерация 6, BRIEF-SEO §6).
+# Лежит в public/.htaccess, попадает в dist/ и на сервер вместе с сайтом.
+#
+# Перед Apache стоит nginx Plesk. Проверено на cybermove.asia (25.09.2026): заголовки из «Header set»
+# доходят до ответов со статикой, а «Header always set» — только до ответов PHP. Поэтому все заголовки
+# ниже ставятся через «Header set».
 
 Options -Indexes
-AddDefaultCharset UTF-8
+AddDefaultCharset utf-8
 
 # ---------- MIME-типы
 <IfModule mod_mime.c>
     AddType font/woff2 .woff2
     AddType image/avif .avif
     AddType image/webp .webp
+    AddType audio/ogg .opus
+    AddType audio/mp4 .m4a
     AddType application/manifest+json .webmanifest
     AddType application/javascript .mjs
 </IfModule>
 
-# ---------- https и единый вариант домена (без www)
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    # https
+
+    # 1. https и единый хост без www — одним переходом
     RewriteCond %{HTTPS} !=on
     RewriteCond %{HTTP:X-Forwarded-Proto} !https
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-    # www → без www (чтобы наоборот, поменяйте условие и цель)
-    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-    RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
-    # /page → /page/ (Astro собирает папки с index.html)
-    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ https://cybermove.asia%{REQUEST_URI} [R=301,L]
+    RewriteCond %{HTTP_HOST} ^www\. [NC]
+    RewriteRule ^ https://cybermove.asia%{REQUEST_URI} [R=301,L]
+
+    # 2. /index.html → /, /cases/index.html → /cases/
+    RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
+    RewriteRule ^(.*/)?index\.html$ https://cybermove.asia/$1 [R=301,L]
+
+    # 3. без слэша → со слэшем (Astro собирает каждую страницу папкой с index.html);
+    #    файлы с расширением и /api/ не трогаем
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_URI} !\.[a-z0-9]{2,5}$ [NC]
     RewriteCond %{REQUEST_URI} !/$
-    RewriteRule ^(.*)$ /$1/ [R=301,L]
+    RewriteRule ^(.*)$ https://cybermove.asia/$1/ [R=301,L]
 </IfModule>
 
+# 4. Несуществующая страница — наша 404 со статусом 404 (сама страница закрыта от индекса meta robots)
 ErrorDocument 404 /404.html
 
-# ---------- сжатие
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml application/xml application/xhtml+xml
-    AddOutputFilterByType DEFLATE application/javascript application/x-javascript text/javascript application/json
-    AddOutputFilterByType DEFLATE image/svg+xml application/manifest+json font/ttf font/otf
-    # woff2, avif, webp, jpg уже сжаты
-</IfModule>
-<IfModule mod_brotli.c>
-    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml application/xml
-    AddOutputFilterByType BROTLI_COMPRESS application/javascript text/javascript application/json image/svg+xml
-</IfModule>
-
-# ---------- кеш: хешированные ассеты — год, HTML — коротко
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType text/html "access plus 10 minutes"
-    ExpiresByType application/xml "access plus 1 hour"
-    ExpiresByType text/xml "access plus 1 hour"
-    ExpiresByType text/css "access plus 1 year"
-    ExpiresByType application/javascript "access plus 1 year"
-    ExpiresByType font/woff2 "access plus 1 year"
-    ExpiresByType image/avif "access plus 1 month"
-    ExpiresByType image/webp "access plus 1 month"
-    ExpiresByType image/jpeg "access plus 1 month"
-    ExpiresByType image/png "access plus 1 month"
-    ExpiresByType image/svg+xml "access plus 1 month"
-    ExpiresByType image/x-icon "access plus 1 month"
-</IfModule>
 <IfModule mod_headers.c>
-    # /_astro/ — имена с хешем, можно кешировать навсегда
-    <FilesMatch "\.(js|css|woff2)$">
-        Header set Cache-Control "public, max-age=31536000, immutable"
+    # 5. Кэш. HTML всегда перепроверяется — после выкладки посетитель сразу видит новую версию.
+    <FilesMatch "\.html$">
+        Header set Cache-Control "no-cache"
     </FilesMatch>
-    <FilesMatch "\.(html)$">
-        Header set Cache-Control "public, max-age=600, must-revalidate"
+    # sitemap, robots, llms.txt, rss, манифест — сутки
+    <FilesMatch "\.(xml|txt|json|webmanifest)$">
+        Header set Cache-Control "public, max-age=86400"
     </FilesMatch>
-    <FilesMatch "\.(avif|webp|jpg|jpeg|png|svg|ico)$">
+    # картинки, иконки и звук вне _astro/ — месяц: имена без хэша, файл может обновиться
+    <FilesMatch "\.(avif|webp|jpg|jpeg|png|svg|ico|opus|m4a|mp3)$">
         Header set Cache-Control "public, max-age=2592000"
     </FilesMatch>
+    # _astro/ — имена с хэшем содержимого: год и immutable (секция <If> применяется после FilesMatch)
+    <If "%{REQUEST_URI} =~ m#^/_astro/#">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
 
-    # ---------- безопасность
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "SAMEORIGIN"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
-    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
-    # CSP: свои скрипты (+ хеш единственного инлайн-скрипта no-js из Base.astro) и стили, аналитика — по списку
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-tuKyZn/3ycw/MNMDii/kvSPrelo6SCsJSecqb1n2neg=' https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.google-analytics.com https://www.facebook.com https://analytics.tiktok.com; font-src 'self'; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://analytics.tiktok.com; worker-src 'self' blob:; media-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://wa.me"
+    # 6. Безопасность. HTTPS на домене работает (сертификат выдан) — HSTS включён, но без includeSubDomains:
+    #    у поддоменов (почта, панель) может не быть сертификата.
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+    Header set Strict-Transport-Security "max-age=31536000"
     Header unset X-Powered-By
+</IfModule>
+
+# 7. Сжатие (что есть на сервере)
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml application/xml application/rss+xml
+    AddOutputFilterByType BROTLI_COMPRESS application/javascript text/javascript application/json image/svg+xml application/manifest+json
+</IfModule>
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml application/xml application/rss+xml application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/javascript text/javascript application/json image/svg+xml application/manifest+json
 </IfModule>
 
 # ---------- служебные файлы закрыты

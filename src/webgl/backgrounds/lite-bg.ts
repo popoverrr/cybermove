@@ -2,30 +2,51 @@
  * lite-bg — лёгкий шейдерный фон для шапок внутренних страниц (BRIEF §10): чистый WebGL2 без three
  * (~6 KB), тот же GLSL, что и на главной. Рендер только пока элемент виден, DPR ≤ 1, при reduced-motion —
  * один кадр. Без WebGL2 остаётся CSS-фон темы.
+ * BRIEF-SEO §6:
+ *  - шейдер компилируется без блокировки основного потока (KHR_parallel_shader_compile): раньше
+ *    немедленный запрос LINK_STATUS заставлял страницу ждать компиляцию (на Windows через ANGLE/D3D11
+ *    это секунды), и Lighthouse показывал 6–10 с TBT на каждой странице с такой шапкой;
+ *  - до первого действия посетителя (мышь, прокрутка, касание, клавиша) рисуется один статичный кадр,
+ *    анимация стартует после — фон и так движется медленно.
  */
 import { BG_MODES, BG_VERT, BG_FRAG_BODY, type BgMode } from './bgShader';
 
 const FRAG = BG_FRAG_BODY.replace('//__OUTPUT__', 'gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(1.0 / 2.2));');
 const VERT = BG_VERT.replace('varying vec2 vUv;', 'attribute vec3 position;\nattribute vec2 uv;\nvarying vec2 vUv;');
 
+/** компиляция без проверки статуса — статус спрашиваем только когда компилятор закончит */
 function compile(gl: WebGLRenderingContext, type: number, src: string) {
   const sh = gl.createShader(type)!;
   gl.shaderSource(sh, src);
   gl.compileShader(sh);
-  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
-    throw new Error(gl.getShaderInfoLog(sh) || 'shader');
-  }
   return sh;
 }
 
+/** что считается действием посетителя, после которого фон оживает */
+const WAKE = ['pointermove', 'pointerdown', 'scroll', 'wheel', 'touchstart', 'keydown'] as const;
+
 export function mountLiteBackground(canvas: HTMLCanvasElement, mode: BgMode, opts: { beam?: number } = {}) {
   const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'low-power' }) as WebGLRenderingContext | null;
-  if (!gl) return null;
+  if (!gl) return;
   const prog = gl.createProgram()!;
   gl.attachShader(prog, compile(gl, gl.VERTEX_SHADER, VERT));
   gl.attachShader(prog, compile(gl, gl.FRAGMENT_SHADER, FRAG));
   gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+
+  // Ждём компилятор, не блокируя поток: без расширения — как раньше, сразу
+  const parallel = gl.getExtension('KHR_parallel_shader_compile') as { COMPLETION_STATUS_KHR: number } | null;
+  const poll = () => {
+    if (parallel && !gl.getProgramParameter(prog, parallel.COMPLETION_STATUS_KHR)) {
+      setTimeout(poll, 60);
+      return;
+    }
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return; // остаётся CSS-фон темы
+    start(gl, prog, canvas, mode, opts);
+  };
+  poll();
+}
+
+function start(gl: WebGLRenderingContext, prog: WebGLProgram, canvas: HTMLCanvasElement, mode: BgMode, opts: { beam?: number }) {
   gl.useProgram(prog);
 
   const buf = gl.createBuffer();
@@ -61,6 +82,7 @@ export function mountLiteBackground(canvas: HTMLCanvasElement, mode: BgMode, opt
   let my = 0;
   let visible = true;
   let raf = 0;
+  let awake = false;
   const start = performance.now();
 
   const resize = () => {
@@ -86,6 +108,7 @@ export function mountLiteBackground(canvas: HTMLCanvasElement, mode: BgMode, opt
   let last = 0;
   const loop = (t: number) => {
     raf = 0;
+    awake = true;
     if (!visible || document.hidden) return;
     // ~30 fps достаточно для медленного фона
     if (t - last >= 30) {
@@ -97,11 +120,11 @@ export function mountLiteBackground(canvas: HTMLCanvasElement, mode: BgMode, opt
 
   const io = new IntersectionObserver((entries) => {
     visible = entries.some((e) => e.isIntersecting);
-    if (visible && !raf) raf = requestAnimationFrame(loop);
+    if (awake && visible && !raf) raf = requestAnimationFrame(loop);
   });
   io.observe(canvas);
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && visible && !raf) raf = requestAnimationFrame(loop);
+    if (awake && !document.hidden && visible && !raf) raf = requestAnimationFrame(loop);
   });
   window.addEventListener('resize', () => draw(), { passive: true });
   window.addEventListener(
@@ -113,7 +136,12 @@ export function mountLiteBackground(canvas: HTMLCanvasElement, mode: BgMode, opt
     { passive: true },
   );
   draw();
-  if (!reduced) raf = requestAnimationFrame(loop);
   canvas.classList.add('is-ready');
-  return { destroy: () => cancelAnimationFrame(raf) };
+  if (!reduced) {
+    const wake = () => {
+      for (const ev of WAKE) window.removeEventListener(ev, wake);
+      if (!raf) raf = requestAnimationFrame(loop);
+    };
+    for (const ev of WAKE) window.addEventListener(ev, wake, { passive: true, once: true });
+  }
 }

@@ -21,7 +21,8 @@ const sections = k.categories
   .map((cat) => ({ ...cat, items: k.items.filter((i) => i.category === cat.id) }))
   .filter((cat) => cat.items.length > 0);
 const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: k.title, path: '/cases/' }])];
-/** первые восемь кадров страницы грузятся сразу — остальные лениво (BRIEF-5 §3) */
+/** первые кадры страницы грузятся сразу, остальные лениво (BRIEF-5 §3). Четыре — первый ряд на десктопе;
+ *  на телефоне LCP — текст лида, и лишние ранние картинки только отнимают канал у шрифта (BRIEF-SEO §6) */
 let shown = 0;
 ---
 
@@ -48,7 +49,7 @@ let shown = 0;
           <p class="t-small cat__lead">{cat.lead}</p>
         </header>
         <div class="grid-tiles">
-          {cat.items.map((item) => <CaseTile lang={lang} item={item} eager={shown++ < 8} anchor />)}
+          {cat.items.map((item) => <CaseTile lang={lang} item={item} eager={shown++ < 4} anchor />)}
         </div>
       </div>
     </section>

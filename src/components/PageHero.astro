@@ -44,11 +44,16 @@ const html = title;
   const el = document.querySelector<HTMLElement>('[data-lite-bg]');
   const canvas = el?.querySelector<HTMLCanvasElement>('canvas');
   if (el && canvas) {
-    try {
-      mountLiteBackground(canvas, el.dataset.liteBg as never, { beam: Number(el.dataset.beam || 0) });
-    } catch {
-      /* остаётся CSS-фон */
-    }
+    // BRIEF-SEO §6: WebGL-фон — после первой отрисовки, когда браузер свободен (LCP остаётся за текстом)
+    const mount = () => {
+      try {
+        mountLiteBackground(canvas, el.dataset.liteBg as never, { beam: Number(el.dataset.beam || 0) });
+      } catch {
+        /* остаётся CSS-фон */
+      }
+    };
+    if ('requestIdleCallback' in window) window.requestIdleCallback(mount, { timeout: 2000 });
+    else setTimeout(mount, 300);
   }
 </script>
 

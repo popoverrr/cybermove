@@ -26,6 +26,33 @@ import { state } from '../lib/state';
 export interface EngineOptions {
   canvas: HTMLCanvasElement;
   onFirstFrame?: () => void;
+  /** рендерер, созданный заранее (boot.create — чтобы окружение успело собраться асинхронно) */
+  gpu?: Gpu;
+  /** карты окружения, собранные заранее тем же рендерером */
+  env?: EnvironmentMaps;
+}
+
+export interface Gpu {
+  renderer: THREE.WebGLRenderer;
+  software: boolean;
+  tierName: Tier;
+}
+
+/** WebGL2-контекст и рендерер с настройками сцены (BRIEF-3 §3.6). */
+export function createGpu(canvas: HTMLCanvasElement): Gpu {
+  // MSAA в контексте: на LOW/MID рендер идёт напрямую и сглаживается им (BRIEF-3 §3.6); на HIGH сглаживает SMAA композера
+  const gl = canvas.getContext('webgl2', { antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: PARAMS.still });
+  if (!gl) throw new Error('WebGL2 недоступен');
+  const software = isSoftwareRenderer(gl);
+  const tierName = detectTier(PARAMS.tier);
+  const renderer = new THREE.WebGLRenderer({ canvas, context: gl, antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: PARAMS.still });
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  // тонмаппинг живёт внутри PBR-материалов (Environment.patchNeutralToneMap)
+  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.setClearColor(0xf2efe9, 1);
+  renderer.autoClear = true;
+  return { renderer, software, tierName };
 }
 
 export class Engine {
@@ -61,6 +88,9 @@ export class Engine {
   private running = false;
   private hidden = false;
   private firstFrameDone = false;
+  /** шейдеры сцены и постобработки скомпилированы в фоне (BRIEF-SEO §6) — можно рисовать */
+  private shadersReady = false;
+  private shadersPending = false;
   private slowFrames = 0;
   private slowSince = 0;
   private frameTimes: number[] = [];
@@ -80,27 +110,16 @@ export class Engine {
     this.canvas = opts.canvas;
     this.onFirstFrame = opts.onFirstFrame;
 
-    // MSAA в контексте: на LOW/MID рендер идёт напрямую и сглаживается им (BRIEF-3 §3.6); на HIGH сглаживает SMAA композера
-    const gl = this.canvas.getContext('webgl2', { antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: PARAMS.still });
-    if (!gl) throw new Error('WebGL2 недоступен');
-    this.software = isSoftwareRenderer(gl);
-
-    const tierName = detectTier(PARAMS.tier);
-    this.tier = TIERS[tierName];
-    this.stats.tier = tierName;
-
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, context: gl, antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: PARAMS.still });
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    // тонмаппинг живёт внутри PBR-материалов (Environment.patchNeutralToneMap)
-    this.renderer.toneMapping = THREE.NoToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
-    this.renderer.setClearColor(0xf2efe9, 1);
-    this.renderer.autoClear = true;
+    const gpu = opts.gpu ?? createGpu(this.canvas);
+    this.software = gpu.software;
+    this.tier = TIERS[gpu.tierName];
+    this.stats.tier = gpu.tierName;
+    this.renderer = gpu.renderer;
 
     this.camera = new THREE.PerspectiveCamera(30, 1, 0.5, 80);
     this.camera.position.set(0, 0, 7.6);
 
-    this.env = buildEnvironments(this.renderer, this.tier.envSize);
+    this.env = opts.env ?? buildEnvironments(this.renderer, this.tier.envSize);
     this.scene.environment = this.env.warm;
     this.scene.environmentIntensity = 0.7;
     this.lights = addStudioLights(this.scene);
@@ -215,6 +234,12 @@ export class Engine {
   /** Один кадр: обновление сюжета и рендер. Возвращает false, когда still-кадр отрисован и продолжать не нужно. */
   frame(now: number): boolean {
     if (this.hidden) return true;
+    // Первый кадр — только после фоновой компиляции шейдеров: синхронная компиляция на первом render()
+    // держала основной поток секундами (Lighthouse: TBT 12–15 с). Сюжет стартует с первого настоящего кадра.
+    if (!this.shadersReady) {
+      this.prepareShaders();
+      return true;
+    }
     if (!this.stillStart) this.stillStart = now;
     if (!this.last) this.last = now;
     const t0 = performance.now();
@@ -263,6 +288,32 @@ export class Engine {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Компиляция всех программ через KHR_parallel_shader_compile (renderer.compileAsync): основной поток
+   * не ждёт компилятор. compile() обходит всю сцену, включая скрытые объекты следующих экранов, поэтому
+   * при прокрутке шейдеры уже готовы. Ключ программы зависит от цели рендера: на HIGH сцена рисуется в буфер
+   * композера — компилируем с ним же, проходы постобработки — со своими полноэкранными сценами.
+   */
+  private prepareShaders() {
+    if (this.shadersPending) return;
+    this.shadersPending = true;
+    const r = this.renderer;
+    const jobs: Promise<unknown>[] = [];
+    const composer = this.post?.composer as unknown as { inputBuffer?: THREE.WebGLRenderTarget; passes?: unknown[] } | undefined;
+    const prev = r.getRenderTarget();
+    r.setRenderTarget(composer?.inputBuffer ?? null);
+    jobs.push(r.compileAsync(this.scene, this.camera));
+    r.setRenderTarget(prev);
+    for (const pass of (composer?.passes ?? []) as Array<{ scene?: THREE.Scene; camera?: THREE.Camera }>) {
+      if (pass.scene && pass.camera && pass.scene !== this.scene) jobs.push(r.compileAsync(pass.scene, pass.camera));
+    }
+    Promise.all(jobs)
+      .catch(() => {})
+      .finally(() => {
+        this.shadersReady = true;
+      });
   }
 
   /** Если кадр дольше 18 мс на протяжении 1.5 с — понижаем тир на лету (не под программным рендером) */

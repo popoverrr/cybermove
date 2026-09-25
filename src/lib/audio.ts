@@ -202,7 +202,15 @@ export function initAudio() {
   // слушатели жестов ставим сразу: первая попытка может «зависнуть» в ожидании активации вкладки
   if (!muted) {
     gestures.forEach((g) => window.addEventListener(g, onGesture, { passive: true }));
-    void tryPlay().then((ok) => ok && offGestures());
+    // BRIEF-SEO §6: попытка автозапуска (и загрузка трека) — после load и первого простоя браузера,
+    // чтобы не конкурировать с первой отрисовкой; жест пользователя запускает музыку сразу, как раньше
+    const firstTry = () => {
+      if (!on) void tryPlay().then((ok) => ok && offGestures());
+    };
+    const idle = () =>
+      'requestIdleCallback' in window ? window.requestIdleCallback(firstTry, { timeout: 2500 }) : setTimeout(firstTry, 300);
+    if (document.readyState === 'complete') idle();
+    else window.addEventListener('load', idle, { once: true });
     // вкладка открыта в фоне — пробуем ещё раз, когда она становится видимой
     document.addEventListener('visibilitychange', () => {
       if (!on && !muted && !document.hidden) void tryPlay().then((ok) => ok && offGestures());

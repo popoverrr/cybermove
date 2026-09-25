@@ -105,6 +105,68 @@ export function buildEnvironments(renderer: THREE.WebGLRenderer, size = 256): En
 }
 
 /**
+ * То же, что buildEnvironments, но без блокировки основного потока (BRIEF-SEO §6).
+ * Почти всё время первого fromScene (1.2 с из 1.2 с на Windows/ANGLE) уходит на синхронную компиляцию шейдеров
+ * PMREM (размытие и GGX) и материалов студий; сам рендер — миллисекунды. Поэтому сначала шейдеры компилируются
+ * через renderer.compileAsync (KHR_parallel_shader_compile) с той же целью рендера, что у PMREM (линейный
+ * half-float), а fromScene вызывается, когда программы готовы. Внутренности PMREMGenerator (three 0.186) —
+ * не публичный API: если их нет, прогрев пропускается и работает прежний синхронный путь.
+ */
+export async function buildEnvironmentsAsync(renderer: THREE.WebGLRenderer, size = 256): Promise<EnvironmentMaps> {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const scenes = [WARM_STUDIO, NIGHT_STUDIO].map((preset) => {
+    const scene = new THREE.Scene();
+    preset.build(scene);
+    return scene;
+  });
+
+  const inner = pmrem as unknown as {
+    _setSize?: (size: number) => void;
+    _allocateTargets?: () => THREE.WebGLRenderTarget;
+    _blurMaterial?: THREE.Material | null;
+    _ggxMaterial?: THREE.Material | null;
+  };
+  if (typeof inner._setSize === 'function' && typeof inner._allocateTargets === 'function') {
+    try {
+      inner._setSize(size);
+      const probe = inner._allocateTargets();
+      const flat = new THREE.Scene();
+      for (const m of [inner._blurMaterial, inner._ggxMaterial]) if (m) flat.add(new THREE.Mesh(new THREE.BufferGeometry(), m));
+      const prev = renderer.getRenderTarget();
+      renderer.setRenderTarget(probe);
+      const jobs = [renderer.compileAsync(flat, new THREE.OrthographicCamera())];
+      const cube = new THREE.PerspectiveCamera(90, 1, 0.1, 100);
+      for (const scene of scenes) jobs.push(renderer.compileAsync(scene, cube));
+      renderer.setRenderTarget(prev);
+      await Promise.all(jobs);
+      probe.dispose();
+    } catch {
+      /* прогрев не удался — fromScene скомпилирует синхронно, как раньше */
+    }
+  }
+
+  const [warmRt, nightRt] = scenes.map((scene) => {
+    // sigma даёт мягкость краям софтбокса
+    const rt = pmrem.fromScene(scene, 0.04, 0.1, 100, { size });
+    scene.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (m.geometry) m.geometry.dispose();
+      if (m.material) (m.material as THREE.Material).dispose();
+    });
+    return rt;
+  });
+  pmrem.dispose();
+  return {
+    warm: warmRt.texture,
+    night: nightRt.texture,
+    dispose() {
+      warmRt.dispose();
+      nightRt.dispose();
+    },
+  };
+}
+
+/**
  * Патч MeshPhysicalMaterial: второй envMap и uEnvMix для непрерывного смешения двух студий.
  * Заменяет textureCubeUV(envMap, …) на смесь двух PMREM-текстур одинакового размера.
  */

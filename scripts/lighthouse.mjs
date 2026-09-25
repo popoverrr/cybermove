@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 /**
- * Lighthouse через Playwright-Chromium (SwiftShader): node scripts/lighthouse.mjs [base] [path] [mobile]
- * Результат: docs/lighthouse-<имя>.json и краткий вывод. Под программным рендером Performance занижен.
+ * Lighthouse через Playwright-Chromium: node scripts/lighthouse.mjs [base] [path] [mobile|desktop] [gpu]
+ * Результат: docs/lighthouse-<имя>.json и краткий вывод.
+ * По умолчанию WebGL идёт через SwiftShader (программный рендер, Performance главной сильно занижен).
+ * С аргументом gpu Chromium рисует на видеокарте машины (ANGLE D3D11) — ближе к реальному устройству;
+ * результат пишется в docs/lighthouse-<имя>-gpu.json.
  */
 import { chromium } from 'playwright';
 import lighthouse from 'lighthouse';
@@ -12,8 +15,10 @@ const base = process.argv[2] || 'http://127.0.0.1:4331';
 const rawPath = process.argv[3] || 'home';
 const path = rawPath === 'home' ? '/' : '/' + rawPath.replace(/^\/+/, '');
 const mobile = process.argv[4] === 'mobile';
+const GPU = process.argv[5] === 'gpu';
 const port = 9333;
-const browser = await chromium.launch({ headless: true, args: [`--remote-debugging-port=${port}`, '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-webgl'] });
+const gl = GPU ? ['--use-angle=d3d11', '--enable-gpu'] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
+const browser = await chromium.launch({ headless: true, args: [`--remote-debugging-port=${port}`, ...gl, '--ignore-gpu-blocklist', '--enable-webgl'] });
 try {
   const result = await lighthouse(`${base}${path}`, {
     port,
@@ -25,7 +30,7 @@ try {
     throttlingMethod: 'simulate',
   });
   const lhr = result.lhr;
-  const name = (path === '/' ? 'home' : path.replace(/\W+/g, '-').replace(/^-|-$/g, '')) + (mobile ? '-mobile' : '-desktop');
+  const name = (path === '/' ? 'home' : path.replace(/\W+/g, '-').replace(/^-|-$/g, '')) + (mobile ? '-mobile' : '-desktop') + (GPU ? '-gpu' : '');
   writeFileSync(`docs/lighthouse-${name}.json`, JSON.stringify(lhr, null, 1));
   const scores = Object.fromEntries(Object.entries(lhr.categories).map(([k, v]) => [k, Math.round((v.score ?? 0) * 100)]));
   const a = lhr.audits;

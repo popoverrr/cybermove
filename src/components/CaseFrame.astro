@@ -27,6 +27,8 @@ export interface Props {
   /** приближение кадра при наведении и в центре экрана на тач (в шапке страницы не нужно) */
   zoom?: boolean;
   eager?: boolean;
+  /** высокий приоритет загрузки — только для кадра, который сам является LCP (шапка страницы кейса) */
+  priority?: boolean;
   class?: string;
 }
 const {
@@ -41,6 +43,7 @@ const {
   hideName = false,
   zoom = true,
   eager = false,
+  priority = false,
   class: cls = '',
 } = Astro.props;
 
@@ -64,7 +67,7 @@ const [rw, rh] = ratio.split(':').map(Number);
       widths={widthsFor(image, widths)}
       sizes={sizes}
       loading={eager ? 'eager' : 'lazy'}
-      fetchpriority={eager ? 'high' : undefined}
+      fetchpriority={priority ? 'high' : undefined}
       decoding="async"
       class="frame__img"
     />

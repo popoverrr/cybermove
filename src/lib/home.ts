@@ -525,7 +525,7 @@ async function loadEngine(canvas: HTMLCanvasElement) {
   try {
     const mod = await import('../webgl/boot');
     // кадры рисует единый тикер страницы (tick), собственный rAF движка не запускаем
-    engine = mod.create(canvas, () => document.body.classList.add('gl-ready'));
+    engine = await mod.create(canvas, () => document.body.classList.add('gl-ready'));
     canvas.dataset.tier = engine.tier.name;
   } catch (err) {
     console.error('[cybermove] WebGL init failed', err);

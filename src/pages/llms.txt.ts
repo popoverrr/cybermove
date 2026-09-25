@@ -22,7 +22,7 @@ export const GET: APIRoute = () => {
   lines.push('## Направления и услуги', '');
   for (const d of ru.services.directions) {
     lines.push(`- [${d.nameFull}](${url('ru', `/services/${d.slug}/`)}): ${d.phrase}`);
-    for (const s of d.services) lines.push(`  - ${s.name}: ${s.line}`);
+    for (const s of d.services) lines.push(`  - [${s.seo.h1}](${url('ru', `/services/${d.slug}/${s.id}/`)}): ${s.line}`);
   }
   lines.push('');
 
@@ -37,7 +37,10 @@ export const GET: APIRoute = () => {
 
   lines.push('## English', '');
   lines.push(`- [Home](${url('en', '/')})`);
-  for (const d of en.services.directions) lines.push(`- [${d.nameFull}](${url('en', `/services/${d.slug}/`)}): ${d.phrase}`);
+  for (const d of en.services.directions) {
+    lines.push(`- [${d.nameFull}](${url('en', `/services/${d.slug}/`)}): ${d.phrase}`);
+    for (const s of d.services) lines.push(`  - [${s.seo.h1}](${url('en', `/services/${d.slug}/${s.id}/`)}): ${s.line}`);
+  }
   lines.push(`- [Case studies](${url('en', '/cases/')})`);
   lines.push(`- [Contact](${url('en', '/contact/')})`);
   lines.push('');

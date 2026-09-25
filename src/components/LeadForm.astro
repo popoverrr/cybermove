@@ -13,8 +13,10 @@ export interface Props {
   lang: LangCode;
   id?: string;
   compact?: boolean;
+  /** BRIEF-SEO §1: поле «Услуга» (на /contact/); `?service=<id>` выбирает пункт (lib/form.ts) */
+  serviceSelect?: boolean;
 }
-const { lang, id = 'lead', compact = false } = Astro.props;
+const { lang, id = 'lead', compact = false, serviceSelect = false } = Astro.props;
 const c = getContent(lang);
 const f = c.contact.form;
 ---
@@ -35,6 +37,20 @@ const f = c.contact.form;
       <span class="field__label t-micro">{f.company}</span>
       <input class="field__input" type="text" name="company" autocomplete="organization" maxlength="200" />
     </label>
+
+    {serviceSelect && (
+      <label class="field field--wide">
+        <span class="field__label t-micro">{f.service}</span>
+        <select class="field__input field__select" name="service" data-service-select>
+          <option value="">{f.serviceNone}</option>
+          {c.services.directions.map((d) => (
+            <optgroup label={d.nameFull}>
+              {d.services.map((s) => <option value={s.id}>{s.name}</option>)}
+            </optgroup>
+          ))}
+        </select>
+      </label>
+    )}
 
     <fieldset class="field field--wide formats">
       <legend class="field__label t-micro">{f.format}</legend>
@@ -130,6 +146,24 @@ const f = c.contact.form;
     resize: vertical;
     min-height: 3.5rem;
     line-height: 1.4;
+  }
+  /* выбор услуги: нативный select в линию поля, стрелка — две волосяные линии */
+  .field__select {
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 0;
+    padding-right: 1.5rem;
+    color: inherit;
+    cursor: pointer;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 9px) 55%, calc(100% - 4px) 55%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+  }
+  .field__select option,
+  .field__select optgroup {
+    background: var(--bg);
+    color: var(--fg);
   }
   .field__error {
     display: none;

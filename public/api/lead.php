@@ -2,7 +2,7 @@
 /**
  * CYBERMOVE — приём заявок с формы (BRIEF §12).
  *
- * Принимает POST JSON: name, contact, company, format, message, lang, page, utm, ts, elapsed, website (honeypot).
+ * Принимает POST JSON: name, contact, company, format, service, service_name, message, lang, page, utm, ts, elapsed, website (honeypot).
  * Валидация, honeypot, минимальное время заполнения, rate-limit по IP на файлах.
  * Доставка: письмо (LEADS_EMAIL), Telegram (Bot API через curl), опциональный вебхук CRM.
  * Каналы независимы: сбой одного не ломает остальные. Настройки — в config.php (см. config.sample.php).
@@ -88,6 +88,9 @@ $name     = $field('name', 120);
 $contact  = $field('contact', 160);
 $company  = $field('company', 200);
 $format   = $field('format', 40);
+// BRIEF-SEO §1: услуга со страницы услуги (/contact/?service=<id>); id — только латиница, цифры и дефис
+$service  = preg_replace('/[^a-z0-9-]/', '', strtolower($field('service', 60))) ?? '';
+$serviceName = $service !== '' ? $field('service_name', 160) : '';
 $message  = $field('message', 4000);
 $lang     = $field('lang', 8);
 $page     = $field('page', 300);
@@ -158,6 +161,7 @@ $lines = [
     'Контакт: ' . $contact,
     'Компания / сайт: ' . ($company !== '' ? $company : '—'),
     'Формат: ' . $formatLabel,
+    'Услуга: ' . ($service !== '' ? ($serviceName !== '' ? $serviceName . ' (' . $service . ')' : $service) : '—'),
     'Сообщение: ' . ($message !== '' ? $message : '—'),
     '',
     'Язык: ' . ($lang !== '' ? $lang : 'ru'),
@@ -215,7 +219,7 @@ if ($config['TELEGRAM_ENABLED'] && $config['TELEGRAM_TOKEN'] !== '' && $config['
 // --- вебхук CRM
 if ($config['WEBHOOK_ENABLED'] && $config['WEBHOOK_URL'] !== '' && function_exists('curl_init')) {
     $payload = json_encode([
-        'name' => $name, 'contact' => $contact, 'company' => $company, 'format' => $format,
+        'name' => $name, 'contact' => $contact, 'company' => $company, 'format' => $format, 'service' => $service,
         'message' => $message, 'lang' => $lang, 'page' => $page, 'utm' => $utm, 'ip' => $ip,
         'created_at' => date('c'), 'source' => 'cybermove-site',
     ], JSON_UNESCAPED_UNICODE);
@@ -240,7 +244,7 @@ if ($config['WEBHOOK_ENABLED'] && $config['WEBHOOK_URL'] !== '' && function_exis
 // --- локальный журнал (страховка, если каналы недоступны)
 if ($config['LOG_LEADS']) {
     $logLine = date('c') . "\t" . json_encode([
-        'name' => $name, 'contact' => $contact, 'company' => $company, 'format' => $format,
+        'name' => $name, 'contact' => $contact, 'company' => $company, 'format' => $format, 'service' => $service,
         'message' => $message, 'lang' => $lang, 'page' => $page, 'utm' => $utm, 'ip' => $ip, 'delivery' => $results,
     ], JSON_UNESCAPED_UNICODE) . "\n";
     @file_put_contents($storage . '/leads.log', $logLine, FILE_APPEND | LOCK_EX);

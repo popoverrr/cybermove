@@ -36,7 +36,9 @@
     "invalidContact": "Укажите телефон, WhatsApp или Telegram",
     "tooFast": "Похоже, форма заполнена слишком быстро. Проверьте поля и отправьте ещё раз.",
     "consentPrefix": "Отправляя форму, вы соглашаетесь с",
-    "consentLink": "политикой конфиденциальности"
+    "consentLink": "политикой конфиденциальности",
+    "service": "Услуга",
+    "serviceNone": "Пока не выбрал(а) — нужен разбор"
   },
   "channelsTitle": "Каналы",
   "whatsappLabel": "WhatsApp",

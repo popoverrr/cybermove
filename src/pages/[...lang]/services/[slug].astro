@@ -1,9 +1,11 @@
 ---
-/** /services/<направление>/ — страница направления: услуги блоками с якорями, связанные кейсы, CTA. */
+/**
+ * /services/<направление>/ — хаб направления (BRIEF-SEO §1): вводный текст, карточки услуг со ссылками на их страницы
+ * (якоря id сохранены), кейсы направления, другие направления, CTA.
+ */
 import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
 import CtaBlock from '../../../components/CtaBlock.astro';
-import Button from '../../../components/Button.astro';
 import CaseTile from '../../../components/CaseTile.astro';
 import { getContent, localePath, findCase, type LangCode } from '../../../lib/i18n';
 import { LANGS } from '../../../../site.config';
@@ -24,87 +26,95 @@ const { lang, slug } = Astro.props;
 const c = getContent(lang);
 const d = c.services.directions.find((x) => x.slug === slug)!;
 const path = `/services/${d.slug}/`;
+const svcPath = (id: string) => `${path}${id}/`;
 const others = c.services.directions.filter((x) => x.id !== d.id);
-const title = lang === 'ru' ? `${d.nameFull} — ${d.h2} | ${c.ui.brand}` : `${d.nameFull} — ${d.h2} | ${c.ui.brand}`;
-const description = `${d.phrase} ${d.services.map((s) => s.name).join(', ')}.`;
-const jsonLd = [
-  breadcrumbLd(lang, [
-    { name: c.ui.brand, path: '/' },
-    { name: c.ui.services, path: '/services/' },
-    { name: d.name, path },
-  ]),
-  serviceLd(lang, { name: d.nameFull, description: d.phrase, path, services: d.services.map((s) => ({ name: s.name, description: s.line, anchor: s.id })) }),
+// кейсы направления: по порядку услуг, без повторов, не больше шести
+const caseIds = [...new Set(d.services.flatMap((s) => s.seo.cases))].slice(0, 6);
+const cases = caseIds.map((id) => findCase(c, id)).filter((k): k is NonNullable<typeof k> => Boolean(k));
+const crumbs = [
+  { name: c.ui.home, path: '/' },
+  { name: c.ui.services, path: '/services/' },
+  { name: d.name, path },
 ];
+const jsonLd = [
+  breadcrumbLd(lang, crumbs),
+  serviceLd(lang, {
+    name: d.nameFull,
+    description: d.seo.description,
+    path,
+    services: d.services.map((s) => ({ name: s.seo.h1, description: s.seo.description, path: svcPath(s.id) })),
+  }),
+];
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<Base lang={lang} path={path} title={title} description={description} theme={d.theme as never} jsonLd={jsonLd} ogImage={`/posters/og-${d.id}.jpg`}>
-  <PageHero theme={d.theme as never} label={`${d.index} · ${d.stage} · ${d.name}`} title={d.h2} accent={d.h2Accent} lead={d.phrase} micro={d.micro} photo={`dir-${d.id}`} beam={d.id === 'brand-content' ? 0.6 : 0} />
+<Base lang={lang} path={path} title={d.seo.title} description={d.seo.description} theme={d.theme as never} jsonLd={jsonLd} ogImage={`/posters/og-${d.id}.jpg`}>
+  <PageHero
+    theme={d.theme as never}
+    label={`${d.index} · ${d.stage}`}
+    kicker={d.seo.kicker}
+    title={d.h2}
+    accent={d.h2Accent}
+    lead={d.phrase}
+    micro={d.micro}
+    photo={`dir-${d.id}`}
+    beam={d.id === 'brand-content' ? 0.6 : 0}
+    crumbs={crumbs.map((x) => ({ name: x.name, href: localePath(lang, x.path) }))}
+    ariaCrumbs={c.ui.crumbs}
+  />
 
-  <nav class="subnav container" aria-label={c.ui.services}>
-    <ol class="subnav__list">
-      {d.services.map((s, i) => (
-        <li><a class="t-micro" href={`#${s.id}`}>0{i + 1} · {s.name}</a></li>
-      ))}
-    </ol>
-  </nav>
-
-  {d.note && (
-    <p class="note container t-small">{d.note}</p>
-  )}
-
-  <section class="svcs">
-    {d.services.map((s, i) => (
-      <article class="svcp" id={s.id}>
-        <div class="container svcp__inner">
-          <header class="svcp__head">
-            <p class="t-micro svcp__idx">0{i + 1} / 0{d.services.length}</p>
-            <h2 class="t-h2 svcp__title">{s.name}</h2>
-            <p class="t-lead svcp__line">{s.line}</p>
-          </header>
-          <div class="svcp__body">
-            <div class="svcp__block">
-              <p class="t-micro">{c.ui.included}</p>
-              <ul class="svcp__list">
-                {s.includes.map((x) => <li>{x}</li>)}
-              </ul>
-            </div>
-            <div class="svcp__block">
-              <p class="t-micro">{c.ui.result}</p>
-              <p class="svcp__result">{s.result}</p>
-            </div>
-            <div class="svcp__block">
-              <p class="t-micro">{c.ui.format}</p>
-              <p class="t-small">{s.format}</p>
-            </div>
-            {s.cases.length > 0 && (
-              <div class="svcp__block">
-                <p class="t-micro">{c.ui.relatedCases}</p>
-                <div class="svcp__cases">
-                  {s.cases.map((id) => {
-                    const k = findCase(c, id);
-                    return k ? <CaseTile lang={lang} item={k} compact sizes="(max-width: 720px) 45vw, 220px" /> : null;
-                  })}
-                </div>
-              </div>
-            )}
-            <div class="svcp__cta">
-              <Button href={localePath(lang, '/contact/')} variant="ghost" arrow>{c.ui.cta}</Button>
-            </div>
-          </div>
-        </div>
-      </article>
-    ))}
+  <section class="hub-intro">
+    <div class="container hub-intro__inner">
+      <p class="hub-intro__text">{d.seo.intro}</p>
+      {d.note && <p class="t-small hub-intro__note">{d.note}</p>}
+    </div>
   </section>
 
-  <section class="others">
+  <section class="hub" aria-labelledby="hub-services">
+    <div class="container hub__inner">
+      <header class="hub__head">
+        <p class="t-micro hub__idx">{d.index} · {pad(d.services.length)}</p>
+        <h2 class="t-h3" id="hub-services">{c.ui.servicesOfDirection}</h2>
+      </header>
+      <ol class:list={['hub__cards', { 'hub__cards--pairs': d.services.length % 2 === 0 }]}>
+        {d.services.map((s, i) => (
+          <li class="card" id={s.id}>
+            <p class="t-micro card__idx">{pad(i + 1)} / {pad(d.services.length)}</p>
+            <h3 class="t-h4 card__title"><a href={localePath(lang, svcPath(s.id))}>{s.name}</a></h3>
+            <p class="card__line">{s.line}</p>
+            <ul class="card__inc t-small">
+              {s.seo.includes.slice(0, 4).map((x) => <li>{x.t}</li>)}
+            </ul>
+            <a class="t-micro card__more" href={localePath(lang, svcPath(s.id))} aria-label={`${c.ui.serviceMore}: ${s.name}`}>{c.ui.serviceMore} →</a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  {cases.length > 0 && (
+    <section class="hub" aria-labelledby="hub-cases">
+      <div class="container hub__inner">
+        <header class="hub__head">
+          <p class="t-micro hub__idx">{d.index} · {c.ui.formula.join(' → ')}</p>
+          <h2 class="t-h3" id="hub-cases">{c.ui.directionCases}</h2>
+        </header>
+        <div class="hub__cases">
+          {cases.map((k) => <CaseTile lang={lang} item={k} compact sizes="(max-width: 720px) 45vw, 260px" />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="others" aria-labelledby="hub-others">
     <div class="container others__inner">
-      <p class="t-micro">{c.ui.directions}</p>
+      <h2 class="t-micro others__title" id="hub-others">{c.ui.directions}</h2>
       <ul class="others__list">
         {others.map((o) => (
           <li>
             <a class="others__link" href={localePath(lang, `/services/${o.slug}/`)}>
               <span class="t-micro">{o.index}</span>
-              <span class="t-h4">{o.name}</span>
+              <span class="t-h4">{o.nameFull}</span>
               <span class="t-small">{o.phrase}</span>
             </a>
           </li>
@@ -117,29 +127,25 @@ const jsonLd = [
 </Base>
 
 <style>
-  .subnav {
-    padding-top: var(--space-6);
-    padding-bottom: var(--space-6);
-    border-bottom: 1px solid var(--hair);
+  .hub-intro__inner {
+    display: grid;
+    gap: var(--space-4);
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-12);
     max-width: none;
   }
-  .subnav__list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-4) var(--space-8);
+  .hub-intro__text {
+    font-size: var(--fs-lead);
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    max-width: 68ch;
+    text-wrap: pretty;
   }
-  .subnav a {
-    color: var(--fg-2);
-  }
-  .subnav a:hover {
-    color: var(--fg);
-  }
-  .note {
-    padding-top: var(--space-6);
+  .hub-intro__note {
+    max-width: 88ch;
     color: var(--fg-3);
-    max-width: none;
   }
-  .note::before {
+  .hub-intro__note::before {
     content: '';
     display: inline-block;
     width: 14px;
@@ -148,80 +154,93 @@ const jsonLd = [
     vertical-align: middle;
     margin-right: 10px;
   }
-  .svcp {
+  .hub {
     border-top: 1px solid var(--hair);
-    scroll-margin-top: calc(var(--header-h) + 1rem);
   }
-  .svcp:first-child {
-    border-top: 0;
-  }
-  .svcp__inner {
+  .hub__inner {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
     gap: var(--space-8) var(--space-12);
-    padding-top: var(--section-pad);
-    padding-bottom: var(--section-pad);
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
     max-width: none;
   }
-  .svcp__head {
+  .hub__head {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-3);
     align-content: start;
     position: sticky;
     top: calc(var(--header-h) + 1rem);
   }
-  .svcp__idx {
+  .hub__idx {
     color: var(--accent);
   }
-  .svcp__line {
-    max-width: 40ch;
-  }
-  .svcp__body {
+  .hub__cards {
     display: grid;
-    gap: var(--space-8);
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-4);
   }
-  .svcp__block {
+  /* четыре услуги — две пары, без одинокой карточки в третьем ряду */
+  .hub__cards--pairs {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  }
+  .card {
     display: grid;
+    grid-template-rows: auto auto auto 1fr auto;
     gap: var(--space-3);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--hair);
+    padding: var(--space-6);
+    border: 1px solid var(--hair);
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+    transition: border-color var(--dur-fast);
   }
-  .svcp__list {
+  .card:hover,
+  .card:focus-within {
+    border-color: var(--hair-strong);
+  }
+  .card__idx {
+    color: var(--accent);
+  }
+  .card__title a {
+    transition: color var(--dur-fast);
+  }
+  .card__title a:hover {
+    color: var(--accent);
+  }
+  .card__line {
+    color: var(--fg-2);
+    line-height: 1.45;
+  }
+  .card__inc {
     display: grid;
-    gap: 0.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.3rem;
+    align-content: start;
   }
-  .svcp__list li {
+  .card__inc li {
     position: relative;
-    padding-left: 1.1rem;
-    line-height: 1.4;
+    padding-left: 1rem;
   }
-  .svcp__list li::before {
+  .card__inc li::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 0.65em;
+    top: 0.7em;
     width: 6px;
     height: 1px;
     background: var(--accent);
   }
-  .svcp__result {
-    font-size: var(--fs-h4);
-    line-height: 1.3;
-    letter-spacing: -0.01em;
-    max-width: 48ch;
+  .card__more {
+    color: var(--fg);
+    justify-self: start;
+    padding-top: var(--space-2);
   }
-  /* BRIEF-5 §4: связанные кейсы — плитки 4:3, три в ряд */
-  .svcp__cases {
+  .card__more:hover {
+    color: var(--accent);
+  }
+  .hub__cases {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-4) var(--space-3);
-    max-width: 760px;
-  }
-  @media (max-width: 720px) {
-    .svcp__cases {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    max-width: 820px;
   }
   .others {
     border-top: 1px solid var(--hair);
@@ -232,6 +251,9 @@ const jsonLd = [
     display: grid;
     gap: var(--space-6);
     max-width: none;
+  }
+  .others__title {
+    color: var(--fg-3);
   }
   .others__list {
     display: grid;
@@ -253,12 +275,19 @@ const jsonLd = [
     color: var(--fg-2);
   }
   @media (max-width: 899px) {
-    .svcp__inner {
+    .hub__inner {
       grid-template-columns: 1fr;
       gap: var(--space-6);
+      padding-top: var(--space-12);
+      padding-bottom: var(--space-12);
     }
-    .svcp__head {
+    .hub__head {
       position: static;
+    }
+  }
+  @media (max-width: 720px) {
+    .hub__cases {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>

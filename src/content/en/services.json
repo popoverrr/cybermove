@@ -20,7 +20,14 @@
       "phrase": "Every engagement starts with an audit: we find where the business loses money and clients, and what will drive growth fastest.",
       "result": "Map of problems and opportunities · priorities · roadmap · budget",
       "note": "“Financial audit” here means management-level financial diagnostics of a business, not a statutory audit of financial statements. “Investment” means investing in your own business, not securities advice.",
-      "micro": ["CAC", "LTV", "ROMI", "CASH FLOW", "MARGIN", "CR"],
+      "micro": [
+        "CAC",
+        "LTV",
+        "ROMI",
+        "CASH FLOW",
+        "MARGIN",
+        "CR"
+      ],
       "services": [
         {
           "id": "business-audit",
@@ -38,7 +45,131 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["usyk", "brsm-nafta", "tpk", "gaia"]
+          "cases": [
+            "usyk",
+            "brsm-nafta",
+            "tpk",
+            "gaia"
+          ],
+          "seo": {
+            "title": "Sales and Marketing Audit — CYBERMOVE",
+            "description": "Sales and marketing audit on your own data: product, ads, funnel and sales team. A map of where revenue leaks and what to fix first. Free initial review.",
+            "h1": "Sales and marketing audit",
+            "lead": "For owners who pay for advertising and a sales team but are not sure the money works. We review the product, marketing and sales process and show where customers are lost and what to fix first.",
+            "intro": "A marketing audit without a sales audit tells half the story: leads can be cheap and still never close. So we look at the whole path — from the offer and the ads to payment and repeat purchase — and work from CRM exports, ad accounts and analytics rather than the team's impressions. The outcome is not a list of general advice but numbers for your funnel and a ranked plan.",
+            "includes": [
+              {
+                "t": "Product and offer",
+                "d": "What you actually sell, to whom, and why people buy from you today; where the offer loses to competitors on price, promise or terms."
+              },
+              {
+                "t": "Positioning and competitors",
+                "d": "How the market sees you and how you really differ. We review key competitors: prices, promises, channels, strengths and weaknesses."
+              },
+              {
+                "t": "Channels and funnel",
+                "d": "Where leads come from, what each one costs, and which step of the funnel loses the most money."
+              },
+              {
+                "t": "Customer journey",
+                "d": "From first contact to payment: response time, follow-ups, reasons for lost deals and repeat purchases."
+              },
+              {
+                "t": "Sales team",
+                "d": "Scripts, call and chat reviews, objection handling and CRM discipline — a proper sales team audit."
+              },
+              {
+                "t": "Analytics and data",
+                "d": "What is measured and what is not: goals, lead sources and reports a manager can actually base decisions on."
+              },
+              {
+                "t": "Website and touchpoints",
+                "d": "Pages, forms, messengers and phone lines — where a lead can get lost for purely technical reasons."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Kick-off meeting",
+                "d": "Goals, constraints, access to ads, CRM and analytics. We agree which decisions the audit has to support.",
+                "time": "1–2 days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Data collection",
+                "d": "CRM and ad account exports, call reviews, test inquiries, interviews with the team.",
+                "time": "1–2 weeks",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Diagnosis",
+                "d": "We break the funnel down step by step, quantify losses and compare with the market and competitors.",
+                "time": "about a week",
+                "stage": "CORE"
+              },
+              {
+                "t": "Problems and opportunities map",
+                "d": "Priorities: quick wins, changes that need investment, and things better left alone for now.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Review with the team",
+                "d": "We present findings to the owner and managers and build an implementation plan — with us or in-house.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A diagnosis for every funnel step: where and how much the business loses",
+              "A problems and opportunities map ranked by impact and cost",
+              "Recommendations on product, acquisition channels and the sales team",
+              "A short list of metrics to track after the changes"
+            ],
+            "forWhom": [
+              {
+                "t": "Ads run, sales lag",
+                "d": "Leads come in, but few turn into payments, and nobody knows whether traffic or sales is to blame."
+              },
+              {
+                "t": "Growth without control",
+                "d": "The company adds locations and channels faster than processes can keep up — as in the four-shop barbershop chain we managed operationally."
+              },
+              {
+                "t": "Before investing in growth",
+                "d": "Before a new line of business, a rebrand or a bigger budget — so you don't scale existing mistakes."
+              },
+              {
+                "t": "B2B with complex deals",
+                "d": "Long sales cycles, several decision-makers, tenders: manufacturing, engineering, industrial supply."
+              }
+            ],
+            "faq": [
+              {
+                "q": "How much does a business audit cost?",
+                "a": "It depends on scale: the number of products and channels, the amount of data and the number of locations. We quote after the initial review, which is free and takes one meeting."
+              },
+              {
+                "q": "How long does it take?",
+                "a": "Usually two to four weeks. Data collection takes the most time, so it goes faster where the CRM and ad accounts are already kept in order."
+              },
+              {
+                "q": "What do you need from us?",
+                "a": "Read-only access to ad accounts, CRM and analytics, sales exports, a contact person in sales, and two or three meetings with the team."
+              },
+              {
+                "q": "How is an audit different from a consultation?",
+                "a": "A consultation is an opinion on a question; an audit is a check against your own data. You get numbers for your funnel and priorities that turn into a work plan, not general advice."
+              },
+              {
+                "q": "What happens after the audit?",
+                "a": "You receive the report and the plan. You can implement it yourself, with us on specific areas — website and CRM, advertising, sales — or end to end."
+              }
+            ],
+            "cases": [
+              "barbershops-kyiv",
+              "tpk",
+              "brsm-nafta"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "financial-audit",
@@ -55,7 +186,126 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["barbershops-kyiv", "toscana-wine", "sii-concept"]
+          "cases": [
+            "barbershops-kyiv",
+            "toscana-wine",
+            "sii-concept"
+          ],
+          "seo": {
+            "title": "Financial Health Check for Business — CYBERMOVE",
+            "description": "Financial health check for business: unit economics, management P&L, cash flow and channel profitability. See where the company earns and loses. Free review.",
+            "h1": "Financial health check for business",
+            "lead": "We show which products, channels and locations make money and which ones eat it. For owners who need a management view, not statements for the tax office.",
+            "intro": "This is a management-level financial review, not a statutory audit of financial statements. We pull numbers from accounting, bank statements, CRM and ad accounts into one model and answer the questions that decide the budget: what a customer costs to acquire, how much they bring over their lifetime, where the margin goes and when a cash gap may appear. The report is written for an owner, with conclusions you can turn into decisions.",
+            "includes": [
+              {
+                "t": "Unit economics",
+                "d": "Customer acquisition cost, lifetime revenue per customer and margin per unit or order."
+              },
+              {
+                "t": "Management P&L",
+                "d": "Revenue and costs by business line and location in one report you can read without an accountant."
+              },
+              {
+                "t": "Cash flow",
+                "d": "When money comes in, when it goes out, and a forecast of possible cash gaps and the reserve you need."
+              },
+              {
+                "t": "Product and channel profitability",
+                "d": "Which products and customer sources pay off and which are subsidised by others."
+              },
+              {
+                "t": "Cost structure",
+                "d": "Fixed and variable costs, what grows faster than revenue, and what can be cut without losing quality."
+              },
+              {
+                "t": "A working model",
+                "d": "A spreadsheet model your team can update and use to test decisions before making them."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Framing the questions",
+                "d": "Which decisions need to be made: cut costs, revise prices, open a location, raise funding.",
+                "time": "1–2 days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Collecting numbers",
+                "d": "Accounting, bank statements, CRM, ad accounts. Where data is missing we agree on assumptions and label them.",
+                "time": "1–2 weeks",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Model and calculations",
+                "d": "Unit economics, P&L by business line, cash flow forecast and scenarios.",
+                "time": "about a week",
+                "stage": "CORE"
+              },
+              {
+                "t": "Findings",
+                "d": "Where the business earns, where it loses, and which decisions follow from the numbers, with expected impact.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Handover and follow-up",
+                "d": "We show how to update the model and which figures to check monthly; optionally we compare actuals with the forecast a month later.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "Unit economics by product and channel",
+              "A management P&L and cash flow forecast",
+              "A list of decisions that follow from the numbers, with expected effect",
+              "A financial model your team maintains"
+            ],
+            "forWhom": [
+              {
+                "t": "Revenue up, cash down",
+                "d": "Turnover grows but the bank balance does not, and it is unclear where the margin disappears."
+              },
+              {
+                "t": "Several locations or lines",
+                "d": "A chain, a restaurant with delivery, offline plus an online shop — like Toscana's wine bars and e-commerce."
+              },
+              {
+                "t": "An investment decision",
+                "d": "Before opening a new location, launching a product or increasing the ad budget."
+              },
+              {
+                "t": "Talking to a partner or a bank",
+                "d": "You need an honest, consolidated picture of the business economics that an outsider can understand."
+              }
+            ],
+            "faq": [
+              {
+                "q": "Is this an audit of financial statements?",
+                "a": "No. It is a management financial review for the owner. Statutory audits are carried out by licensed audit firms; we do not replace that work or issue audit opinions."
+              },
+              {
+                "q": "How much does it cost?",
+                "a": "It depends on the number of business lines and locations, the state of your bookkeeping and the volume of data. We quote after the free initial review."
+              },
+              {
+                "q": "How long does it take?",
+                "a": "Usually two to three weeks. Collecting data takes longest; if everything sits in one system and exports are available, it goes faster."
+              },
+              {
+                "q": "What if our bookkeeping is a mess?",
+                "a": "That is common. We use the sources that exist, cover gaps with clearly labelled assumptions, and add recommendations on which records to set up so the numbers calculate themselves next time."
+              },
+              {
+                "q": "Who will see our numbers?",
+                "a": "Only the project team. Read-only access is enough, and exports can be shared as files without giving access to your systems."
+              }
+            ],
+            "cases": [
+              "barbershops-kyiv",
+              "toscana-wine",
+              "sii-concept"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "investment",
@@ -71,7 +321,125 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["apicapsules", "maharadj", "furniture-factory"]
+          "cases": [
+            "apicapsules",
+            "maharadj",
+            "furniture-factory"
+          ],
+          "seo": {
+            "title": "Cost Reduction Consulting — CYBERMOVE",
+            "description": "Cost reduction consulting: what to cut, where to invest and what growth budget you need, with payback scenarios for each option. Free initial cost review.",
+            "h1": "Cost reduction consulting",
+            "lead": "We review your costs and investment plans: what can be cut safely, what returns money fastest and what budget growth really needs. For owners facing a decision about money.",
+            "intro": "This is about investing in your own business — marketing, sales, systems, people, new locations — not advice on securities. Cutting costs blindly is risky: sometimes the most expensive line brings in most of the revenue, and a cheap contractor ends up costing the most through lost leads. So every decision is checked against unit economics, with a payback estimate and a view of what happens if it does not work.",
+            "includes": [
+              {
+                "t": "Cost analysis",
+                "d": "Fixed and variable costs, how they relate to revenue, lines that grow faster than the business and costs without a clear owner."
+              },
+              {
+                "t": "Marketing and sales budget",
+                "d": "How much to spend on acquisition and retention so customer cost stays within margin, and how to split it across channels."
+              },
+              {
+                "t": "Investment priorities",
+                "d": "Which initiatives pay back fastest — lead tracking, advertising, product, team, a new location — and what can wait."
+              },
+              {
+                "t": "Growth scenarios",
+                "d": "Cautious, base and bold scenarios with payback periods and break-even points."
+              },
+              {
+                "t": "Savings",
+                "d": "Contractors, tools, subscriptions and processes that can be replaced, merged or automated without losing quality."
+              },
+              {
+                "t": "Impact tracking",
+                "d": "Metrics that show within a month or two whether the change worked or should be revisited."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Goal and horizon",
+                "d": "Free up cash, fund growth, prepare for the season — we agree what the work must achieve.",
+                "time": "1–2 days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Costs and plans review",
+                "d": "Cost lines, current and planned investments and their link to results.",
+                "time": "1–2 weeks",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Scenarios",
+                "d": "Payback for each option, its risks, and what happens if it does not deliver.",
+                "stage": "CORE"
+              },
+              {
+                "t": "Change plan",
+                "d": "What to cut, what to reallocate, where to invest and in what order — with numbers for each item.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Implementation support",
+                "d": "Optionally we help rebuild the budget, switch contractors and set up cost control.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A financial plan of changes with numbers",
+              "A list of cuts with expected savings",
+              "Investment priorities with payback estimates",
+              "A marketing and sales budget for the next period"
+            ],
+            "forWhom": [
+              {
+                "t": "Costs growing faster than revenue",
+                "d": "Subscriptions, contractors and headcount have grown, returns have not, and some monthly spend is hard to explain."
+              },
+              {
+                "t": "Launching something new",
+                "d": "A startup or a new line: from idea to product concept, as in the APICAPSULES project."
+              },
+              {
+                "t": "Money available for growth",
+                "d": "You need to choose what to fund first so the budget is not spread thin."
+              },
+              {
+                "t": "Several lines of business",
+                "d": "Units that subsidise each other, like MAHARADJ's wellness ecosystem with fitness, spa and restaurant."
+              }
+            ],
+            "faq": [
+              {
+                "q": "Do you give investment advice?",
+                "a": "No. We talk about investing in your own business — marketing, systems, people, locations. We do not advise on securities, deposits or other financial instruments."
+              },
+              {
+                "q": "How much can we save?",
+                "a": "We do not promise a figure upfront; it depends on your cost structure. After the review we name specific lines, expected savings for each and the risks of cutting them."
+              },
+              {
+                "q": "How much does the work cost?",
+                "a": "It depends on the size of the business and the number of lines. We quote after the free initial review."
+              },
+              {
+                "q": "Will quality suffer after the cuts?",
+                "a": "That is why we cut by contribution to revenue, not by size of the line. For every decision we describe what may get worse and how to track it."
+              },
+              {
+                "q": "Can this be combined with a financial health check?",
+                "a": "Yes, that is common: the financial review shows the picture first, and the cost and investment plan is built on it."
+              }
+            ],
+            "cases": [
+              "apicapsules",
+              "maharadj",
+              "furniture-factory"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "strategy",
@@ -88,10 +456,145 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["hydrosta-kazakhstan", "hsta-group", "cybermove-games"]
+          "cases": [
+            "hydrosta-kazakhstan",
+            "hsta-group",
+            "cybermove-games"
+          ],
+          "seo": {
+            "title": "Business Growth Strategy Consulting — CYBERMOVE",
+            "description": "Business growth strategy consulting: priorities, a quarterly roadmap for 3–12 months and KPIs with checkpoints. A plan your team can work to. Free review.",
+            "h1": "Business growth strategy consulting",
+            "lead": "We turn the owner's goals into a 3–12 month plan: what to do, in what order and how to tell it is working. For companies that want to grow by plan rather than from task to task.",
+            "intro": "A growth strategy should not be a deck that ends up in a folder. We connect goals to specific initiatives, resources and metrics so the team knows what to do this week and the owner can check progress every month. The strategy rests on audit data: without knowing where the business loses money today, a growth plan is a set of guesses. If there has been no audit, we run a short diagnosis inside the project.",
+            "includes": [
+              {
+                "t": "Goals and constraints",
+                "d": "Where the company is and where it wants to be, what resources, people and time are really available, and which limits cannot be bypassed."
+              },
+              {
+                "t": "Growth strategy",
+                "d": "What growth comes from — new customers, repeat sales, average order, new markets or products — and the cost of each route."
+              },
+              {
+                "t": "Prioritised initiatives",
+                "d": "Opportunities ranked by impact, cost and dependencies, so the first steps unlock the rest."
+              },
+              {
+                "t": "Quarterly roadmap",
+                "d": "A business development plan by period, with owners and checkpoints."
+              },
+              {
+                "t": "KPIs and checkpoints",
+                "d": "A few metrics that show whether the plan is on track and what to do if it is not."
+              },
+              {
+                "t": "Sales processes",
+                "d": "How to organise sales for the new strategy: roles, funnel and rules."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Diagnosis",
+                "d": "If there was no audit, a short review of the market, product and funnel.",
+                "time": "1–2 weeks",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Strategy session",
+                "d": "We work with the owner and key people on goals and growth options, settling disputes with numbers.",
+                "stage": "CORE"
+              },
+              {
+                "t": "Roadmap and KPIs",
+                "d": "A quarterly plan with responsibilities and metrics.",
+                "time": "about a week",
+                "stage": "CORE"
+              },
+              {
+                "t": "Launch",
+                "d": "First initiatives, a rhythm of meetings and reports.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Ongoing support",
+                "d": "Optionally, a monthly review of metrics and plan adjustments.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A growth strategy with clear priorities",
+              "A 3–12 month roadmap by quarter",
+              "KPIs and checkpoints for management",
+              "A plan you can execute with us or on your own"
+            ],
+            "forWhom": [
+              {
+                "t": "Entering a new market",
+                "d": "For example, bringing a brand to Kazakhstan — as with the official HYDROSTA distributor."
+              },
+              {
+                "t": "Growth has stalled",
+                "d": "Familiar channels no longer grow, advertising gets more expensive and there is no new foothold yet."
+              },
+              {
+                "t": "A new product or line",
+                "d": "From concept and positioning to launch, as with the VR project Cybermove Games."
+              },
+              {
+                "t": "A team pulling in different directions",
+                "d": "Marketing, sales and operations each pursue their own goals and need one plan with shared priorities."
+              }
+            ],
+            "faq": [
+              {
+                "q": "What horizon does the strategy cover?",
+                "a": "Usually 3–12 months broken into quarters. Longer horizons are described as a direction, while the detailed plan stays short enough to remain practical."
+              },
+              {
+                "q": "How much does it cost?",
+                "a": "It depends on company size, the number of business lines and whether an audit has been done. We quote after the free initial review."
+              },
+              {
+                "q": "Do we need an audit first?",
+                "a": "Ideally, yes: strategy without diagnosis rests on assumptions. If there has been no audit, we start with a short review of the market, product and funnel within the project."
+              },
+              {
+                "q": "How is a roadmap different from a strategy?",
+                "a": "Strategy answers what growth will come from; the roadmap answers what we do and when. We deliver both and tie them to KPIs."
+              },
+              {
+                "q": "Who will execute the plan?",
+                "a": "Whatever suits you: your team, us on selected areas, or together. The plan is written so it can be executed without us."
+              },
+              {
+                "q": "What if the plan stops working?",
+                "a": "That is what the checkpoints are for. At monthly reviews we compare metrics and adjust priorities without waiting for the end of the quarter."
+              }
+            ],
+            "cases": [
+              "hydrosta-kazakhstan",
+              "hsta-group",
+              "cybermove-games"
+            ],
+            "articles": []
+          }
         }
       ],
-      "dataPoints": ["CAC", "LTV", "ROMI", "Cash flow", "Margin", "Conversion"]
+      "dataPoints": [
+        "CAC",
+        "LTV",
+        "ROMI",
+        "Cash flow",
+        "Margin",
+        "Conversion"
+      ],
+      "seo": {
+        "title": "Business Audit Services — CYBERMOVE",
+        "kicker": "Business audit",
+        "description": "Business, marketing and financial audit: we find where the company loses money and customers and what will drive growth fastest. Strategy and plan. Free review.",
+        "intro": "An audit is where every CYBERMOVE engagement starts. We look at the whole business: product and marketing, sales, finances and the cost of growth. We work from CRM exports, ad accounts and bookkeeping data rather than impressions. The outcome is a map of problems and opportunities, priorities and a plan you can carry out in-house or with us. Each of the four services can be ordered on its own."
+      }
     },
     {
       "id": "systems",
@@ -108,7 +611,13 @@
       "phrase": "We connect the website, CRM, telephony and AI into one linked system: every lead is visible, counted and taken through to the sale.",
       "result": "Website · CRM · telephony · AI · automation — in one system",
       "note": "",
-      "micro": ["SITE", "CRM", "VOIP", "AI", "AUTO"],
+      "micro": [
+        "SITE",
+        "CRM",
+        "VOIP",
+        "AI",
+        "AUTO"
+      ],
       "services": [
         {
           "id": "websites",
@@ -127,7 +636,135 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["hydrosta-kazakhstan", "hsta-group", "building-time", "tpk"]
+          "cases": [
+            "hydrosta-kazakhstan",
+            "hsta-group",
+            "building-time",
+            "tpk"
+          ],
+          "seo": {
+            "title": "Business Website Development — CYBERMOVE",
+            "description": "Business website development: structure, copy, design, analytics and CRM integration. Landing pages, corporate websites and online stores. Free initial review.",
+            "h1": "Business website development",
+            "lead": "We build websites that bring in leads and are connected to sales: from structure and copy to launch, analytics and support. A landing page for ads, a corporate website or an online store — built for the task, not a template.",
+            "intro": "A good-looking website that the sales team never sees is a common story: leads land in an inbox, calls are not tracked, and ads point to a page that does not answer the customer's main question. So we start with meaning and the customer journey, and we finish not at publication but at verification: every lead reaches the CRM, and every traffic source shows its cost per customer. For companies in Kazakhstan we account for local habits: WhatsApp as the main channel, bilingual versions, maps and local search.",
+            "includes": [
+              {
+                "t": "Structure and prototype",
+                "d": "Which pages you need, what goes on each, and in what order a visitor gets answers and makes a decision."
+              },
+              {
+                "t": "Copywriting",
+                "d": "Short and specific: what you do, for whom, why you can be trusted and what to do next. No filler about a team of professionals."
+              },
+              {
+                "t": "Design",
+                "d": "A visual language that fits the brand and audience, designed mobile-first because the phone is the first screen for most customers."
+              },
+              {
+                "t": "Development",
+                "d": "Fast pages, forms, messenger buttons, catalogues and landing pages for services and campaigns."
+              },
+              {
+                "t": "Analytics and goals",
+                "d": "Goals for forms, calls and messenger clicks plus UTM tagging, so you can see which channel brings customers."
+              },
+              {
+                "t": "CRM integration",
+                "d": "Website leads go straight into the CRM with their source instead of getting lost in a manager's inbox."
+              },
+              {
+                "t": "SEO foundations",
+                "d": "Structure, headings, speed and markup that let the site be promoted in search without a rebuild."
+              },
+              {
+                "t": "Support",
+                "d": "Edits, new pages and ongoing checks that forms and analytics keep working after launch."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Brief and current site review",
+                "d": "Goals, audience, competitors, what works today and what does not.",
+                "time": "a few days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Structure and copy",
+                "d": "Page prototype and copy for approval — before design, so nobody designs empty blocks.",
+                "time": "1–2 weeks",
+                "stage": "CORE"
+              },
+              {
+                "t": "Design and development",
+                "d": "Mock-ups, front-end, forms, integrations and mobile layout.",
+                "time": "2–6 weeks depending on scope",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Launch and QA",
+                "d": "We test forms, goals, speed and lead delivery to the CRM with real inquiries.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Support and growth",
+                "d": "New pages for ads and search, tests and changes based on analytics.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A website that works on mobile and generates leads",
+              "Every lead in the CRM with its source and cost",
+              "Analytics that show which channel pays off",
+              "A foundation for SEO and advertising without a rebuild"
+            ],
+            "forWhom": [
+              {
+                "t": "B2B and industrial companies",
+                "d": "Complex services and equipment that must be explained to engineers and buyers — like the HYDROSTA and HSTA Group websites."
+              },
+              {
+                "t": "Local businesses",
+                "d": "Equipment rental, service, clinics — where customers search nearby, as in the Building Time equipment rental project in Almaty."
+              },
+              {
+                "t": "Launching ads",
+                "d": "You need a landing page for a specific campaign so traffic is not wasted on a generic home page."
+              },
+              {
+                "t": "A website with no leads",
+                "d": "The site is outdated, slow or disconnected from sales, and it is unclear whether to rebuild or improve it."
+              }
+            ],
+            "faq": [
+              {
+                "q": "How much does website development cost?",
+                "a": "It depends on type and scope: a landing page, a multi-section corporate website or a catalogue with integrations are priced differently. We quote after the free initial review."
+              },
+              {
+                "q": "How long does it take?",
+                "a": "A landing page usually takes a few weeks, a corporate website one to three months. Approving copy takes longest, which is why we write it before design."
+              },
+              {
+                "q": "Who writes the copy?",
+                "a": "We do, based on the brief and interviews with you. Your part is to check facts and product wording; we handle the rest."
+              },
+              {
+                "q": "Can you improve our existing site instead?",
+                "a": "Yes. After a review we say plainly which is better value: improving the current site or building a new one. Sometimes new landing pages and proper analytics are enough."
+              },
+              {
+                "q": "Will the site be bilingual?",
+                "a": "If needed, yes: Russian and English versions, and Kazakh if required. Each version gets proper URLs and markup so search engines do not mix them up."
+              }
+            ],
+            "cases": [
+              "building-time",
+              "hydrosta-kazakhstan",
+              "hsta-group"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "crm",
@@ -145,7 +782,130 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["hydrosta-service", "building-time", "fitness-room-menden"]
+          "cases": [
+            "hydrosta-service",
+            "building-time",
+            "fitness-room-menden"
+          ],
+          "seo": {
+            "title": "CRM Implementation Services — CYBERMOVE",
+            "description": "CRM implementation: pipelines, automated tasks, integrations with your website, phones and WhatsApp, and reports for management. No lead gets lost. Free review.",
+            "h1": "CRM implementation services",
+            "lead": "We set up a CRM around the way your company actually sells: pipelines, automated tasks, and integrations with your website, ads, phones and messengers. The goal is that no lead gets lost and management sees sales without manual reports.",
+            "intro": "A CRM installed out of the box quickly turns into an expensive address book: managers run deals in messengers, data drifts apart and nobody trusts the reports. So we start by describing your sales process, not by picking buttons. We configure the system so it is easier for a manager to work in it than around it, and the owner gets pipeline, conversion and source figures without spreadsheets assembled by hand.",
+            "includes": [
+              {
+                "t": "Choosing a platform",
+                "d": "Comparing options for your process, budget and required integrations; data migration if you already have a CRM."
+              },
+              {
+                "t": "Pipelines and records",
+                "d": "Deal stages, required fields and loss reasons — exactly as much as you need to see the picture."
+              },
+              {
+                "t": "Automated tasks and scenarios",
+                "d": "Reminders, follow-ups, lead distribution between managers, reactions to missed calls."
+              },
+              {
+                "t": "Integrations",
+                "d": "Website, forms, ad accounts, telephony, WhatsApp and other messengers, payment services."
+              },
+              {
+                "t": "Management reports",
+                "d": "Pipeline, stage conversion, lead sources, response time and each manager's performance."
+              },
+              {
+                "t": "Team training",
+                "d": "Guides and walkthroughs on real deals, so the CRM gets used rather than tolerated."
+              },
+              {
+                "t": "Ongoing support",
+                "d": "Adjustments after the first weeks, new scenarios and discipline checks."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Mapping the sales process",
+                "d": "Interviews with the head of sales and managers; the path of a lead from first contact to payment.",
+                "time": "a few days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Design",
+                "d": "Pipelines, fields, roles, automations and integrations for approval.",
+                "time": "about a week",
+                "stage": "CORE"
+              },
+              {
+                "t": "Configuration and integrations",
+                "d": "We build the system, connect lead sources and telephony and migrate data.",
+                "time": "1–3 weeks",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Training and go-live",
+                "d": "The team starts working in the CRM on live deals; in the first weeks we fix mistakes together.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Reports and refinement",
+                "d": "Management gets its reports; we refine scenarios and fields using data from the first weeks.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "All leads from all channels in one system",
+              "A sales pipeline with conversion rates and loss reasons",
+              "Automated tasks instead of reminders kept in people's heads",
+              "Management reports without manual collection"
+            ],
+            "forWhom": [
+              {
+                "t": "Leads slip through",
+                "d": "Some inquiries from WhatsApp, calls and forms never become deals, and nobody knows how many."
+              },
+              {
+                "t": "A growing sales team",
+                "d": "New managers are harder to onboard and monitor without one system and clear rules."
+              },
+              {
+                "t": "Service companies",
+                "d": "Many repeat and service requests that have to be assigned to technicians and closed without losing customer history."
+              },
+              {
+                "t": "A CRM that nobody uses",
+                "d": "The system was bought but is ignored or used for show, and reports still live in spreadsheets."
+              }
+            ],
+            "faq": [
+              {
+                "q": "Which CRM should we choose — Bitrix24, amoCRM or something else?",
+                "a": "It depends on your sales process, the number of managers, required integrations and budget. We compare options against your process and explain the pros and limits of each rather than selling one system."
+              },
+              {
+                "q": "How much does CRM implementation cost?",
+                "a": "It combines the platform's licence fees with the scope of configuration: pipelines, integrations, scenarios. We quote our part after the free initial review."
+              },
+              {
+                "q": "How long does implementation take?",
+                "a": "Usually two to six weeks to go-live, followed by refinement based on the first weeks of data. Timing depends on integrations and data migration."
+              },
+              {
+                "q": "Can you migrate data from our old system or spreadsheets?",
+                "a": "Yes. We move contacts, deals and history if an export is available. Before migrating we remove duplicates and agree on what should not be moved."
+              },
+              {
+                "q": "What if managers refuse to use the CRM?",
+                "a": "That is the main reason implementations fail. We configure the system around their work, remove unnecessary fields, train on live deals and give management a discipline report."
+              }
+            ],
+            "cases": [
+              "hydrosta-service",
+              "building-time",
+              "fitness-room-menden"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "telephony",
@@ -162,7 +922,131 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["hydrosta-service", "hsta-group"]
+          "cases": [
+            "hydrosta-service",
+            "hsta-group"
+          ],
+          "seo": {
+            "title": "Business Phone System and Call Tracking — CYBERMOVE",
+            "description": "Business phone system setup: VoIP numbers, call routing, recording, call tracking and CRM integration. Every call linked to a deal and a source. Free review.",
+            "h1": "Business phone system and call tracking setup",
+            "lead": "We connect and configure telephony so every call is recorded and linked to a deal in the CRM and to the ad channel the customer came from. For companies where sales and service start with a phone call.",
+            "intro": "When calls go to managers' personal numbers, the company does not know how many customers called, how many could not get through or what they were told. A cloud VoIP system fixes that: one shared number, call routing, recording and statistics. Integration with the CRM and call tracking turns each call into data: where the customer came from, who answered, how the conversation ended and what the lead cost.",
+            "includes": [
+              {
+                "t": "Setup and configuration",
+                "d": "Numbers, lines and extensions, working from a phone, a computer or on the road."
+              },
+              {
+                "t": "Call routing",
+                "d": "Queues, forwarding, working hours and an IVR menu only where it really helps."
+              },
+              {
+                "t": "Call recording",
+                "d": "All calls are recorded and available to management for quality control and training."
+              },
+              {
+                "t": "Missed calls",
+                "d": "Every missed call becomes a call-back task instead of disappearing."
+              },
+              {
+                "t": "Call tracking",
+                "d": "Dynamic numbers per ad channel show which campaign drives calls and what each call costs."
+              },
+              {
+                "t": "CRM integration",
+                "d": "A call creates or finds a deal, and the recording is attached to the customer record."
+              },
+              {
+                "t": "Reports",
+                "d": "Call volume, missed calls, answer time and workload per employee."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Call flow design",
+                "d": "Who answers, during which hours, and what happens to missed and after-hours calls.",
+                "time": "1–2 days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Provider and numbers",
+                "d": "We choose a service that fits your volume, cities and integrations.",
+                "stage": "CORE"
+              },
+              {
+                "t": "Configuration and integration",
+                "d": "Scenarios, recording, CRM and call tracking connection.",
+                "time": "about a week",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Testing",
+                "d": "Test calls through every scenario, checking recordings and CRM entries.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Training and reporting",
+                "d": "Guides for the team and the first reports for management.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "One shared number and a clear call-handling flow",
+              "Call recordings for quality control and training",
+              "Every call linked to a deal and its source",
+              "Reports on missed calls and answer times"
+            ],
+            "forWhom": [
+              {
+                "t": "Service businesses",
+                "d": "Companies where customers call to book a technician, order maintenance or ask about prices."
+              },
+              {
+                "t": "B2B with long deals",
+                "d": "Calls on one project run for weeks, and the full conversation history must sit in one record."
+              },
+              {
+                "t": "Ads optimised for calls",
+                "d": "You need to know which campaigns drive calls, not just form submissions."
+              },
+              {
+                "t": "Several offices or cities",
+                "d": "You need one number and shared statistics even when staff work in different cities or remotely."
+              }
+            ],
+            "faq": [
+              {
+                "q": "Do we need to change our number?",
+                "a": "Not necessarily. An existing number can often be ported or forwarded to the new system, with tracking numbers added for advertising."
+              },
+              {
+                "q": "How much does it cost?",
+                "a": "It combines the provider's plan — based on lines and minutes — with the scope of our setup. We quote after the free initial review."
+              },
+              {
+                "q": "Is call recording legal?",
+                "a": "Recording business calls is common practice, but customers are usually informed at the start of the call. We set up that notice and store recordings with restricted access."
+              },
+              {
+                "q": "Does it work on mobile phones?",
+                "a": "Yes, staff can make and take calls on the shared number through an app on their phone or computer."
+              },
+              {
+                "q": "What is call tracking and do we need it?",
+                "a": "It swaps the phone number on your site depending on the visitor's source, so you can see which ads drive calls. You need it if a meaningful share of customers call rather than fill in forms."
+              },
+              {
+                "q": "Can telephony connect to our CRM?",
+                "a": "In most cases yes: popular CRMs and VoIP providers have ready integrations. If not, we connect them via API or an integration platform."
+              }
+            ],
+            "cases": [
+              "hydrosta-service",
+              "hsta-group"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "ai",
@@ -179,7 +1063,129 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["oleg-baryshevsky", "tsepukh", "cybermove-games"]
+          "cases": [
+            "oleg-baryshevsky",
+            "tsepukh",
+            "cybermove-games"
+          ],
+          "seo": {
+            "title": "AI Agents for Business — CYBERMOVE",
+            "description": "AI agents for business: lead qualification, customer replies, call and chat analysis, automated reports. Built into your process, not for a demo. Free review.",
+            "h1": "AI agents for business",
+            "lead": "We put AI where it saves your team time: qualifying leads, answering routine questions, analysing calls and chats, preparing management reports. AI that works inside the process rather than impressing in a presentation.",
+            "intro": "Bringing AI into a business starts with a question, not a model: which routine will it take over, and how will we check the result? A good AI agent answers customers at any hour, asks clarifying questions and hands a prepared lead to a manager; a bad one confidently states things that are not true. So we limit the agent to your data, spell out what it must not do and keep a human in charge wherever mistakes are expensive.",
+            "includes": [
+              {
+                "t": "Lead qualification",
+                "d": "The agent clarifies the task, budget and timing, scores the lead and passes a prepared customer to a manager."
+              },
+              {
+                "t": "AI chatbot for sales",
+                "d": "Answers to frequent questions on the website and in messengers, booking consultations, handing complex questions to a person."
+              },
+              {
+                "t": "Call and chat analysis",
+                "d": "Reviewing conversations against a checklist — objection handling, next step, tone — without listening to everything manually."
+              },
+              {
+                "t": "Assistants for the team",
+                "d": "Helpers for internal work: searching documents and policies, drafting replies and proposals."
+              },
+              {
+                "t": "Automated reports",
+                "d": "Scheduled summaries for management from the CRM and ad accounts, in plain language."
+              },
+              {
+                "t": "Content systems",
+                "d": "Generating visuals, video and avatars for content and ads, with quality control."
+              },
+              {
+                "t": "Data safety",
+                "d": "Which data may be sent to AI services, where it is stored and who has access."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Choosing the task",
+                "d": "We find routine work where AI gives a measurable effect: response time, manager workload, conversation quality.",
+                "time": "a few days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Prototype",
+                "d": "We build the agent on your data and test it on real examples before customers see it.",
+                "time": "1–2 weeks",
+                "stage": "CORE"
+              },
+              {
+                "t": "Integration",
+                "d": "Connecting to the website, messengers and CRM, and defining when the agent hands over to a person.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Launch and supervision",
+                "d": "In the first weeks answers are checked manually and the instructions are refined.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Measuring impact",
+                "d": "Before-and-after comparison: response time, share of qualified leads, team workload.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "An AI agent working inside your sales or service process",
+              "Instructions and limits that govern its answers",
+              "Clean hand-over of complex cases to a person",
+              "Metrics that show whether the implementation pays off"
+            ],
+            "forWhom": [
+              {
+                "t": "Many repetitive questions",
+                "d": "Managers spend hours answering the same questions about prices, timing and terms."
+              },
+              {
+                "t": "Online schools and experts",
+                "d": "Course launches with chatbots for sign-ups, nurturing and student questions — as in our joint launches with bloggers."
+              },
+              {
+                "t": "Sales quality control",
+                "d": "There are too many calls and chats for a manager to review even a fraction."
+              },
+              {
+                "t": "High-volume content",
+                "d": "Lots of visuals and short videos for social media and ads, like the AI visuals for Fitness Room Menden."
+              }
+            ],
+            "faq": [
+              {
+                "q": "Will an AI agent replace our managers?",
+                "a": "No, and we do not aim for that. The agent takes the routine — standard answers, clarifications, reminders — while negotiations, complex cases and decisions stay with people."
+              },
+              {
+                "q": "What if the agent gives a wrong answer?",
+                "a": "We restrict it to your data and instructions, forbid answers outside its scope and define hand-over to a person. In the first weeks answers are reviewed manually."
+              },
+              {
+                "q": "Is it safe to send our data to AI?",
+                "a": "It depends on the service and its settings. Before launch we decide which data can and cannot be used and choose a solution that meets your data-storage requirements."
+              },
+              {
+                "q": "How much does AI implementation cost?",
+                "a": "It combines usage-based service fees with our setup. We start with one task and a prototype to prove the effect before larger spend, and quote after the free initial review."
+              },
+              {
+                "q": "Does the agent work in WhatsApp?",
+                "a": "Yes, it can be connected to WhatsApp, Telegram, a website widget and other channels through official integrations."
+              }
+            ],
+            "cases": [
+              "oleg-baryshevsky",
+              "tsepukh",
+              "fitness-room-menden"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "automation",
@@ -196,10 +1202,138 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["barbershops-kyiv", "maharadj", "ecommerce"]
+          "cases": [
+            "barbershops-kyiv",
+            "maharadj",
+            "ecommerce"
+          ],
+          "seo": {
+            "title": "Business Process Automation — CYBERMOVE",
+            "description": "Business process automation: process mapping, integrations via Make, n8n and APIs, end-to-end analytics and dashboards. Less manual work. Free initial review.",
+            "h1": "Business process automation",
+            "lead": "We remove manual work between your tools: leads, invoices, reports and notifications flow automatically, and management sees the business on one screen. For companies whose processes live in employees' memory and spreadsheets.",
+            "intro": "Digitalisation often means buying tools that know nothing about each other. The website, CRM, accounting, ads and messengers live separately, and people copy data by hand and make mistakes. We start with a process map — where the routine is, where errors happen, where time is lost — and automate what brings the biggest effect, connecting tools through Make, n8n or direct APIs.",
+            "includes": [
+              {
+                "t": "Process map",
+                "d": "How leads, orders, documents and reports really flow; where manual work sits and where time is lost."
+              },
+              {
+                "t": "Tool integrations",
+                "d": "Connecting the website, CRM, ads, messengers, spreadsheets and accounting systems via Make, n8n or APIs."
+              },
+              {
+                "t": "Sales and marketing automation",
+                "d": "Leads from every channel into the CRM, notifications, follow-ups and data sent back to ad platforms."
+              },
+              {
+                "t": "End-to-end analytics",
+                "d": "From ad click to payment: which channel brings revenue, not just leads."
+              },
+              {
+                "t": "Routine automation",
+                "d": "Templated documents, reminders, reconciliations, exports and notifications that are done by hand today and cause errors."
+              },
+              {
+                "t": "Dashboards",
+                "d": "Key business metrics on one screen, updated without anyone's involvement."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Interviews and process map",
+                "d": "We go through processes with the people who run them every day and measure how much time the routine takes.",
+                "time": "about a week",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Priorities",
+                "d": "We pick automations with the highest impact and lowest risk.",
+                "stage": "CORE"
+              },
+              {
+                "t": "Build and integration",
+                "d": "Scenarios are built, tools connected and tested on real data.",
+                "time": "1–4 weeks",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Launch and training",
+                "d": "We hand processes to the team, document what to do if something fails and where to check scenario status.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Support",
+                "d": "We monitor scenarios and extend them as the business grows.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "Processes that do not depend on employees' memory",
+              "Connected tools without manual copying",
+              "End-to-end analytics from ad to payment",
+              "A management dashboard that updates itself"
+            ],
+            "forWhom": [
+              {
+                "t": "Multi-location businesses",
+                "d": "Several sites with the same processes that must be controlled from one place — like the barbershop chain."
+              },
+              {
+                "t": "Service ecosystems",
+                "d": "Fitness, spa, restaurant and events under one brand, as in the MAHARADJ wellness project."
+              },
+              {
+                "t": "Online stores",
+                "d": "Orders, payments, stock, delivery and advertising that need to be connected."
+              },
+              {
+                "t": "Manual reporting",
+                "d": "Management gets numbers once a month and late, because they are compiled in spreadsheets."
+              }
+            ],
+            "faq": [
+              {
+                "q": "Which processes should be automated first?",
+                "a": "The ones that repeat most often and where mistakes cost most: lead hand-off, invoicing, reporting. We start there so the effect is visible immediately."
+              },
+              {
+                "q": "How do Make and n8n differ from custom development?",
+                "a": "They are integration platforms: scenarios are built faster and cheaper than code from scratch and are easier to change. For non-standard tasks we use direct APIs."
+              },
+              {
+                "q": "How much does automation cost?",
+                "a": "It depends on the number of processes and tools to connect. After the process map we price each scenario; the initial review is free."
+              },
+              {
+                "q": "What if a tool changes or breaks?",
+                "a": "Scenarios are documented and failure alerts are set up. Under a support plan we track tool changes and fix integrations before customers notice."
+              },
+              {
+                "q": "Do we have to replace our tools?",
+                "a": "Usually not. We first connect what you already use and suggest replacing a tool only where it blocks automation."
+              },
+              {
+                "q": "How much time will automation save?",
+                "a": "We do not promise a number upfront: it depends on the volume of routine. During mapping we measure how long each operation takes now and compare after launch."
+              }
+            ],
+            "cases": [
+              "barbershops-kyiv",
+              "maharadj",
+              "ecommerce"
+            ],
+            "articles": []
+          }
         }
       ],
-      "dataPoints": []
+      "dataPoints": [],
+      "seo": {
+        "title": "Business Digitalization Services — CYBERMOVE",
+        "kicker": "Business digitalization",
+        "description": "Business digitalization: websites, CRM, phone systems, AI agents and automation working as one — every lead tracked and followed through to a sale. Free review.",
+        "intro": "For us, business digitalization starts not with choosing software but with the path of a lead: where it comes from, who handles it and when, and where it gets lost. We build the website, CRM, phone system, AI tools and integrations so that every enquiry is visible and counted, and management gets reports without manual spreadsheets. You can start with one link in the chain and add the rest as you grow."
+      }
     },
     {
       "id": "brand-content",
@@ -216,7 +1350,13 @@
       "phrase": "We define the brand core and turn it into content that sells, not content that merely goes out on schedule.",
       "result": "Brand core · production · SMM · PR · personal brand",
       "note": "",
-      "micro": ["CORE", "LENS", "9:16", "WAVE", "BEAM"],
+      "micro": [
+        "CORE",
+        "LENS",
+        "9:16",
+        "WAVE",
+        "BEAM"
+      ],
       "services": [
         {
           "id": "brand-core",
@@ -232,7 +1372,134 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["gaia", "sii-concept", "furniture-factory", "cybermove-games"]
+          "cases": [
+            "gaia",
+            "sii-concept",
+            "furniture-factory",
+            "cybermove-games"
+          ],
+          "seo": {
+            "title": "Brand Positioning Services — CYBERMOVE",
+            "description": "Brand positioning services and brand platform: audience, value, difference, offer and message. The core your website, content and ads build on. Free review.",
+            "h1": "Brand positioning services",
+            "lead": "We put into words how you differ and why customers should choose you — so that clients, your team and contractors understand it the same way. The brand core then becomes the base for your website, content, advertising and sales.",
+            "intro": "Without positioning, every contractor reinvents the brand: the designer in the logo, the copywriter in the texts, the ads specialist in the creatives. The result is a set of disconnected messages that are hard to believe. Positioning work starts from what already exists — the product, customers, competitors, real advantages. We assemble this into an eight-element brand core and test whether it holds up against the market.",
+            "includes": [
+              {
+                "t": "Product and audience",
+                "d": "What you really sell and who buys it: segments, their jobs to be done, fears and reasons to choose."
+              },
+              {
+                "t": "Positioning",
+                "d": "Where the brand stands against competitors: what makes you first, best or only for your customer."
+              },
+              {
+                "t": "Value and difference",
+                "d": "What the customer gets and why they cannot get it the same way elsewhere; proof rather than promises."
+              },
+              {
+                "t": "Offer and message",
+                "d": "The offer and core messages for the website, ads and sales, phrased briefly and verifiably."
+              },
+              {
+                "t": "Brand DNA and tone of voice",
+                "d": "Character, values and way of speaking that make every text and video recognisable."
+              },
+              {
+                "t": "Brand strategy and architecture",
+                "d": "How products and sub-brands relate, what grows under one name and what stands alone."
+              },
+              {
+                "t": "Naming",
+                "d": "Names for the company, products or lines when needed, checked for meaning and memorability."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Research",
+                "d": "Interviews with the owner, team and customers; competitor and market analysis.",
+                "time": "1–2 weeks",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Positioning hypotheses",
+                "d": "Several options with arguments for and against each.",
+                "stage": "CORE"
+              },
+              {
+                "t": "Strategy session",
+                "d": "We choose the direction with the owner and refine the wording.",
+                "stage": "CORE"
+              },
+              {
+                "t": "Brand platform",
+                "d": "The eight-element core, messages, tone of voice and usage examples.",
+                "time": "about a week",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Roll-out",
+                "d": "Hand-over to the team and contractors, and help applying it to the website, content and ads.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A brand platform: the eight-element core in one document",
+              "Messages for the website, advertising and sales",
+              "Tone of voice with examples of what we say and what we don't",
+              "Clear briefs for designers, copywriters and ad specialists"
+            ],
+            "forWhom": [
+              {
+                "t": "Launching a brand or product",
+                "d": "You need to speak clearly to the market from day one — as at the launch of the VR project Cybermove Games."
+              },
+              {
+                "t": "Restaurants and hospitality",
+                "d": "The place is good, but on social feeds and maps it looks like its neighbours, as with the GAIA restaurant."
+              },
+              {
+                "t": "Manufacturing and B2B",
+                "d": "A strong product whose brand speaks like a catalogue: brand development for a furniture factory."
+              },
+              {
+                "t": "Before a rebrand",
+                "d": "You want a new logo, but first you need to decide what the brand should communicate."
+              }
+            ],
+            "faq": [
+              {
+                "q": "How is positioning different from a logo and visual identity?",
+                "a": "Positioning is the meaning: for whom, what and why. Logo and identity are its visual expression. Without positioning, design becomes a matter of taste, so we start with the core."
+              },
+              {
+                "q": "How much does brand positioning cost?",
+                "a": "It depends on the number of products and segments and the depth of research. We quote after the free initial review."
+              },
+              {
+                "q": "How long does it take?",
+                "a": "Usually three to four weeks from research to brand platform. Customer interviews take the most time and give the most precise wording."
+              },
+              {
+                "q": "Does the owner need to be involved?",
+                "a": "Yes, in the research and the strategy session. Positioning the owner does not share will not survive its first conflict with sales."
+              },
+              {
+                "q": "What do we do with the brand platform afterwards?",
+                "a": "Apply it: rewrite the website, update creatives, train the sales team. We can do this ourselves or help your contractors."
+              },
+              {
+                "q": "Can positioning be done without customer research?",
+                "a": "It can, but the result will be weaker: the wording will sound like the company rather than the customer. If interviews are impossible, we use reviews, chats and call recordings, which also show why people buy from you."
+              }
+            ],
+            "cases": [
+              "gaia",
+              "cybermove-games",
+              "furniture-factory"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "production",
@@ -249,7 +1516,135 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["van-dog-agency", "intertop", "ukrainian-fashion-week", "kehhsha"]
+          "cases": [
+            "van-dog-agency",
+            "intertop",
+            "ukrainian-fashion-week",
+            "kehhsha"
+          ],
+          "seo": {
+            "title": "Content Production for Brands — CYBERMOVE",
+            "description": "Content production for brands: concept, script, photo and video shoots, editing, ad creatives for social media and AI video. Content ready to publish.",
+            "h1": "Content production for brands",
+            "lead": "We produce photos, videos, reels and ad creatives from idea to finished files for every platform. Content that goes out on social media and performs in ads instead of sitting in a folder after the shoot.",
+            "intro": "Shooting social content and producing ads are different jobs, but they fail the same way: the footage looks great, then it turns out the formats are wrong and the videos lack what actually sells. We start with the goal and the platform: what the viewer should do, where they will see it and how many seconds we have. We write scripts for that, plan the shoot day to capture as much material as possible and edit a whole series of videos and creatives at once.",
+            "includes": [
+              {
+                "t": "Concept and script",
+                "d": "An idea built for the goal — awareness, leads, product launch — and a storyboard for each format."
+              },
+              {
+                "t": "Shoot organisation",
+                "d": "Crew, location, talent, props and timing; a production day that yields content for weeks."
+              },
+              {
+                "t": "Photo and video",
+                "d": "Product, brand and reportage shoots, vertical videos for Reels and TikTok."
+              },
+              {
+                "t": "Editing and graphics",
+                "d": "Editing, colour grading, captions and motion graphics, versions for sound on and sound off."
+              },
+              {
+                "t": "Ad creatives",
+                "d": "Series of variations for testing in social and Google ads, cut for each placement."
+              },
+              {
+                "t": "AI video and avatars",
+                "d": "Generated visuals, video and digital avatars where they are faster and appropriate."
+              },
+              {
+                "t": "Large projects",
+                "d": "Ad campaigns, events and broadcasts with contractor coordination and logistics."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Brief",
+                "d": "Goal, platforms, audience, budget, timing and existing materials.",
+                "time": "1–2 days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Concept and scripts",
+                "d": "Idea, scripts, storyboards and a shot list for approval.",
+                "time": "about a week",
+                "stage": "CORE"
+              },
+              {
+                "t": "Pre-production",
+                "d": "Crew, locations, casting, props and a shoot-day plan.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Shoot",
+                "d": "One or more shoot days according to plan.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Post-production",
+                "d": "Editing, graphics and versions for each platform and ad format.",
+                "time": "1–2 weeks",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "Finished videos and photos for every platform",
+              "Series of creatives for ad testing",
+              "Source files and usage rights",
+              "A content buffer for weeks ahead from a single shoot day"
+            ],
+            "forWhom": [
+              {
+                "t": "Fashion and retail",
+                "d": "Campaigns and seasonal shoots — ad concepts for INTERTOP, SPEX and Yevrooptyka."
+              },
+              {
+                "t": "Agencies and brands",
+                "d": "Production for an existing concept — like projects for major brands at the Van Dog agency."
+              },
+              {
+                "t": "Experts and online schools",
+                "d": "Course and launch content: full production of the KEHHSHA course."
+              },
+              {
+                "t": "Events",
+                "d": "Shoots, broadcasts and event content — from private events to Ukrainian Fashion Week projects."
+              }
+            ],
+            "faq": [
+              {
+                "q": "How much does video production cost?",
+                "a": "It depends on the number of shoot days, crew, locations and editing volume. After the brief we provide an itemised estimate; the initial review is free."
+              },
+              {
+                "q": "How many videos come out of one shoot day?",
+                "a": "It depends on the format: with good preparation, one production day yields a series of short videos and photos for several weeks of posting. The exact number is fixed in the shot plan before the shoot."
+              },
+              {
+                "q": "Who owns the rights to the materials?",
+                "a": "Usage terms are agreed in the contract before the shoot: where, for how long and in which formats the materials can be used, including talent and music rights."
+              },
+              {
+                "q": "Can you shoot in Almaty and other cities?",
+                "a": "Yes, we organise shoots where the project needs them; logistics and a local crew are included in the estimate."
+              },
+              {
+                "q": "When is AI video appropriate?",
+                "a": "For quick creative tests, visuals and content where the real product is not on screen. For trust in the brand, people and product we still recommend live shoots."
+              },
+              {
+                "q": "Can one shoot cover several platforms?",
+                "a": "Yes, that is how we plan it: one shoot day gives vertical videos for Reels and TikTok, horizontal versions for YouTube and the website, photos and ad creatives. The format list is approved before the shoot."
+              }
+            ],
+            "cases": [
+              "intertop",
+              "van-dog-agency",
+              "ukrainian-fashion-week"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "smm",
@@ -266,7 +1661,134 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["fitness-room-menden", "spa-maharadj", "gaia", "good-market"]
+          "cases": [
+            "fitness-room-menden",
+            "spa-maharadj",
+            "gaia",
+            "good-market"
+          ],
+          "seo": {
+            "title": "Social Media Management Services — CYBERMOVE",
+            "description": "Social media management services: strategy, content plan, posting, Reels and Stories, community management and monthly reports. Social media that drives sales.",
+            "h1": "Social media management services",
+            "lead": "We run social media so it builds trust and sales: presence strategy, content plan, production and posting, community management and metric reports. For businesses that need results, not just scheduled posts.",
+            "intro": "Social media for business often becomes posting for its own sake: neat, regular and with no effect on sales. We start by asking what role social media plays in the customer journey — first acquaintance, choosing between you and a competitor, or coming back for another purchase. That decides the content pillars, formats, frequency and how we measure results. Instagram and TikTok growth is built on short vertical videos and series that can be boosted with ads.",
+            "includes": [
+              {
+                "t": "Presence strategy",
+                "d": "Platforms and the role of each in the customer journey, audience, competitors and what will make you worth following."
+              },
+              {
+                "t": "Content pillars and plan",
+                "d": "Topics and formats that answer customers' questions and show the product in action."
+              },
+              {
+                "t": "Visual concept",
+                "d": "A recognisable feed, covers and Stories style, with templates for regular posts."
+              },
+              {
+                "t": "Content production",
+                "d": "Reels, Stories, photos and copy; shoot days and AI visuals when needed."
+              },
+              {
+                "t": "Account management",
+                "d": "Posting to plan, replying to comments and messages, moderation."
+              },
+              {
+                "t": "Community engagement",
+                "d": "Promotions, interactive formats, collaborations with creators and local partners."
+              },
+              {
+                "t": "Metric reports",
+                "d": "Reach, engagement, clicks and inquiries — and what we change in the plan each month."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Account audit",
+                "d": "What works today, what does not, how competitors and the audience behave.",
+                "time": "a few days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Strategy and content plan",
+                "d": "Pillars, formats, frequency and visual concept for approval.",
+                "time": "about a week",
+                "stage": "CORE"
+              },
+              {
+                "t": "Production",
+                "d": "Shoots and content preparation a month ahead: Reels, Stories, photos and copy.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Management",
+                "d": "Posting, replies and community work.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Report and adjustment",
+                "d": "A monthly metric review and an updated plan.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A strategy and content plan a month ahead, with a clear role for each platform",
+              "Regular content in a recognisable style",
+              "Timely replies to comments and messages",
+              "A monthly report with an improvement plan"
+            ],
+            "forWhom": [
+              {
+                "t": "Fitness and wellness",
+                "d": "Group classes, schedules and club atmosphere — as in social media management for Fitness Room Menden."
+              },
+              {
+                "t": "Restaurants and spas",
+                "d": "Places people choose by photos and reviews: GAIA, SPA Maharadj."
+              },
+              {
+                "t": "Retail",
+                "d": "Store chains with promotions and seasonal offers, like Good Market."
+              },
+              {
+                "t": "Local businesses in Kazakhstan",
+                "d": "Companies that need customers from their own city, not nationwide reach."
+              }
+            ],
+            "faq": [
+              {
+                "q": "How much does social media management cost?",
+                "a": "It depends on the number of platforms, the volume of content and whether shoots are needed. We quote after the free initial review."
+              },
+              {
+                "q": "When will we see results?",
+                "a": "Changes in reach and engagement show in the first weeks; the effect on inquiries usually takes one to two months of consistent work, depending on where the account starts."
+              },
+              {
+                "q": "Do we need ads as well?",
+                "a": "Ideally, yes. Organic reach is limited, and promoting the best posts helps them reach the right people. The ad budget is discussed separately."
+              },
+              {
+                "q": "Who creates the content?",
+                "a": "We can shoot it on production days or work with your materials. Often we combine a monthly shoot day with quick content from your team."
+              },
+              {
+                "q": "Which networks do you manage?",
+                "a": "Mainly Instagram and TikTok, plus Facebook, YouTube and Telegram when needed. We choose platforms by audience, not by trend."
+              },
+              {
+                "q": "Can we run social media without the owner on camera?",
+                "a": "Yes. Employees, customers, the product and the work process can all be the face of the brand. The owner's presence builds trust but is not required for every company."
+              }
+            ],
+            "cases": [
+              "fitness-room-menden",
+              "gaia",
+              "spa-maharadj"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "pr",
@@ -283,7 +1805,130 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["udar", "morris-group", "art-mango-production", "ukrainian-fashion-week"]
+          "cases": [
+            "udar",
+            "morris-group",
+            "art-mango-production",
+            "ukrainian-fashion-week"
+          ],
+          "seo": {
+            "title": "PR Services for Companies — CYBERMOVE",
+            "description": "PR services for companies: PR strategy, media relations, news hooks and publications, reputation management and events. Be present where trust is built.",
+            "h1": "PR services for companies",
+            "lead": "Public relations for companies and their leaders: PR strategy, media relations, news hooks, reputation and events. The goal is for you to be talked about where your clients and partners make decisions.",
+            "intro": "Media coverage on its own achieves little if it is unclear what it is for: trust before a deal, recognition in a new market, protecting a reputation. So PR starts with the goal and the audience, and only then do we choose outlets, formats and news hooks. We work with companies and individuals — from promoting political candidates within a large communications team to PR for a law firm. We measure results not by clippings but by how the right people's attitude changes: branded searches, inquiries and the quality of partner conversations.",
+            "includes": [
+              {
+                "t": "PR strategy",
+                "d": "Goals, audiences, key messages, outlets and a news calendar for the period."
+              },
+              {
+                "t": "Media relations",
+                "d": "Relationships with editors and journalists, press releases, expert comments, interviews and spokesperson preparation."
+              },
+              {
+                "t": "News hooks and publications",
+                "d": "Finding and creating stories from company life: launches, research, events, expertise."
+              },
+              {
+                "t": "Reputation",
+                "d": "Mention monitoring, handling reviews and criticism, prepared answers and a crisis plan."
+              },
+              {
+                "t": "Events",
+                "d": "Organising and running events, exhibitions and presentations as a PR tool."
+              },
+              {
+                "t": "Executive PR",
+                "d": "Positioning the leader as an industry expert: talks, columns and interviews."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Goals and audiences",
+                "d": "Whom we need to convince, of what, and where these people get their information.",
+                "time": "a few days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Strategy and messages",
+                "d": "Key messages, outlets and a news calendar.",
+                "time": "about a week",
+                "stage": "CORE"
+              },
+              {
+                "t": "Materials",
+                "d": "Press releases, expert comments, presentations, photo and video, spokesperson preparation.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Working with outlets",
+                "d": "Pitches to editors, interviews, speaking slots, events.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Report",
+                "d": "Publications, reach, outlet quality and conclusions for the next period.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A PR strategy and news calendar",
+              "Publications and appearances where your audience reads and watches",
+              "A reputation protection plan with prepared answers to hard questions",
+              "Regular reports on publications and mentions"
+            ],
+            "forWhom": [
+              {
+                "t": "Professional services",
+                "d": "Legal, consulting and financial firms that need trust before the first meeting — like PR support for MORIS."
+              },
+              {
+                "t": "Public figures and politicians",
+                "d": "Candidates and opinion leaders who need media and consistent messages — experience from the UDAR campaigns."
+              },
+              {
+                "t": "Entering a new market",
+                "d": "A brand nobody knows yet in the new market, which must earn recognition and trust with partners and first customers quickly."
+              },
+              {
+                "t": "Exhibitions and events",
+                "d": "Events that should work for reputation — like an international exhibition in Cannes."
+              }
+            ],
+            "faq": [
+              {
+                "q": "Do you guarantee publications?",
+                "a": "Nobody can honestly guarantee editorial coverage — the editor decides. We guarantee strong stories and materials and active work with outlets; paid placements, if needed, are labelled separately."
+              },
+              {
+                "q": "How much do PR services cost?",
+                "a": "It depends on the tasks, the number of directions and whether events are included. We quote after the free initial review."
+              },
+              {
+                "q": "How is PR different from advertising?",
+                "a": "Advertising is a paid message you control. PR is what others say about you: media, experts, partners. The second is trusted more but is harder to control."
+              },
+              {
+                "q": "Do you handle crises?",
+                "a": "Yes: we prepare the position and messages and help with media and social media responses. It is better when a crisis plan is prepared in advance rather than during the crisis."
+              },
+              {
+                "q": "Which media do you work with?",
+                "a": "We choose outlets for the project's audience: business and trade media, city publications, specialist blogs and podcasts."
+              },
+              {
+                "q": "How do you measure PR results?",
+                "a": "By outlet quality and reach, mentions of key messages, growth in branded searches and inquiries after publications. We agree on these metrics in advance so evaluation does not become counting clippings."
+              }
+            ],
+            "cases": [
+              "morris-group",
+              "udar",
+              "art-mango-production"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "personal-brand",
@@ -300,10 +1945,138 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "",
-          "cases": ["usyk", "ukrainian-radio", "oleg-baryshevsky", "miss-sverona"]
+          "cases": [
+            "usyk",
+            "ukrainian-radio",
+            "oleg-baryshevsky",
+            "miss-sverona"
+          ],
+          "seo": {
+            "title": "Personal Branding Services — CYBERMOVE",
+            "description": "Personal branding services for experts, founders and athletes: positioning, content system, course launches and PR. Six years building the USYK brand.",
+            "h1": "Personal branding services",
+            "lead": "We build personal brands that sell: positioning, a content system, product and course launches, and PR for the person. Our experience includes six years with Oleksandr Usyk's personal brand, promoting radio hosts and launching experts.",
+            "intro": "A personal brand is not a follower count but how much a person's name helps sell: consultations, courses, company products, partnerships. We start with positioning — where the person is stronger than others and for whom — then build a content system that can be sustained without burning out, and turn audience attention into launches and sales.",
+            "includes": [
+              {
+                "t": "Personal positioning",
+                "d": "Expertise, values, story and what sets the person apart in their niche."
+              },
+              {
+                "t": "Content system",
+                "d": "Pillars, formats and production that do not depend on daily improvisation and survive a busy schedule."
+              },
+              {
+                "t": "Launch production",
+                "d": "Courses, consultations and products: from idea and packaging to sales and support."
+              },
+              {
+                "t": "Technical side",
+                "d": "Chatbots, course platforms, funnels and payments, so a launch is never held up by tech."
+              },
+              {
+                "t": "Personal PR",
+                "d": "Interviews, talks, media and events that strengthen expert status."
+              },
+              {
+                "t": "Commercial partnerships",
+                "d": "Work with brands and partners, events and projects built around the name."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Diagnosis",
+                "d": "Goals, audience, current platforms and products, what already works and what holds growth back.",
+                "time": "about a week",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Positioning and strategy",
+                "d": "Who the person becomes for the audience and how to monetise it.",
+                "stage": "CORE"
+              },
+              {
+                "t": "Content and platforms",
+                "d": "Launching the content system, shoots and profile packaging.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Product launches",
+                "d": "Producing courses or consultations: packaging, tech, warm-up and sales.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Growth",
+                "d": "PR, partnerships, new products and platforms, repeat launches using the proven process.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "Positioning that is clear from first contact and sets you apart in the niche",
+              "A content system you can keep up regularly",
+              "Launched products with clear economics and a repeatable launch process",
+              "Recognition in the media and professional community that opens doors to partners"
+            ],
+            "forWhom": [
+              {
+                "t": "Athletes",
+                "d": "A personal brand beyond the ring or the field: commercial projects, events, international partners — as in six years with USYK."
+              },
+              {
+                "t": "Experts and bloggers",
+                "d": "Course launches, chatbots and technical production — joint projects with Oleg Baryshevsky and other authors."
+              },
+              {
+                "t": "Media personalities",
+                "d": "Hosts and authors who need their own brand and YouTube projects — like promoting Ukrainian Radio hosts."
+              },
+              {
+                "t": "Founders",
+                "d": "Business owners whose name can bring customers to the company and open doors to partners."
+              }
+            ],
+            "faq": [
+              {
+                "q": "Do I have to run my own social media?",
+                "a": "Your face and voice stay yours; the rest can be delegated: scripts, shooting, editing, posting and replies. We design the system so it needs a few hours a week from you."
+              },
+              {
+                "q": "How much do personal branding services cost?",
+                "a": "It depends on the scope: positioning and a content system only, or product launches and PR as well. We quote after the free initial review."
+              },
+              {
+                "q": "How soon will I see results?",
+                "a": "Positioning and the content system take the first weeks. Growing recognition and sales through a personal brand takes months of consistent work; promising quick results without a product launch would be dishonest."
+              },
+              {
+                "q": "Do you help launch a course?",
+                "a": "Yes: from the idea and packaging to the technical side — platform, chatbots, payments — and launch support. We have done this with several authors and experts."
+              },
+              {
+                "q": "Do you work with people outside the media?",
+                "a": "Yes. Most personal brands belong to founders and experts, not media personalities. For them we build the brand around expertise and results."
+              },
+              {
+                "q": "What if I already have an audience but no income from it?",
+                "a": "That is common: the audience exists, but there is no product or clear offer. We start with a diagnosis — who the followers are and what they expect — and build a product and launch around that audience."
+              }
+            ],
+            "cases": [
+              "usyk",
+              "ukrainian-radio",
+              "oleg-baryshevsky"
+            ],
+            "articles": []
+          }
         }
       ],
-      "dataPoints": []
+      "dataPoints": [],
+      "seo": {
+        "title": "Branding and Content Services — CYBERMOVE",
+        "kicker": "Branding and content",
+        "description": "Branding and content services: positioning, production, social media, PR and personal branding. A brand people trust and content that sells. Free review.",
+        "intro": "Branding and content start with the core: what you sell, to whom, and why people should buy from you. Shoots, social media, press coverage and the personal brand of a founder or expert all grow out of that core. Content exists to support sales and trust, so every format is tied to the funnel and measured by what it delivers."
+      }
     },
     {
       "id": "traffic",
@@ -320,7 +2093,12 @@
       "phrase": "We launch and run advertising wherever your audience is. We count CPL, CAC and ROMI, not clicks.",
       "result": "CPL · CAC · ROMI — for every channel",
       "note": "",
-      "micro": ["CPL", "CAC", "ROMI", "CTR"],
+      "micro": [
+        "CPL",
+        "CAC",
+        "ROMI",
+        "CTR"
+      ],
       "services": [
         {
           "id": "targeting",
@@ -337,7 +2115,130 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "CPL",
           "kind": "",
-          "cases": ["brsm-nafta", "good-market", "intertop", "ecommerce"]
+          "cases": [
+            "brsm-nafta",
+            "good-market",
+            "intertop",
+            "ecommerce"
+          ],
+          "seo": {
+            "title": "Meta Ads Management — CYBERMOVE",
+            "description": "Meta ads management for Instagram and Facebook: audiences, creatives, testing, optimisation and reports on cost per lead and per customer. A steady lead flow.",
+            "h1": "Meta ads management",
+            "lead": "We set up and run ads on Instagram, Facebook and other social networks: audiences, creatives, testing and scaling. We measure cost per lead and per customer, not clicks and reach.",
+            "intro": "Setting up targeting is the easy part. The hard part is understanding why one combination brings leads at a sensible price while another burns budget — and seeing it in time. So before launch we agree on the goal and what counts as a lead, set up event tracking from the website and CRM, then test creatives and audiences in batches and scale what pays off. Reports are built on cost per lead and per customer rather than impressive reach.",
+            "includes": [
+              {
+                "t": "Strategy and campaign structure",
+                "d": "Goals, funnel and budgets by stage: awareness, interest, lead, repeat purchase."
+              },
+              {
+                "t": "Audiences",
+                "d": "Interests, lookalikes, website and social retargeting, and exclusions so you do not pay to reach existing customers."
+              },
+              {
+                "t": "Creatives and testing",
+                "d": "Series of image and video variations for feed, Reels and Stories, tested against a plan."
+              },
+              {
+                "t": "Lead forms or landing pages",
+                "d": "Native lead forms or a landing page — chosen by lead quality, not just cost."
+              },
+              {
+                "t": "Event tracking",
+                "d": "Pixel and Conversions API so algorithms learn from leads and sales, not clicks."
+              },
+              {
+                "t": "Optimisation",
+                "d": "Switching off weak combinations, reallocating budget and managing frequency."
+              },
+              {
+                "t": "CPL and CAC reports",
+                "d": "Cost per lead and per customer by campaign, creative and audience, with conclusions and a test plan."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Audit and goals",
+                "d": "Past campaigns, product, audience and economics: what cost per lead the business can afford.",
+                "time": "a few days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Preparation",
+                "d": "Campaign structure, audiences, creatives, pixel and event tracking.",
+                "time": "about a week",
+                "stage": "CORE"
+              },
+              {
+                "t": "Launch and testing",
+                "d": "In the first weeks we test creatives and audiences in batches and cut weak combinations.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Optimisation and scaling",
+                "d": "More budget for combinations that pay off, plus new hypotheses.",
+                "stage": "GROWTH"
+              },
+              {
+                "t": "Reporting",
+                "d": "A monthly review of cost per lead and per customer, and a plan for the next period.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A steady lead flow at a controlled cost",
+              "Clarity on which creatives and audiences pay off",
+              "Event tracking the platforms can learn from",
+              "Monthly reports on cost per lead and per customer"
+            ],
+            "forWhom": [
+              {
+                "t": "Retail and chains",
+                "d": "Promotions, openings and seasonal offers — like ad projects for the Good Market supermarket chain."
+              },
+              {
+                "t": "Fashion and e-commerce",
+                "d": "Online store sales and traffic for many e-commerce projects."
+              },
+              {
+                "t": "Large brands",
+                "d": "Ad concepts and campaigns for chains such as BRSM-Nafta and INTERTOP."
+              },
+              {
+                "t": "Local services",
+                "d": "Clinics, salons, gyms and restaurants: city and neighbourhood targeting with leads straight to a messenger."
+              }
+            ],
+            "faq": [
+              {
+                "q": "How much does Meta ads management cost?",
+                "a": "It has two parts: the ad budget you pay the platform, and our setup and management fee. The budget depends on your niche and goals; we quote our fee after the free initial review."
+              },
+              {
+                "q": "What budget do we need to start?",
+                "a": "Enough to gather statistics on several combinations in the first weeks. We calculate it from the cost per lead in your niche and the number of hypotheses to test, rather than quoting a market average."
+              },
+              {
+                "q": "When will the first leads come in?",
+                "a": "Usually within the first days. A stable cost per lead forms over several weeks of testing, once it is clear which creatives and audiences work."
+              },
+              {
+                "q": "Who makes the creatives?",
+                "a": "We do: design and editing are included, and we organise shoots when needed. Your part is approval and access to the product."
+              },
+              {
+                "q": "Why are leads cheap but sales low?",
+                "a": "Often the platform optimises for any lead, including random ones. We send qualified lead and sales data back to the ad account and check the sales process as well."
+              }
+            ],
+            "cases": [
+              "good-market",
+              "brsm-nafta",
+              "ecommerce"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "google-ads",
@@ -354,7 +2255,130 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "CAC",
           "kind": "",
-          "cases": ["hydrosta-kazakhstan", "building-time", "tpk", "toscana-wine"]
+          "cases": [
+            "hydrosta-kazakhstan",
+            "building-time",
+            "tpk",
+            "toscana-wine"
+          ],
+          "seo": {
+            "title": "Google Ads Management Services — CYBERMOVE",
+            "description": "Google Ads management: Search, Display, Performance Max, YouTube, remarketing and conversion tracking. High-intent demand with clear payback. Free review.",
+            "h1": "Google Ads management services",
+            "lead": "We set up and manage Google advertising: Search, Display, Performance Max, YouTube and remarketing. We bring in people already searching for your product and measure what a customer costs.",
+            "intro": "Google Ads works with high-intent demand: a person is searching for the service, and you need to appear with a clear offer. Ad position depends not only on the bid but also on quality — how well the ad and landing page match the search. So our setup starts with structure and keywords, continues with landing pages and conversion tracking, and only then moves to bidding. Without correct conversions, automated strategies optimise for the wrong thing.",
+            "includes": [
+              {
+                "t": "Keywords and structure",
+                "d": "The searches people use to find your product, grouped by intent, with negative keywords so you do not pay for irrelevant traffic."
+              },
+              {
+                "t": "Ads and assets",
+                "d": "Copy for every ad group, plus call, location, sitelink and callout assets."
+              },
+              {
+                "t": "Conversion tracking",
+                "d": "Leads, calls and purchases sent to Google Ads, and CRM sales data where possible."
+              },
+              {
+                "t": "Search and Performance Max",
+                "d": "Search campaigns for high-intent demand, automated campaigns where there is enough data to learn from."
+              },
+              {
+                "t": "Display and YouTube",
+                "d": "Display and video ads for reach and for reminding past website visitors."
+              },
+              {
+                "t": "Remarketing",
+                "d": "Bringing back visitors who did not convert, with a dedicated offer."
+              },
+              {
+                "t": "Bid and budget optimisation",
+                "d": "Bidding strategies, budget reallocation and switching off wasteful searches and placements."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Audit and economics",
+                "d": "Past campaigns, competitors in results, the cost per lead you can afford.",
+                "time": "a few days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Structure and keywords",
+                "d": "Keyword research and grouping, ads and landing pages.",
+                "time": "about a week",
+                "stage": "CORE"
+              },
+              {
+                "t": "Conversions and analytics",
+                "d": "Goals, call and lead tracking, CRM connection.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Launch and optimisation",
+                "d": "First weeks: cleaning search terms, testing ads, choosing a bidding strategy.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Scaling and reporting",
+                "d": "Expanding to new keywords and campaigns, monthly cost-per-customer reports.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "High-intent search demand with clear payback",
+              "Correct conversion tracking, calls included",
+              "A campaign structure that is easy to extend to new services and cities",
+              "Reports on cost per lead and per customer"
+            ],
+            "forWhom": [
+              {
+                "t": "B2B and industrial",
+                "d": "Equipment and engineering solutions people search for by specific terms — like HYDROSTA and TPK."
+              },
+              {
+                "t": "Local services in Almaty",
+                "d": "Equipment rental, service and repairs — city-level ads for people searching nearby, like Building Time."
+              },
+              {
+                "t": "Online stores",
+                "d": "Search and Performance Max for product sales, as for the Toscana online wine store."
+              },
+              {
+                "t": "New services",
+                "d": "Testing demand for a new line before investing heavily in SEO and content."
+              }
+            ],
+            "faq": [
+              {
+                "q": "How much does Google Ads management cost?",
+                "a": "It has two parts: the ad budget you pay Google, and our setup and management fee. We quote our fee after the free initial review."
+              },
+              {
+                "q": "Why do clicks keep getting more expensive?",
+                "a": "Competitors raise bids in the auction, and cost per click also depends on ad and landing page quality. Improving relevance lets you pay less for the same position; we cover this in the audit."
+              },
+              {
+                "q": "Search or Performance Max — which is better?",
+                "a": "For services with clear demand we start with Search: it is more transparent and controllable. Performance Max comes in once there are enough conversions for automation to learn from."
+              },
+              {
+                "q": "Can we advertise without a website?",
+                "a": "You can send traffic to a maps listing or a form, but a website or landing page usually performs better and is easier to measure. If you have none, we can build a landing page for the campaign."
+              },
+              {
+                "q": "How soon will we see results?",
+                "a": "Impressions and first leads start at launch. A stable cost per lead takes several weeks, once statistics accumulate and irrelevant searches are cleaned out."
+              }
+            ],
+            "cases": [
+              "building-time",
+              "hydrosta-kazakhstan",
+              "toscana-wine"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "tiktok-ads",
@@ -371,7 +2395,129 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "CPL",
           "kind": "",
-          "cases": ["ecommerce", "education", "meshtiish"]
+          "cases": [
+            "ecommerce",
+            "education",
+            "meshtiish"
+          ],
+          "seo": {
+            "title": "TikTok Ads Management — CYBERMOVE",
+            "description": "TikTok ads management: creative strategy, native-style videos, Spark Ads, lead generation, creator partnerships and analytics. A new customer channel.",
+            "h1": "TikTok ads management",
+            "lead": "We run TikTok ads built for the platform: videos that look like content, Spark Ads, traffic and lead campaigns, and creator partnerships. For businesses looking for a new customer channel.",
+            "intro": "TikTok advertising works differently from other social networks: the first seconds decide everything, and banner aesthetics lose to authentic content. That makes creative strategy more important than fine-tuning audiences. We start with the videos your audience will actually watch, produce series of variations, test them quickly and scale those that bring inquiries. We work with creators where their voice is more convincing than the brand's.",
+            "includes": [
+              {
+                "t": "Creative strategy",
+                "d": "Topics, formats and scripts that feel native in the feed and lead to action."
+              },
+              {
+                "t": "Video production",
+                "d": "Shooting and editing vertical video, variation series for testing, AI creatives where appropriate."
+              },
+              {
+                "t": "Traffic and lead campaigns",
+                "d": "Ads that send people to your website or use an in-app lead form — chosen by lead quality."
+              },
+              {
+                "t": "Spark Ads",
+                "d": "Boosting organic posts from the brand or creators while keeping likes and comments."
+              },
+              {
+                "t": "Creator partnerships",
+                "d": "Choosing creators for your audience, briefs, integrations and using their videos in ads."
+              },
+              {
+                "t": "Analytics",
+                "d": "Pixel, events, cost per lead and per customer, watch-through and retention, so you know why a video works or not."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Fit check",
+                "d": "Is your audience on TikTok, and can your product sell through short video?",
+                "time": "a few days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Creative strategy",
+                "d": "Topics and scripts, plus a test plan.",
+                "stage": "CORE"
+              },
+              {
+                "t": "Production",
+                "d": "A first batch of videos, pixel and event setup.",
+                "time": "1–2 weeks",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Testing",
+                "d": "Several creatives run in parallel; weak ones are cut by watch-through and cost per lead.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Scaling",
+                "d": "Budget on winning videos, new variations and creators.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A new lead channel with measurable cost",
+              "A set of videos proven in advertising",
+              "Clarity on which topics and formats work for your audience",
+              "Analytics and events showing cost per lead and per customer"
+            ],
+            "forWhom": [
+              {
+                "t": "Online education",
+                "d": "Courses and experts whose audience watches short videos — experience from education launches with bloggers."
+              },
+              {
+                "t": "E-commerce",
+                "d": "Products that are easy to show in motion and in use."
+              },
+              {
+                "t": "Younger audiences",
+                "d": "Products and services for people who spend more time on TikTok than on other networks."
+              },
+              {
+                "t": "Brands with strong content",
+                "d": "Companies whose organic videos already work and can be amplified with Spark Ads."
+              }
+            ],
+            "faq": [
+              {
+                "q": "Does TikTok work for B2B?",
+                "a": "Less often than for consumer products, but it can work for hiring, an executive's personal brand and awareness. We check fit before launch so the budget is not wasted."
+              },
+              {
+                "q": "How much do TikTok ads cost?",
+                "a": "It combines the ad budget with video production and campaign management. We quote our fee after the free initial review."
+              },
+              {
+                "q": "Do we need a brand account on TikTok?",
+                "a": "Not for ads, but an active account builds trust and provides material for Spark Ads. We often combine ads with organic content."
+              },
+              {
+                "q": "How many videos do we need for a test?",
+                "a": "Several different variations at the start — one video is not enough to tell what works. The exact number is set in the creative strategy."
+              },
+              {
+                "q": "What are Spark Ads?",
+                "a": "A format where ads run on an already published video from the brand or a creator. Reactions and comments stay, and the ad looks like regular content."
+              },
+              {
+                "q": "Can TikTok leads go straight into our CRM?",
+                "a": "Yes. Leads from lead forms and the website are passed to the CRM automatically with their source, so TikTok can be compared with other channels by cost per customer."
+              }
+            ],
+            "cases": [
+              "ecommerce",
+              "education",
+              "meshtiish"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "seo",
@@ -389,10 +2535,142 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "ROMI",
           "kind": "",
-          "cases": ["hydrosta-kazakhstan", "hsta-group", "hydrosta-service", "tpk"]
+          "cases": [
+            "hydrosta-kazakhstan",
+            "hsta-group",
+            "hydrosta-service",
+            "tpk"
+          ],
+          "seo": {
+            "title": "SEO Services for Service Businesses — CYBERMOVE",
+            "description": "SEO services: technical audit, keyword research, service page optimisation, content, links and local search in Kazakhstan. Organic traffic, no pay-per-click.",
+            "h1": "SEO services",
+            "lead": "We grow company websites in Google so customers find you by the services you offer, not just by your name. Technical fixes, service pages, content, links and local search — without promises of the top spot in a month.",
+            "intro": "SEO for a service company is first of all the right structure: a dedicated page for each service that answers the customer's questions, a technically sound site and content that shows expertise. Then links and local signals do their work: a business profile on maps, reviews and mentions. Search optimisation does not work overnight — rankings for services usually appear within months — but traffic grows without paying for every click.",
+            "includes": [
+              {
+                "t": "Technical site audit",
+                "d": "Indexing, speed, mobile version, duplicates, redirects, markup and errors that get in the search engine's way."
+              },
+              {
+                "t": "Keyword research",
+                "d": "The searches people use to find your services, mapped to pages by user intent."
+              },
+              {
+                "t": "On-page optimisation",
+                "d": "Headings, copy, structure, internal links and markup for every service page."
+              },
+              {
+                "t": "Content plan",
+                "d": "Articles and guides for informational searches that bring future customers."
+              },
+              {
+                "t": "Link strategy",
+                "d": "Mentions and links from industry, partner and local sites — no spam schemes."
+              },
+              {
+                "t": "Local search",
+                "d": "Google Business Profile and local maps, reviews, and consistent name, address and phone everywhere."
+              },
+              {
+                "t": "Analytics",
+                "d": "Search Console, rankings, traffic and search-driven leads in one report."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Audit and keywords",
+                "d": "Technical state, competitors in search, keywords and a page map.",
+                "time": "1–2 weeks",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Technical fixes",
+                "d": "Indexing errors, speed, redirects, markup.",
+                "stage": "CORE"
+              },
+              {
+                "t": "Pages and content",
+                "d": "Optimising service pages, new pages, first articles.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Off-site signals",
+                "d": "Business profile, reviews, links and mentions.",
+                "stage": "GROWTH"
+              },
+              {
+                "t": "Growth and reporting",
+                "d": "Monthly reports on rankings, traffic and leads, and a plan for next month.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A website free of technical errors that block indexing",
+              "Pages built for the searches behind your services",
+              "Growing organic traffic and leads from search",
+              "Monthly reports on rankings, traffic and leads"
+            ],
+            "forWhom": [
+              {
+                "t": "B2B and engineering",
+                "d": "Companies whose customers search for specific solutions and equipment — like HYDROSTA and HSTA Group in Kazakhstan."
+              },
+              {
+                "t": "Service companies",
+                "d": "Maintenance and repair businesses with many local and city searches, like Hydrosta Service."
+              },
+              {
+                "t": "Manufacturers",
+                "d": "Producers of materials and goods, like TPK, for whom search is a source of wholesale inquiries."
+              },
+              {
+                "t": "Expensive paid clicks",
+                "d": "Where paid clicks are costly and organic traffic helps lower customer acquisition cost."
+              }
+            ],
+            "faq": [
+              {
+                "q": "When will SEO show results?",
+                "a": "Technical fixes show within weeks; rankings for services usually take several months depending on competition and the site's starting point. Nobody, including us, can guarantee search positions."
+              },
+              {
+                "q": "How much do SEO services cost?",
+                "a": "It depends on site size, competition in your niche and content volume. We quote after the audit and the free initial review."
+              },
+              {
+                "q": "Do we need articles on the website?",
+                "a": "For a service business, yes: articles answer customers' questions before they contact you and attract informational searches. But we start with service pages, which bring leads."
+              },
+              {
+                "q": "Do you buy links?",
+                "a": "We do not use schemes that search engines penalise. Links and mentions come from industry, partner and local sites where they belong."
+              },
+              {
+                "q": "What is local SEO?",
+                "a": "Ranking in search and on maps for queries with a city name or \"near me\". It needs a Google Business Profile, reviews and the same name, address and phone on the website and in directories."
+              },
+              {
+                "q": "Can a bilingual website be optimised?",
+                "a": "Yes, and in Kazakhstan it often makes sense. Each language version needs its own URLs, hreflang markup and copy written for searches in that language rather than machine translation."
+              }
+            ],
+            "cases": [
+              "hydrosta-kazakhstan",
+              "hsta-group",
+              "hydrosta-service"
+            ],
+            "articles": []
+          }
         }
       ],
-      "dataPoints": []
+      "dataPoints": [],
+      "seo": {
+        "title": "PPC and SEO Services — CYBERMOVE",
+        "kicker": "PPC and SEO",
+        "description": "PPC and SEO services: Meta ads, Google Ads, TikTok ads and search optimisation. Customers from every channel with a clear cost per lead. Free initial review.",
+        "intro": "We run paid media and SEO as one acquisition system with shared economics: the cost of a lead, of a customer and the return on spend for every source. Before launch we check the website, analytics and lead handling, because traffic without them only multiplies losses. After that: testing, switching off what does not pay back and scaling what works."
+      }
     },
     {
       "id": "tenders-legal",
@@ -409,7 +2687,12 @@
       "phrase": "We find tenders, prepare bids and manage the deal legally: from documentation to a signed contract.",
       "result": "Tenders · bids · contracts · corporate support",
       "note": "",
-      "micro": ["TENDER", "BID", "CONTRACT", "CORP"],
+      "micro": [
+        "TENDER",
+        "BID",
+        "CONTRACT",
+        "CORP"
+      ],
       "services": [
         {
           "id": "tender-monitoring",
@@ -425,7 +2708,125 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "tender",
-          "cases": ["medical-protective-equipment", "hsta-group", "building-time"]
+          "cases": [
+            "medical-protective-equipment",
+            "hsta-group",
+            "building-time"
+          ],
+          "seo": {
+            "title": "Tender Monitoring in Kazakhstan — CYBERMOVE",
+            "description": "Tender monitoring in Kazakhstan: public procurement on goszakup.gov.kz and corporate portals, requirement and competitor analysis, and a bid-or-no-bid call.",
+            "h1": "Tender monitoring",
+            "lead": "We find tenders that fit your company and assess your chances and margin before you bid. For suppliers and contractors who want to take part in tenders systematically rather than by chance.",
+            "intro": "Finding a tender is easy; picking the ones worth bidding on is the hard part. Experience and document requirements, delivery deadlines, payment and security terms, competitors' prices in past tenders — all of this should be checked before your team spends time on a bid. We set up monitoring of public procurement on the goszakup.gov.kz portal and of large companies' purchases on their own platforms, shortlist suitable lots and give a short assessment of each: bid or not, and why.",
+            "includes": [
+              {
+                "t": "Monitoring setup",
+                "d": "Keywords, product and service codes, regions, amounts and procurement types to track — tested against past tenders."
+              },
+              {
+                "t": "Platforms",
+                "d": "The public procurement portal plus the procurement platforms of large and state-owned companies when your profile fits them."
+              },
+              {
+                "t": "Shortlisting",
+                "d": "Daily selection of relevant lots without the noise of hundreds of irrelevant notices."
+              },
+              {
+                "t": "Requirement analysis",
+                "d": "Qualification requirements, documents, deadlines, payment and security terms — anything that could get a bid rejected."
+              },
+              {
+                "t": "Competitor analysis",
+                "d": "Who took part in similar tenders, at what prices, and who won."
+              },
+              {
+                "t": "Profitability check",
+                "d": "Whether margin survives price cuts during bidding, logistics, bid security and payment terms."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Company profile",
+                "d": "What you supply or deliver, where, at what volumes, and which experience and documents you already have.",
+                "time": "1–2 days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Search setup",
+                "d": "Keywords, codes, platforms and filters, validated on past tenders.",
+                "time": "a few days",
+                "stage": "CORE"
+              },
+              {
+                "t": "Daily shortlist",
+                "d": "Relevant tenders with a brief: amount, deadlines, requirements, risks and a recommendation.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "On-demand assessment",
+                "d": "A detailed review of a tender and its competitors before you decide to bid.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Monthly report",
+                "d": "How many tenders were found, how many you bid on, results and conclusions.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A shortlist of tenders worth bidding on, each with a brief",
+              "An assessment of chances and margin before preparing a bid",
+              "Insight into competitors' prices and behaviour",
+              "Less team time spent searching and reading notices"
+            ],
+            "forWhom": [
+              {
+                "t": "Manufacturers and suppliers",
+                "d": "Companies able to supply government and corporate customers — like the medical protective equipment producer."
+              },
+              {
+                "t": "Engineering and construction contractors",
+                "d": "Design, installation and servicing of engineering systems for commercial and industrial sites."
+              },
+              {
+                "t": "First steps in public procurement",
+                "d": "Companies that want to start bidding and do not know which tenders to begin with."
+              },
+              {
+                "t": "Bidding without a system",
+                "d": "Someone searches for tenders between other tasks, and suitable ones are missed."
+              }
+            ],
+            "faq": [
+              {
+                "q": "Which platforms do you monitor?",
+                "a": "Primarily the goszakup.gov.kz public procurement portal. If your profile suits large and state-owned companies, we add their procurement platforms, which have their own rules and registration."
+              },
+              {
+                "q": "How much does tender monitoring cost?",
+                "a": "It depends on the number of product lines, regions and platforms, and whether detailed tender assessments are needed. We quote after the free initial review."
+              },
+              {
+                "q": "What does a company need to take part in public procurement in Kazakhstan?",
+                "a": "Registration on the portal with an electronic digital signature and the documents a specific tender requires. During profiling we check what is missing so you do not find out on the last day before the deadline."
+              },
+              {
+                "q": "Can you also prepare the bid?",
+                "a": "Yes, monitoring is usually combined with bid preparation: shortlisted tenders go straight into work under the same process."
+              },
+              {
+                "q": "Do you guarantee a win?",
+                "a": "No, nobody can guarantee a win: price, requirements and competitors decide it. We raise your chances by choosing suitable tenders and preparing correct bids."
+              }
+            ],
+            "cases": [
+              "medical-protective-equipment",
+              "hsta-group",
+              "building-time"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "tender-application",
@@ -442,7 +2843,131 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "tender",
-          "cases": ["medical-protective-equipment", "hydrosta-kazakhstan"]
+          "cases": [
+            "medical-protective-equipment",
+            "hydrosta-kazakhstan"
+          ],
+          "seo": {
+            "title": "Tender Bid Preparation — CYBERMOVE",
+            "description": "Tender bid preparation for public and corporate procurement in Kazakhstan: document package, submission, bidding support and contract signing. Free review.",
+            "h1": "Tender bid preparation",
+            "lead": "We prepare the documents, submit the bid and support the procurement until the contract is signed. For companies that want to bid without rejections over formal mistakes.",
+            "intro": "Bids are often rejected not on price but on paperwork: the wrong format, an expired certificate, a mismatch with the technical specification, an unsigned file. Full-service tender support removes that risk: we analyse the tender requirements, assemble the document package, check it against the conditions, submit on time and then run the process — answering questions, tracking protocols and helping sign the contract. The document package stays with you and speeds up the next bid.",
+            "includes": [
+              {
+                "t": "Tender documentation review",
+                "d": "Participant requirements, technical specification, draft contract, deadlines and submission rules."
+              },
+              {
+                "t": "Document package",
+                "d": "The list of documents for the tender, checks on certificate validity and form compliance."
+              },
+              {
+                "t": "Technical part",
+                "d": "Compliance of the offered goods or services with the specification, descriptions and supporting documents."
+              },
+              {
+                "t": "Price offer",
+                "d": "Pricing that accounts for costs, logistics, bid security and the minimum acceptable margin."
+              },
+              {
+                "t": "Submission",
+                "d": "Uploading documents and signing with the participant's electronic digital signature on time, with a buffer for technical glitches."
+              },
+              {
+                "t": "Support during bidding",
+                "d": "Answering the customer's questions, tracking protocols and results, and challenging violations together with a lawyer."
+              },
+              {
+                "t": "Contract signing",
+                "d": "Reviewing the draft contract, performance security and signing deadlines."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Tender analysis",
+                "d": "Requirements, risks, what is missing and whether to bid.",
+                "time": "1–2 days",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Collecting documents",
+                "d": "Document list, requests for missing items, validity checks.",
+                "time": "within the tender deadline",
+                "stage": "CORE"
+              },
+              {
+                "t": "Preparing the bid",
+                "d": "Technical part, price offer, forms and a final check of the whole package against the requirements.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Submission and bidding",
+                "d": "On-time submission, answers to questions, protocol tracking.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Contract",
+                "d": "Signing the contract and handing over to the delivery team.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A correct bid submitted on time and checked against the requirements",
+              "A reusable document package",
+              "Support until the contract is signed",
+              "A review of mistakes and lessons for the next bids"
+            ],
+            "forWhom": [
+              {
+                "t": "Suppliers to large customers",
+                "d": "Contract supply to government and corporate customers — as in the medical protective equipment project."
+              },
+              {
+                "t": "No in-house tender specialist",
+                "d": "Tenders come up a few times a quarter, and a full-time specialist does not pay off."
+              },
+              {
+                "t": "Past rejections",
+                "d": "Bids have already been rejected on formal grounds, and you need to understand what went wrong."
+              },
+              {
+                "t": "A first tender",
+                "d": "A company bidding for the first time that wants to get through without mistakes and build a base document package."
+              }
+            ],
+            "faq": [
+              {
+                "q": "How much does tender bid preparation cost?",
+                "a": "It depends on the complexity of the tender and the volume of documents; one-off bids and ongoing support are priced differently. We quote after the free initial review."
+              },
+              {
+                "q": "How early should we contact you?",
+                "a": "The earlier the better: some certificates take several days to obtain. Ideally right after the tender is published, leaving time to ask the customer questions about the documentation."
+              },
+              {
+                "q": "Why are bids most often rejected?",
+                "a": "Mismatches with qualification requirements or the technical specification, incomplete packages, expired certificates and form violations. Most of these can be spotted early by reading the documentation carefully."
+              },
+              {
+                "q": "Do we need our own electronic signature?",
+                "a": "Yes, the bid is signed by the participant with its own electronic digital signature. We prepare everything for signing and check that the signature is valid."
+              },
+              {
+                "q": "Do you work with corporate procurement too?",
+                "a": "Yes, including tenders run by large and state-owned companies. They have their own rules and platforms, so we analyse the requirements for each specific tender."
+              },
+              {
+                "q": "What if we lose the tender?",
+                "a": "We review the protocol — who won, at what price, whether our bid had remarks — and apply the lessons to the next bids."
+              }
+            ],
+            "cases": [
+              "medical-protective-equipment",
+              "hydrosta-kazakhstan"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "contracts",
@@ -458,7 +2983,129 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "legal",
-          "cases": ["morris-group", "sii-concept", "hsta-group"]
+          "cases": [
+            "morris-group",
+            "sii-concept",
+            "hsta-group"
+          ],
+          "seo": {
+            "title": "Contract Drafting and Review — CYBERMOVE",
+            "description": "Contract drafting and review for business: preparing and checking contracts, negotiating terms, deal support and claims. Risks addressed before you sign.",
+            "h1": "Contract drafting and review",
+            "lead": "We draft and review contracts with customers, suppliers and contractors, negotiate terms and support the deal. So risks are handled before signing, not discovered in a dispute.",
+            "intro": "A template from the internet, or a contract sent by the other side, rarely reflects how the deal will actually be performed: deadlines, acceptance, payment, liability for delays, rights to the work product. Having a lawyer review a contract before signing costs less than any dispute. We read a contract not only as a legal text but as a description of a business process: what you must do, what you will receive and what happens if things do not go to plan.",
+            "includes": [
+              {
+                "t": "Contract drafting",
+                "d": "Supply, services, work, agency and other contracts built around your business model."
+              },
+              {
+                "t": "Contract review",
+                "d": "Assessment of the counterparty's contract: risks, unfavourable and unclear terms, what is missing, what to change and how to argue for it."
+              },
+              {
+                "t": "Negotiating terms",
+                "d": "Disagreement protocols and negotiations with the counterparty on disputed clauses."
+              },
+              {
+                "t": "Company templates",
+                "d": "Standard contracts your team can use without a lawyer for routine deals."
+              },
+              {
+                "t": "Deal support",
+                "d": "Performance tracking, amendments, acts and acceptance."
+              },
+              {
+                "t": "Claims",
+                "d": "Drafting and answering claims when terms are breached, pre-trial settlement."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Task and context",
+                "d": "What the deal is, with whom, for how much and which risks matter most.",
+                "time": "1 day",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Draft or review",
+                "d": "We prepare the contract or a review of the counterparty's draft with specific changes and why they matter.",
+                "time": "usually a few business days",
+                "stage": "CORE"
+              },
+              {
+                "t": "Agreement",
+                "d": "We discuss the changes with you and, if needed, with the counterparty.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Signing",
+                "d": "A final check of the wording and annexes.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Support",
+                "d": "On request: performance tracking, amendments and claims.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "A contract where risks are addressed upfront and clear to both sides",
+              "Clear terms for payment, deadlines, acceptance and liability",
+              "Standard templates for recurring deals",
+              "A position and documents ready if the counterparty breaches the terms"
+            ],
+            "forWhom": [
+              {
+                "t": "Contract supply",
+                "d": "Work with large customers whose contracts set strict deadlines and penalties — as in the medical protective equipment project."
+              },
+              {
+                "t": "Manufacturing and contractors",
+                "d": "Fashion and production projects with foreign partners and contractors, as during SII Concept's international development."
+              },
+              {
+                "t": "Marketing and IT services",
+                "d": "Contracts with agencies and contractors: deliverables, account access, content rights and exit terms."
+              },
+              {
+                "t": "No in-house lawyer",
+                "d": "Deals happen regularly, but a full-time lawyer is not yet worth it."
+              }
+            ],
+            "faq": [
+              {
+                "q": "How much does a contract review cost?",
+                "a": "It depends on the length and complexity of the contract and on urgency. We quote after seeing the document; the initial review is free."
+              },
+              {
+                "q": "How quickly can you review a contract?",
+                "a": "Usually within a few business days; urgent cases are discussed separately. The deadline is agreed when we receive the document."
+              },
+              {
+                "q": "Do you represent clients in court?",
+                "a": "Our job is to keep things out of court: contracts, negotiations, claims. If a dispute does go to court, we coordinate the work with specialist litigators and advocates."
+              },
+              {
+                "q": "Can you create contract templates for our team?",
+                "a": "Yes, and it saves time: for recurring deals we prepare standard contracts with clear fields and a guide on when a lawyer's review is needed."
+              },
+              {
+                "q": "What should a contract with a marketing agency cover?",
+                "a": "Scope and deliverables, metrics and how they are measured, access to accounts and data, content rights and exit terms. We cover this in detail in a separate article in Insights."
+              },
+              {
+                "q": "Should we review a contract sent by a large customer?",
+                "a": "Yes. Large customers rarely change their forms, but a review shows which risks you are accepting, where reservations are needed and what to factor into price and delivery timing."
+              }
+            ],
+            "cases": [
+              "medical-protective-equipment",
+              "sii-concept",
+              "barbershops-kyiv"
+            ],
+            "articles": []
+          }
         },
         {
           "id": "corporate",
@@ -474,10 +3121,137 @@
           "format": "[PLACEHOLDER: format and timeline]",
           "metric": "",
           "kind": "legal",
-          "cases": ["morris-group", "barbershops-kyiv", "maharadj"]
+          "cases": [
+            "morris-group",
+            "barbershops-kyiv",
+            "maharadj"
+          ],
+          "seo": {
+            "title": "Corporate Legal Support — CYBERMOVE",
+            "description": "Outsourced corporate legal support: corporate documents, changes to an LLP, legal coordination of projects and tender paperwork. Free initial review.",
+            "h1": "Corporate legal support",
+            "lead": "We maintain corporate documentation and legal coordination for your business: shareholder resolutions, internal policies, the legal side of tenders and work with external lawyers. Order in the paperwork and predictability in disputes.",
+            "intro": "Corporate legal support is not only about registering a company; it is ongoing order: up-to-date charter documents, formal resolutions, clear shareholder rights and internal rules. While things go well this is easy to neglect; problems surface when a partner joins, a director changes, an inspection arrives or a tender demands documents. A retainer keeps this in order without an in-house lawyer, while complex and specialised issues are handled together with dedicated specialists.",
+            "includes": [
+              {
+                "t": "Corporate documents",
+                "d": "Charter, shareholder resolutions and minutes, amendments to an LLP's constituent documents."
+              },
+              {
+                "t": "Company changes",
+                "d": "Changes of director, participants, shares or address — documents and the step-by-step procedure."
+              },
+              {
+                "t": "Internal documents",
+                "d": "Policies, regulations and job descriptions required by law and useful for running the company."
+              },
+              {
+                "t": "Legal coordination of projects",
+                "d": "The legal side of new business lines, partnerships and joint projects: who is responsible for what and how results are shared."
+              },
+              {
+                "t": "Tender paperwork",
+                "d": "Legal documents and certificates required to take part in procurement."
+              },
+              {
+                "t": "Working with external lawyers",
+                "d": "Briefing and overseeing specialists in tax, litigation and intellectual property."
+              }
+            ],
+            "steps": [
+              {
+                "t": "Document review",
+                "d": "We gather constituent and internal documents: what exists, what is outdated, what is missing and what risks this creates.",
+                "time": "about a week",
+                "stage": "CHAOS"
+              },
+              {
+                "t": "Putting things in order",
+                "d": "Missing resolutions, amendments and internal documents — by level of risk, starting with what could stop the business.",
+                "stage": "CORE"
+              },
+              {
+                "t": "Retainer support",
+                "d": "Day-to-day questions, documents and advice within an agreed monthly scope.",
+                "stage": "SYSTEM"
+              },
+              {
+                "t": "Projects and changes",
+                "d": "Support for major events: a partner joining, a new business line, reorganisation.",
+                "stage": "GROWTH"
+              },
+              {
+                "t": "Specialist coordination",
+                "d": "Bringing in and overseeing specialist lawyers and advocates when an issue goes beyond ongoing support.",
+                "stage": "GROWTH"
+              }
+            ],
+            "result": [
+              "Up-to-date corporate documents without gaps or contradictions",
+              "A clear procedure for changes in the company",
+              "An outsourced business lawyer without the cost of a full-time hire",
+              "Predictability in disputes thanks to properly documented decisions"
+            ],
+            "forWhom": [
+              {
+                "t": "Growing companies",
+                "d": "New partners, locations and business lines appear, while the documents date back to registration."
+              },
+              {
+                "t": "Chains and operational businesses",
+                "d": "Several locations, many contracts and employees — as in the operational management of a barbershop chain."
+              },
+              {
+                "t": "Tender participants",
+                "d": "Companies for which orderly corporate documents are a condition for taking part in procurement."
+              },
+              {
+                "t": "Joint ventures",
+                "d": "Businesses with several participants that need to agree on rights and exit terms in advance."
+              }
+            ],
+            "faq": [
+              {
+                "q": "What does a legal retainer include?",
+                "a": "Day-to-day documents, advice and support for changes within an agreed monthly scope. We set the scope based on the actual workload after reviewing your documents."
+              },
+              {
+                "q": "How much does corporate legal support cost?",
+                "a": "It depends on the volume of work and the format — one-off tasks or a retainer. We quote after the free initial review."
+              },
+              {
+                "q": "Do you help with LLP registration and changes?",
+                "a": "Yes, we prepare documents for changes — director, participants, shares, address — and describe the procedure. The registration itself goes through government services."
+              },
+              {
+                "q": "Who handles tax and litigation matters?",
+                "a": "Specialist lawyers and advocates whom we bring in and coordinate. You get one person responsible for the overall legal picture and specialists for specific tasks."
+              },
+              {
+                "q": "Do you work with companies outside Kazakhstan?",
+                "a": "Corporate support is provided under Kazakh law. For other jurisdictions we coordinate with local lawyers."
+              },
+              {
+                "q": "Where do we start if the documents have not been updated for years?",
+                "a": "With a review: we collect all constituent and internal documents, compare them with how the company actually works and list what to fix first by level of risk."
+              }
+            ],
+            "cases": [
+              "barbershops-kyiv",
+              "maharadj",
+              "sii-concept"
+            ],
+            "articles": []
+          }
         }
       ],
-      "dataPoints": []
+      "dataPoints": [],
+      "seo": {
+        "title": "Tender Support and Legal Services — CYBERMOVE",
+        "kicker": "Tender support and legal services",
+        "description": "Tender support and legal services in Kazakhstan: procurement monitoring, bid preparation, contracts and corporate documents — from tender to signed contract.",
+        "intro": "Tender support and legal services cover the area where businesses most often lose time and money: finding suitable procurements, bids and documentation, contracts with customers and partners, corporate paperwork. We work with public procurement in Kazakhstan and commercial tenders, from monitoring to a signed contract and its performance."
+      }
     }
   ]
 }

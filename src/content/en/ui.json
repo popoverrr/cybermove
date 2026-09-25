@@ -75,12 +75,12 @@
   },
   "meta": {
     "home": {
-      "title": "CYBERMOVE — we set business in motion: audit, systems, brand, traffic, tenders",
-      "description": "CYBERMOVE (Cyber Move Consulting): business and financial audit, websites and CRM, brand and content, advertising and SEO, tenders and legal. One team, one system. Free initial review."
+      "title": "Business Consulting in Kazakhstan — CYBERMOVE",
+      "description": "Business consulting in Kazakhstan: audit and finance, websites and CRM, brand and content, ads and SEO, tenders and legal. One team, one system. Free review."
     },
     "services": {
-      "title": "CYBERMOVE services — 5 areas, 22 services",
-      "description": "Business and financial audit, websites, CRM, telephony and AI, brand and content, paid social, Google Ads, TikTok Ads and SEO, tenders and legal. All in one system."
+      "title": "Business Consulting Services — CYBERMOVE",
+      "description": "Business consulting services: 5 areas and 22 services — audit, digitalization, branding, PPC and SEO, tenders and legal. Get a free initial review today."
     },
     "cases": {
       "title": "CYBERMOVE cases — 34 projects in 13 cities",
@@ -142,5 +142,18 @@
   "caseDiscuss": "Discuss a similar task",
   "caseNext": "Next case",
   "scrollHint": "Scroll down",
-  "langTitle": "Язык / Language"
+  "langTitle": "Язык / Language",
+  "home": "Home",
+  "crumbs": "Breadcrumbs",
+  "howItWorks": "How the work goes",
+  "forWhom": "Who it is for",
+  "faq": "FAQ",
+  "siblings": "Other services in this area",
+  "serviceMore": "About the service",
+  "serviceCta": "Discuss this service",
+  "serviceField": "Service",
+  "articlesTitle": "Related insights",
+  "directionCases": "Cases in this area",
+  "servicesOfDirection": "Services in this area",
+  "stepsNote": "Timelines are indicative: exact ones depend on scope and are set after the initial review."
 }

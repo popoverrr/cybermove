@@ -8,8 +8,10 @@ export interface Props {
   lang: LangCode;
   title?: string;
   text?: string;
+  /** id услуги: кнопка ведёт на /contact/?service=<id> (форма выбирает услугу) */
+  service?: string;
 }
-const { lang, title, text } = Astro.props;
+const { lang, title, text, service } = Astro.props;
 const c = getContent(lang);
 ---
 
@@ -19,7 +21,7 @@ const c = getContent(lang);
     <h2 class="t-h2 cta__title">{title ?? c.home.s8.h2}</h2>
     <p class="t-lead cta__text">{text ?? c.home.s8.lead}</p>
     <div class="cta__btns">
-      <Button href={localePath(lang, '/contact/')} variant="fill" size="lg">{c.ui.cta}</Button>
+      <Button href={localePath(lang, '/contact/') + (service ? `?service=${service}` : '')} variant="fill" size="lg">{c.ui.cta}</Button>
       <Button href={WHATSAPP_URL} variant="ghost" size="lg" target="_blank" rel="noopener">{c.ui.whatsapp}</Button>
     </div>
   </div>

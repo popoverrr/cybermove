@@ -15,15 +15,22 @@ export interface Props {
   beam?: number;
   accent?: string;
   size?: 'lg' | 'md';
+  /** BRIEF-SEO §1: видимые хлебные крошки над заголовком (последний пункт — текущая страница, без ссылки) */
+  crumbs?: Array<{ name: string; href?: string }>;
+  /** BRIEF-SEO §1: ключевая фраза страницы — микрометка встаёт внутрь H1 (визуально та же строка над заголовком) */
+  kicker?: string;
+  /** длинный заголовок (страницы услуг): шире колонка */
+  wide?: boolean;
+  ariaCrumbs?: string;
 }
 import { withBase } from '../lib/base';
 import ImageSlot from './ImageSlot.astro';
-const { theme, label, title, lead, micro = [], render, photo, beam = 0, accent, size = 'lg' } = Astro.props;
+const { theme, label, title, lead, micro = [], render, photo, beam = 0, accent, size = 'lg', crumbs = [], kicker, wide = false, ariaCrumbs = 'Breadcrumbs' } = Astro.props;
 const renderUrl = render ? withBase(render) : '';
 const html = title;
 ---
 
-<section class:list={['phero', `phero--${size}`]} data-theme={theme} data-lite-bg={theme} data-beam={beam}>
+<section class:list={['phero', `phero--${size}`, { 'phero--wide': wide }]} data-theme={theme} data-lite-bg={theme} data-beam={beam}>
   <canvas class="phero__bg" aria-hidden="true"></canvas>
   {photo ? (
     <div class="phero__slot" aria-hidden="true"><ImageSlot id={photo} ratio="16:9" alt="" sizes="(max-width: 899px) 100vw, 52vw" eager /></div>
@@ -31,8 +38,27 @@ const html = title;
     renderUrl && <div class="phero__render" style={`background-image:url(${renderUrl})`} aria-hidden="true"></div>
   )}
   <div class="phero__inner container">
-    <p class="t-micro phero__label">{label}</p>
-    <h1 class="t-h1 phero__title" set:html={html} />
+    {crumbs.length > 0 && (
+      <nav class="phero__crumbs t-micro" aria-label={ariaCrumbs}>
+        <ol>
+          {crumbs.map((c, i) => (
+            <li>
+              {c.href && i < crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )}
+    {kicker ? (
+      <h1 class="t-h1 phero__title">
+        <span class="t-micro phero__label phero__kicker" data-label={`${label} · `}>{kicker}</span>{' '}<span set:html={html} />
+      </h1>
+    ) : (
+      <>
+        {!crumbs.length && <p class="t-micro phero__label">{label}</p>}
+        <h1 class="t-h1 phero__title" set:html={html} />
+      </>
+    )}
     {lead && <p class="t-lead phero__lead">{lead}</p>}
     {micro.length > 0 && <p class="t-micro phero__micro">{micro.join(' · ')}</p>}
     <span class="crosshair phero__cross" aria-hidden="true"></span>
@@ -120,6 +146,34 @@ const html = title;
   }
   .phero__title {
     max-width: 14ch;
+  }
+  .phero--wide .phero__title {
+    max-width: 20ch;
+  }
+  /* микрометка внутри H1: та же строка над заголовком, что и отдельная метка */
+  /* индекс и этап — генерируемым текстом: видны, но не входят в текст H1 */
+  .phero__kicker::before {
+    content: attr(data-label);
+  }
+  .phero__kicker {
+    display: block;
+    margin-bottom: var(--space-4);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--ls-micro);
+  }
+  .phero__crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+    color: var(--fg-2);
+  }
+  .phero__crumbs li + li::before {
+    content: '/';
+    margin-right: 0.6rem;
+    color: var(--fg-3);
+  }
+  .phero__crumbs a:hover {
+    color: var(--accent);
   }
   .phero__lead {
     max-width: 52ch;

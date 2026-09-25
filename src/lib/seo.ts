@@ -87,9 +87,15 @@ export function breadcrumbLd(lang: LangCode, items: Array<{ name: string; path: 
   };
 }
 
+/** Область обслуживания: Казахстан + города, где есть проекты (GEOGRAPHY) */
+function areaServed() {
+  return [{ '@type': 'Country', name: 'Kazakhstan' }, ...GEOGRAPHY.map((city) => ({ '@type': 'City', name: city }))];
+}
+
+/** Направление (хаб): Service с каталогом услуг; `url` позиции — страница услуги (BRIEF-SEO §1) */
 export function serviceLd(
   lang: LangCode,
-  opts: { name: string; description: string; path: string; services: Array<{ name: string; description: string; anchor: string }> },
+  opts: { name: string; description: string; path: string; services: Array<{ name: string; description: string; path: string }> },
 ) {
   return {
     '@context': 'https://schema.org',
@@ -98,7 +104,7 @@ export function serviceLd(
     description: opts.description,
     url: canonical(lang, opts.path),
     provider: { '@id': `${SITE_URL}/#organization` },
-    areaServed: GEOGRAPHY.map((city) => ({ '@type': 'City', name: city })),
+    areaServed: areaServed(),
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: opts.name,
@@ -108,9 +114,48 @@ export function serviceLd(
           '@type': 'Service',
           name: s.name,
           description: s.description,
-          url: `${canonical(lang, opts.path)}#${s.anchor}`,
+          url: canonical(lang, s.path),
         },
       })),
     },
+  };
+}
+
+/** Страница услуги: Service без цен (цена называется после разбора) */
+export function serviceItemLd(
+  lang: LangCode,
+  opts: { name: string; serviceType: string; description: string; path: string; category: string },
+) {
+  const url = canonical(lang, opts.path);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': `${url}#service`,
+    name: opts.name,
+    serviceType: opts.serviceType,
+    category: opts.category,
+    description: opts.description,
+    url,
+    inLanguage: lang,
+    provider: { '@id': `${SITE_URL}/#organization` },
+    areaServed: areaServed(),
+    offers: {
+      '@type': 'Offer',
+      url,
+      availability: 'https://schema.org/InStock',
+      seller: { '@id': `${SITE_URL}/#organization` },
+    },
+  };
+}
+
+export function faqLd(items: Array<{ q: string; a: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((it) => ({
+      '@type': 'Question',
+      name: it.q,
+      acceptedAnswer: { '@type': 'Answer', text: it.a },
+    })),
   };
 }

@@ -90,6 +90,12 @@ export function initForms() {
     form.querySelector<HTMLInputElement>('[data-page]')!.value = location.pathname;
     form.querySelector<HTMLInputElement>('[data-utm]')!.value = utm;
     form.querySelector<HTMLInputElement>('[data-ts]')!.value = String(started);
+    // BRIEF-SEO §1: /contact/?service=<id> со страницы услуги выбирает её в поле «Услуга»
+    const select = form.querySelector<HTMLSelectElement>('[data-service-select]');
+    if (select) {
+      const want = new URLSearchParams(location.search).get('service');
+      if (want && Array.from(select.options).some((o) => o.value === want)) select.value = want;
+    }
 
     form.querySelectorAll<HTMLInputElement>('input, textarea').forEach((el) => {
       el.addEventListener('focus', () => {
@@ -112,6 +118,7 @@ export function initForms() {
       const fd = new FormData(form);
       const payload: Record<string, string> = {};
       fd.forEach((v, k) => (payload[k] = String(v)));
+      if (select?.value) payload.service_name = select.selectedOptions[0]?.textContent?.trim() || '';
       payload.elapsed = String(Math.round((Date.now() - started) / 1000));
       show(form, 'sending');
       try {
@@ -119,7 +126,7 @@ export function initForms() {
         if (r.ok) {
           show(form, 'success');
           state.events.emit('formSuccess', undefined);
-          track('lead_submit', { format: payload.format, page: location.pathname });
+          track('lead_submit', { format: payload.format, service: payload.service || '', page: location.pathname });
         } else {
           show(form, 'error');
         }

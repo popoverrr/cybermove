@@ -60,7 +60,7 @@ const c = getContent(lang);
           )}
           <div class="drawer__actions">
             <Button href={localePath(lang, '/contact/')} variant="fill" magnetic={false}>{c.ui.cta}</Button>
-            <Button href={`${localePath(lang, `/services/${d.slug}/`)}#${s.id}`} variant="text" magnetic={false} arrow>{c.ui.toDirection}</Button>
+            <Button href={localePath(lang, `/services/${d.slug}/${s.id}/`)} variant="text" magnetic={false} arrow>{c.ui.serviceMore}</Button>
           </div>
         </article>
       )),

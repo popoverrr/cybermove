@@ -8,10 +8,22 @@
     "company": "Company or website",
     "format": "Format",
     "formatOptions": [
-      { "value": "audit", "label": "Audit & roadmap" },
-      { "value": "launch", "label": "Project launch" },
-      { "value": "growth", "label": "Growth partnership" },
-      { "value": "other", "label": "Other" }
+      {
+        "value": "audit",
+        "label": "Audit & roadmap"
+      },
+      {
+        "value": "launch",
+        "label": "Project launch"
+      },
+      {
+        "value": "growth",
+        "label": "Growth partnership"
+      },
+      {
+        "value": "other",
+        "label": "Other"
+      }
     ],
     "message": "Message",
     "submit": "Send",
@@ -24,7 +36,9 @@
     "consentLink": "privacy policy",
     "required": "Required field",
     "invalidContact": "Enter a phone number, WhatsApp or Telegram",
-    "tooFast": "The form seems to have been filled too quickly. Check the fields and send again."
+    "tooFast": "The form seems to have been filled too quickly. Check the fields and send again.",
+    "service": "Service",
+    "serviceNone": "Not sure yet — need a review"
   },
   "channelsTitle": "Channels",
   "whatsappLabel": "WhatsApp",

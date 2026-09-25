@@ -1,10 +1,12 @@
 ---
-/** /about/ — подход CHAOS → CORE → SYSTEM → GROWTH, почему, что измеряем, форматы, команда [PLACEHOLDER], география. */
+/**
+ * /about/ — BRIEF-SEO §3: факты (счётчики S7), направления со ссылками, подход CHAOS → CORE → SYSTEM → GROWTH,
+ * почему и форматы, «Как считаем результат», география по кейсам. Команды на сайте нет (решение руководства).
+ */
 import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
-import ImageSlot from '../../../components/ImageSlot.astro';
 import CtaBlock from '../../../components/CtaBlock.astro';
-import { getContent, langStaticPaths } from '../../../lib/i18n';
+import { getContent, langStaticPaths, localePath, findCase } from '../../../lib/i18n';
 import { breadcrumbLd } from '../../../lib/seo';
 import { GEOGRAPHY } from '../../../../site.config';
 
@@ -14,20 +16,65 @@ export function getStaticPaths() {
 const { lang } = Astro.props;
 const c = getContent(lang);
 const a = c.about;
-const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: a.title, path: '/about/' }])];
+const crumbs = [
+  { name: c.ui.home, path: '/' },
+  { name: a.title, path: '/about/' },
+];
+const jsonLd = [breadcrumbLd(lang, crumbs)];
+// «Также следим»: то из прежнего списка «Что измеряем», чего нет среди расшифрованных метрик
+const also = a.measure.filter((m) => !['CAC', 'CPL'].includes(m) && !/^(конверсия|conversion)$/i.test(m));
 ---
 
 <Base lang={lang} path="/about/" title={c.ui.meta.about.title} description={c.ui.meta.about.description} theme="ivory" jsonLd={jsonLd} ogImage="/posters/og-about.jpg">
-  <PageHero theme="sand" label={a.title} title={a.h1} lead={a.lead} micro={c.ui.formula} render="/posters/dir-core.webp" />
+  <PageHero
+    theme="sand"
+    label={a.title}
+    kicker={a.kicker}
+    title={a.h1}
+    lead={a.lead}
+    micro={c.ui.formula}
+    render="/posters/dir-core.webp"
+    crumbs={crumbs.map((x) => ({ name: x.name, href: localePath(lang, x.path) }))}
+    ariaCrumbs={c.ui.crumbs}
+  />
 
-  <section class="approach">
+  <section class="facts" aria-labelledby="ab-facts">
+    <div class="container facts__inner">
+      <h2 class="t-micro facts__title" id="ab-facts">{a.factsTitle}</h2>
+      <ul class="facts__list">
+        {c.home.s7.counters.map((k) => (
+          <li class="fact">
+            <p class="t-counter fact__value">{k.value}{k.suffix}</p>
+            <p class="t-micro fact__label">{k.label}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="dirs" aria-labelledby="ab-dirs">
+    <div class="container dirs__inner">
+      <h2 class="t-micro" id="ab-dirs">{a.directionsTitle}</h2>
+      <ul class="dirs__list">
+        {c.services.directions.map((d) => (
+          <li class="dirs__item">
+            <p class="t-micro dirs__idx">{d.index} · {d.stage} · {d.services.length} {a.servicesCount}</p>
+            <h3 class="t-h4"><a href={localePath(lang, `/services/${d.slug}/`)}>{d.nameFull}</a></h3>
+            <p class="t-small">{d.phrase}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="approach" aria-labelledby="ab-approach">
     <div class="container approach__inner">
-      <p class="t-micro approach__label">{a.approachTitle}</p>
+      <h2 class="t-micro approach__label" id="ab-approach">{a.approachTitle}</h2>
       <ol class="steps">
         {a.approach.map((st) => (
           <li class="step">
             <p class="t-micro step__code"><span class="t-micro--accent">{st.step}</span> · {st.code}</p>
-            <h2 class="t-h3 step__name">{st.name}</h2>
+            <h3 class="t-h3 step__name">{st.name}</h3>
             <p class="t-body step__text">{st.text}</p>
           </li>
         ))}
@@ -38,7 +85,7 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: a.t
   <section class="why">
     <div class="container why__inner">
       <div class="why__col">
-        <p class="t-micro">{a.whyTitle}</p>
+        <h2 class="t-micro">{a.whyTitle}</h2>
         <ul class="why__list">
           {a.why.map((w) => (
             <li>
@@ -49,11 +96,7 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: a.t
         </ul>
       </div>
       <div class="why__col">
-        <p class="t-micro">{a.measureTitle}</p>
-        <ul class="measure">
-          {a.measure.map((m) => <li class="measure__item">{m}</li>)}
-        </ul>
-        <p class="t-micro" style="margin-top: var(--space-8)">{a.formatsTitle}</p>
+        <h2 class="t-micro">{a.formatsTitle}</h2>
         <ul class="why__list">
           {a.formats.map((f) => (
             <li>
@@ -66,35 +109,59 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: a.t
     </div>
   </section>
 
-  <!-- BRIEF-4 §3.1: шесть участников, био раскрывается по клику (одно за раз) -->
-  <section class="team">
-    <div class="container team__inner">
-      <p class="t-micro">{a.teamTitle}</p>
-      <p class="t-lead team__lead">{a.teamLead}</p>
-      <p class="t-small team__ph">{a.teamPlaceholder}</p>
-      {/* Людей на сайте не показываем (решение руководства): шесть пустых слотов той же раскладки. */}
-      <ul class="team__grid">
-        {Array.from({ length: 6 }, (_, i) => (
-          <li class="member">
-            <div class="member__slot"><span class="t-micro">{a.teamPhotoPlaceholder}</span></div>
-            <p class="t-h4 member__name">{a.teamNamePlaceholder}</p>
-            <p class="t-micro member__role">{a.teamRolePlaceholder}</p>
-          </li>
+  <section class="metrics" id="metrics" aria-labelledby="ab-metrics">
+    <div class="container metrics__inner">
+      <div class="metrics__head">
+        <h2 class="t-h3" id="ab-metrics">{a.metricsTitle}</h2>
+        <p class="t-lead metrics__lead">{a.metricsLead}</p>
+      </div>
+      <dl class="metrics__list">
+        {a.metrics.map((m) => (
+          <div class="metric">
+            <dt>
+              <span class="t-micro metric__k">{m.k}</span>
+              <span class="t-h4 metric__t">{m.t}</span>
+            </dt>
+            <dd class="metric__d">{m.d}</dd>
+          </div>
         ))}
-      </ul>
+      </dl>
+      <div class="metrics__also">
+        <p class="t-micro">{a.alsoTitle}</p>
+        <ul class="measure">
+          {also.map((m) => <li class="measure__item">{m}</li>)}
+        </ul>
+      </div>
     </div>
   </section>
 
-
-  <section class="geo">
+  <section class="geo" aria-labelledby="ab-geo">
     <div class="container geo__inner">
-      <p class="t-micro">{a.geoTitle}</p>
+      <h2 class="t-micro" id="ab-geo">{a.geoTitle}</h2>
       <p class="t-lead">{a.geoLead}</p>
       <ul class="geo__list">
         {GEOGRAPHY.map((city, i) => (
           <li class="geo__city">
             <span class="t-micro">{String(i + 1).padStart(2, '0')}</span>
             <span class="t-h4">{city}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="t-micro geo__sub">{a.geoCasesTitle}</p>
+      <ul class="regions">
+        {a.geoRegions.map((r) => (
+          <li class="region">
+            <h3 class="t-h4">{r.region}</h3>
+            <p class="t-micro region__cities">{r.cities.join(' · ')}</p>
+            {r.text && <p class="t-small">{r.text}</p>}
+            {r.cases.length > 0 && (
+              <ul class="region__cases">
+                {r.cases.map((id) => {
+                  const k = findCase(c, id);
+                  return k ? <li><a class="t-micro" href={localePath(lang, `/cases/${k.id}/`)}>{k.name} →</a></li> : null;
+                })}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
@@ -107,7 +174,6 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: a.t
 <style>
   .approach__inner,
   .why__inner,
-  .team__inner,
   .geo__inner {
     padding-top: var(--section-pad);
     padding-bottom: var(--section-pad);
@@ -165,50 +231,129 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: a.t
     border: 1px solid var(--hair-strong);
     font-size: 0.875rem;
   }
-  .team {
+  .facts__inner,
+  .dirs__inner,
+  .metrics__inner {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+    max-width: none;
+    display: grid;
+    gap: var(--space-8);
+  }
+  .facts__title,
+  .dirs__inner > h2,
+  .geo__sub {
+    color: var(--fg-3);
+  }
+  .facts__list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+  .fact {
+    display: grid;
+    gap: var(--space-2);
+    padding-top: var(--space-4);
     border-top: 1px solid var(--hair);
   }
-  .team__lead {
-    max-width: 64ch;
-    color: var(--fg-2);
+  .fact__value {
+    font-size: min(var(--fs-counter), 7rem);
   }
-  /* BRIEF-4 §3.1: сетка 3×2 на десктопе, 2×3 на телефоне */
-  .team__grid {
+  .dirs,
+  .metrics {
+    border-top: 1px solid var(--hair);
+  }
+  .dirs__list {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-8) var(--space-6);
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-4);
   }
-  @media (max-width: 899px) {
-    .team__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--space-6) var(--space-4);
-    }
-  }
-  .member {
+  .dirs__item {
     display: grid;
     gap: var(--space-2);
     align-content: start;
+    padding: var(--space-4);
+    border: 1px solid var(--hair);
   }
-  .team__ph {
-    color: var(--fg-3);
+  .dirs__idx {
+    color: var(--accent);
   }
-  /* Пустой слот портрета: квадрат бумаги с волосяной рамкой и микрометкой по центру */
-  .member__slot {
-    aspect-ratio: 1;
-    display: grid;
-    place-items: center;
-    margin-bottom: var(--space-2);
-    background: var(--paper);
-    border: 1px solid color-mix(in srgb, var(--umber) 25%, transparent);
-    color: var(--fg-3);
-    text-align: center;
-    padding: var(--space-3);
+  .dirs__item a:hover {
+    color: var(--accent);
   }
-  .member__name {
+  .dirs__item .t-small {
     color: var(--fg-2);
   }
-  .member__role {
+  .metrics__inner {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: var(--space-8) var(--space-12);
+  }
+  .metrics__head {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+  }
+  .metrics__lead {
+    max-width: 44ch;
+  }
+  .metrics__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-6) var(--space-8);
+    margin: 0;
+  }
+  .metric {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--hair);
+  }
+  .metric dt {
+    display: grid;
+    gap: var(--space-1);
+  }
+  .metric__k {
+    color: var(--accent);
+  }
+  .metric__d {
+    margin: 0;
+    color: var(--fg-2);
+    line-height: 1.5;
+  }
+  .metrics__also {
+    grid-column: 2;
+    display: grid;
+    gap: var(--space-3);
+  }
+  .regions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-6) var(--space-8);
+  }
+  .region {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--hair);
+  }
+  .region__cities {
     color: var(--fg-3);
+  }
+  .region .t-small {
+    color: var(--fg-2);
+  }
+  .region__cases {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+  }
+  .region__cases a {
+    color: var(--fg);
+  }
+  .region__cases a:hover {
+    color: var(--accent);
   }
   .geo {
     border-top: 1px solid var(--hair);
@@ -229,8 +374,15 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: a.t
     .steps {
       grid-template-columns: 1fr 1fr;
     }
-    .why__inner {
+    .why__inner,
+    .metrics__inner {
       grid-template-columns: 1fr;
+    }
+    .metrics__also {
+      grid-column: auto;
+    }
+    .facts__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   @media (max-width: 559px) {

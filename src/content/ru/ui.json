@@ -87,8 +87,8 @@
       "description": "USYK, Ukrainian Fashion Week, INTERTOP, BRSM-NAFTA, HYDROSTA и другие проекты: личные бренды, retail, HoReCa, B2B, медиа, технологии."
     },
     "about": {
-      "title": "О компании CYBERMOVE — CHAOS → CORE → SYSTEM → GROWTH",
-      "description": "Как мы работаем: диагностика, ядро бизнеса, система, рост. Одна команда: маркетинг, технологии, финансы, тендеры и право. География от Bielefeld до Bali."
+      "title": "Консалтинговая компания CYBERMOVE — о компании",
+      "description": "CYBERMOVE — консалтинговая компания: 34+ проекта в 13 городах и 7 отраслях. Аудит, системы, бренд, реклама и тендеры — от диагностики до роста бизнеса."
     },
     "contact": {
       "title": "Контакты CYBERMOVE — получить первичный разбор",
@@ -104,7 +104,8 @@
     },
     "caseItem": {
       "title": "{name} — кейс CYBERMOVE",
-      "description": "{summary}. Что делали, роль CYBERMOVE и дисциплины проекта."
+      "description": "{summary}. Что делали, роль CYBERMOVE и дисциплины проекта.",
+      "titleCat": "{name}: {category} — кейс CYBERMOVE"
     }
   },
   "notFound": {
@@ -155,5 +156,8 @@
   "articlesTitle": "Разборы по теме",
   "directionCases": "Кейсы направления",
   "servicesOfDirection": "Услуги направления",
-  "stepsNote": "Сроки ориентировочные: точные зависят от объёма и называются после первичного разбора."
+  "stepsNote": "Сроки ориентировочные: точные зависят от объёма и называются после первичного разбора.",
+  "caseServices": "Услуги в проекте",
+  "caseSimilar": "Похожие кейсы",
+  "aboutLink": "Как мы работаем и считаем результат"
 }

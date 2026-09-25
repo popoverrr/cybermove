@@ -553,6 +553,8 @@ function applyProgressParam() {
 export function initHome() {
   state.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (POSTER) document.body.classList.add('is-poster');
+  // BRIEF-SEO §3: в HTML счётчики S7 несут итоговые числа (для поисковиков и без JS); сценарий начинает с нуля, как раньше
+  for (const el of Array.from(document.querySelectorAll<HTMLElement>('[data-count]'))) el.textContent = '0';
   stageWrap = document.querySelector<HTMLElement>('[data-stage-wrap]');
   for (const el of Array.from(document.querySelectorAll<HTMLElement>('[data-screen]'))) {
     const first = screens.length === 0;

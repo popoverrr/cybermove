@@ -30,7 +30,7 @@ const tickerItems = [...TICKER, ...TICKER];
       <ul class="counters" data-counters data-tw>
         {s7.counters.map((k) => (
           <li class="counter">
-            <p class="counter__value t-counter"><span data-count={k.value}>0</span>{k.suffix}</p>
+            <p class="counter__value t-counter"><span data-count={k.value}>{k.value}</span>{k.suffix}</p>
             <p class="counter__label t-micro">{k.label}</p>
           </li>
         ))}

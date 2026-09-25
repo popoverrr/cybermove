@@ -3,7 +3,7 @@
 import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
 import LeadForm from '../../../components/LeadForm.astro';
-import { getContent, langStaticPaths } from '../../../lib/i18n';
+import { getContent, langStaticPaths, localePath, filled } from '../../../lib/i18n';
 import { breadcrumbLd } from '../../../lib/seo';
 import { WHATSAPP_NUMBER, WHATSAPP_URL, GEOGRAPHY } from '../../../../site.config';
 
@@ -13,11 +13,15 @@ export function getStaticPaths() {
 const { lang } = Astro.props;
 const c = getContent(lang);
 const k = c.contact;
-const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: k.title, path: '/contact/' }])];
+const crumbs = [
+  { name: c.ui.home, path: '/' },
+  { name: k.title, path: '/contact/' },
+];
+const jsonLd = [breadcrumbLd(lang, crumbs)];
 ---
 
 <Base lang={lang} path="/contact/" title={c.ui.meta.contact.title} description={c.ui.meta.contact.description} theme="ivory" jsonLd={jsonLd} ogImage="/posters/og-contact.jpg">
-  <PageHero theme="ivory" label={`${k.title} · 07`} title={k.h1} lead={k.lead} render="/posters/dir-contact.webp" beam={0.4} size="md" />
+  <PageHero theme="ivory" label={`${k.title} · 07`} title={k.h1} lead={k.lead} render="/posters/dir-contact.webp" beam={0.4} size="md" crumbs={crumbs.map((x) => ({ name: x.name, href: localePath(lang, x.path) }))} ariaCrumbs={c.ui.crumbs} />
 
   <section class="contact">
     <div class="container contact__inner">
@@ -29,18 +33,25 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: k.t
           <p class="t-micro">{k.whatsappLabel}</p>
           <a class="channel__value" href={WHATSAPP_URL} target="_blank" rel="noopener">{WHATSAPP_NUMBER}</a>
         </div>
-        <div class="channel">
-          <p class="t-micro">{k.emailLabel}</p>
-          <p class="channel__value channel__value--ph">{k.email}</p>
-        </div>
-        <div class="channel">
-          <p class="t-micro">{k.telegramLabel}</p>
-          <p class="channel__value channel__value--ph">{k.telegram}</p>
-        </div>
-        <div class="channel">
-          <p class="t-micro">{k.addressLabel}</p>
-          <p class="channel__value channel__value--ph">{k.address}</p>
-        </div>
+        {/* BRIEF-SEO §3: незаполненные каналы (плейсхолдеры) не выводим */}
+        {filled(k.email) && (
+          <div class="channel">
+            <p class="t-micro">{k.emailLabel}</p>
+            <a class="channel__value" href={`mailto:${k.email}`}>{k.email}</a>
+          </div>
+        )}
+        {filled(k.telegram) && (
+          <div class="channel">
+            <p class="t-micro">{k.telegramLabel}</p>
+            <p class="channel__value">{k.telegram}</p>
+          </div>
+        )}
+        {filled(k.address) && (
+          <div class="channel">
+            <p class="t-micro">{k.addressLabel}</p>
+            <p class="channel__value">{k.address}</p>
+          </div>
+        )}
         <div class="channel">
           <p class="t-micro">{k.geoTitle}</p>
           <p class="t-small">{GEOGRAPHY.join(' · ')}</p>

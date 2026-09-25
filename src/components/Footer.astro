@@ -1,16 +1,26 @@
 ---
+/**
+ * Подвал (BRIEF-SEO §3): каталог услуг — 5 направлений × 22 ссылки (на телефоне аккордеон), разделы, языки,
+ * контакты. Незаполненные контакты ([PLACEHOLDER…]) не выводятся.
+ */
 import Logo from './Logo.astro';
-import { getContent, localePath, type LangCode } from '../lib/i18n';
+import { getContent, localePath, alternates, filled, type LangCode } from '../lib/i18n';
 import { WHATSAPP_NUMBER, WHATSAPP_URL, GEOGRAPHY } from '../../site.config';
 
 export interface Props {
   lang: LangCode;
+  /** путь страницы без языкового префикса — для ссылок на другие языки */
+  path?: string;
   /** компактный подвал внутри последнего экрана главной */
   compact?: boolean;
 }
-const { lang, compact = false } = Astro.props;
+const { lang, path = '/', compact = false } = Astro.props;
 const c = getContent(lang);
 const year = new Date().getFullYear();
+const email = filled(c.ui.footer.email) ? c.ui.footer.email : '';
+const telegram = filled(c.ui.footer.telegram) ? c.ui.footer.telegram : '';
+const address = filled(c.ui.footer.address) ? c.ui.footer.address : '';
+const langs = alternates(path);
 ---
 
 <footer class:list={['footer', { 'footer--compact': compact }]} data-theme="night">
@@ -19,9 +29,13 @@ const year = new Date().getFullYear();
       <div class="footer__brand">
         <Logo height={24} />
         <p class="footer__tagline t-small">{c.ui.tagline}</p>
+        <a class="footer__wa" href={WHATSAPP_URL} target="_blank" rel="noopener">{WHATSAPP_NUMBER}</a>
+        {email && <a class="t-small" href={`mailto:${email}`}>{email}</a>}
+        {telegram && <p class="t-small">{telegram}</p>}
       </div>
 
-      <nav class="footer__nav" aria-label={c.ui.menu}>
+      <nav class="footer__nav" aria-label={c.ui.sections}>
+        <p class="t-micro footer__label">{c.ui.sections}</p>
         <ul>
           {c.ui.nav.map((item) => (
             <li><a href={localePath(lang, item.href)}>{item.label}</a></li>
@@ -30,26 +44,56 @@ const year = new Date().getFullYear();
         </ul>
       </nav>
 
-      <div class="footer__contacts">
-        <p class="t-micro">{c.ui.footer.contactsTitle}</p>
-        <a class="footer__wa" href={WHATSAPP_URL} target="_blank" rel="noopener">{WHATSAPP_NUMBER}</a>
-        <p class="t-small">{c.ui.footer.email}</p>
-        <p class="t-small">{c.ui.footer.telegram}</p>
-      </div>
-
-      <div class="footer__geo">
-        <p class="t-micro">{c.ui.footer.geographyTitle}</p>
+      <div class="footer__meta">
+        <p class="t-micro footer__label">{c.ui.langSwitch}</p>
+        <ul class="footer__langs">
+          {langs.map((l) => (
+            <li>
+              <a href={l.href} hreflang={l.hreflang} lang={l.lang} aria-current={l.lang === lang ? 'true' : undefined}>{l.label}</a>
+            </li>
+          ))}
+        </ul>
+        <p class="t-micro footer__label">{c.ui.footer.geographyTitle}</p>
         <p class="t-small footer__cities">{GEOGRAPHY.join(' · ')}</p>
       </div>
     </div>
 
+    <nav class="footer__dirs hair" aria-label={c.ui.services}>
+      {c.services.directions.map((d) => (
+        <details class="fdir" open data-fdir>
+          <summary class="fdir__head t-micro">
+            <span>{d.index} · {d.name}</span>
+            <span class="fdir__mark" aria-hidden="true"></span>
+          </summary>
+          <ul class="fdir__list">
+            {d.services.map((s) => (
+              <li><a href={localePath(lang, `/services/${d.slug}/${s.id}/`)}>{s.name}</a></li>
+            ))}
+            <li class="fdir__all"><a class="t-micro" href={localePath(lang, `/services/${d.slug}/`)}>{d.nameFull} →</a></li>
+          </ul>
+        </details>
+      ))}
+    </nav>
+
     <div class="footer__bottom hair">
       <p class="t-micro">{c.ui.formula.join(' → ')}</p>
       <p class="t-micro">© {year} {c.ui.legalName}. {c.ui.footer.rights}</p>
-      <p class="t-micro footer__requisites">{c.ui.footer.address}</p>
+      {address && <p class="t-micro footer__requisites">{address}</p>}
     </div>
   </div>
 </footer>
+
+<script>
+  // Аккордеон направлений только на телефоне: на широком экране все группы раскрыты
+  const mq = window.matchMedia('(max-width: 559px)');
+  const sync = () => {
+    document.querySelectorAll<HTMLDetailsElement>('[data-fdir]').forEach((el) => {
+      el.open = !mq.matches;
+    });
+  };
+  sync();
+  mq.addEventListener('change', sync);
+</script>
 
 <style>
   .footer {
@@ -63,44 +107,107 @@ const year = new Date().getFullYear();
   }
   .footer__top {
     display: grid;
-    grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+    grid-template-columns: 1.4fr 1fr 1.4fr;
     gap: var(--space-8);
     padding-top: var(--space-8);
-    padding-bottom: var(--space-12);
+    padding-bottom: var(--space-8);
   }
   .footer__brand {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-2);
     align-content: start;
+    justify-items: start;
   }
   .footer__tagline {
     max-width: 24ch;
+    margin: var(--space-2) 0 var(--space-2);
+  }
+  .footer__label {
+    color: var(--fg-3);
+  }
+  .footer__nav,
+  .footer__meta {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
   }
   .footer__nav ul {
     display: grid;
     gap: var(--space-2);
   }
-  .footer__nav a {
-    font-size: var(--fs-small);
-    color: var(--fg-2);
+  .footer a {
     transition: color var(--dur-fast);
   }
-  .footer__nav a:hover {
-    color: var(--fg);
+  .footer__nav a,
+  .fdir__list a {
+    font-size: var(--fs-small);
+    color: var(--fg-2);
   }
-  .footer__contacts,
-  .footer__geo {
-    display: grid;
-    gap: var(--space-2);
-    align-content: start;
+  .footer__nav a:hover,
+  .fdir__list a:hover,
+  .footer__langs a:hover {
+    color: var(--fg);
   }
   .footer__wa {
     font-family: var(--font-mono);
     font-size: 1rem;
     letter-spacing: 0.02em;
   }
+  .footer__langs {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-3);
+  }
+  .footer__langs a {
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--ls-micro);
+    color: var(--fg-2);
+  }
+  .footer__langs a[aria-current] {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
   .footer__cities {
-    max-width: 36ch;
+    max-width: 40ch;
+  }
+  /* каталог услуг: пять групп в ряд, на планшете — две колонки, на телефоне — аккордеон */
+  .footer__dirs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--space-6) var(--space-8);
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+  .fdir__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    color: var(--fg-3);
+    list-style: none;
+    pointer-events: none;
+    margin-bottom: var(--space-3);
+  }
+  .fdir__head::-webkit-details-marker {
+    display: none;
+  }
+  .fdir__mark {
+    display: none;
+  }
+  .fdir__list {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .fdir__all {
+    margin-top: var(--space-1);
+  }
+  .fdir__all a {
+    color: var(--fg-3);
+  }
+  .fdir__all a:hover {
+    color: var(--fg);
   }
   .footer__bottom {
     display: flex;
@@ -109,15 +216,68 @@ const year = new Date().getFullYear();
     gap: var(--space-4);
     padding-top: var(--space-4);
   }
+  @media (max-width: 1099px) {
+    .footer__dirs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
   @media (max-width: 899px) {
     .footer__top {
       grid-template-columns: 1fr 1fr;
+    }
+    .footer__brand {
+      grid-column: 1 / -1;
     }
   }
   @media (max-width: 559px) {
     .footer__top {
       grid-template-columns: 1fr;
       gap: var(--space-6);
+    }
+    .footer__dirs {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    .fdir {
+      border-bottom: 1px solid var(--hair);
+    }
+    .fdir__head {
+      pointer-events: auto;
+      cursor: pointer;
+      margin-bottom: 0;
+      padding: var(--space-4) 0;
+    }
+    .fdir[open] .fdir__head {
+      color: var(--fg);
+    }
+    .fdir__list {
+      padding-bottom: var(--space-4);
+    }
+    /* плюс / минус из волосяных линий */
+    .fdir__mark {
+      display: block;
+      position: relative;
+      width: 11px;
+      height: 11px;
+    }
+    .fdir__mark::before,
+    .fdir__mark::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: currentColor;
+    }
+    .fdir__mark::after {
+      transform: rotate(90deg);
+      transition: transform var(--dur-fast);
+    }
+    .fdir[open] .fdir__mark::after {
+      transform: rotate(0deg);
     }
     .footer__bottom {
       flex-direction: column;

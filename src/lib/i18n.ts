@@ -141,3 +141,8 @@ export function findService(content: Content, id: string): { direction: Directio
 export const allLangs = LANGS;
 export { DEFAULT_LANG };
 export type { LangCode };
+
+/** Значение заполнено: не пустое и не «[PLACEHOLDER…]» (BRIEF-SEO §3–4: пустые блоки не выводим) */
+export function filled(v: string | null | undefined): v is string {
+  return Boolean(v && v.trim() && !v.includes('[PLACEHOLDER'));
+}

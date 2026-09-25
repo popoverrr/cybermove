@@ -10,7 +10,7 @@ import Drawer from '../../components/home/Drawer.astro';
 import Rail from '../../components/home/Rail.astro';
 import Overlays from '../../components/home/Overlays.astro';
 import Hints from '../../components/home/Hints.astro';
-import { getContent, langStaticPaths } from '../../lib/i18n';
+import { getContent, langStaticPaths, localePath } from '../../lib/i18n';
 import '../../styles/home.css';
 
 export function getStaticPaths() {
@@ -71,6 +71,42 @@ const s1 = c.home.s1;
       <S7Growth lang={lang} />
     </div>
   </div>
+
+  <!--
+    BRIEF-SEO §3: без JavaScript стейдж не анимируется — экраны S2–S7 встают в поток статично,
+    строки услуг (кнопки drawer) дублируются ссылками на страницы услуг, CTA ведёт на /contact/.
+  -->
+  <noscript>
+    <style is:inline>
+      .stage-wrap { height: auto !important; }
+      .stage { position: relative !important; height: auto !important; overflow: visible !important; contain: none !important; }
+      .stage .screen { position: relative !important; inset: auto !important; visibility: visible !important; pointer-events: auto !important; }
+      .stage .screen__pin { height: auto !important; padding-bottom: var(--space-16); }
+      .stage .rows, .anchor-labels, .status, .rail, .preloader { display: none !important; }
+      .nojs { position: relative; z-index: 1; background: var(--bg); border-top: 1px solid var(--hair); }
+      .nojs__inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-8); padding-top: var(--space-16); padding-bottom: var(--space-16); max-width: none; }
+      .nojs__dir { display: grid; gap: var(--space-2); align-content: start; }
+      .nojs__dir > a { font-size: var(--fs-h4); }
+      .nojs__dir li a { color: var(--fg-2); font-size: var(--fs-small); }
+      .nojs__cta { grid-column: 1 / -1; }
+    </style>
+    <nav class="nojs" aria-label={c.ui.services}>
+      <div class="container nojs__inner">
+        {c.services.directions.map((d) => (
+          <div class="nojs__dir">
+            <p class="t-micro">{d.index} · {d.stage}</p>
+            <a href={localePath(lang, `/services/${d.slug}/`)}>{d.nameFull}</a>
+            <ul>
+              {d.services.map((sv) => (
+                <li><a href={localePath(lang, `/services/${d.slug}/${sv.id}/`)}>{sv.name}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+        <p class="nojs__cta"><a class="t-h4" href={localePath(lang, '/contact/')}>{c.ui.cta} →</a></p>
+      </div>
+    </nav>
+  </noscript>
 
   <HomeAbout lang={lang} />
   <S8Contact lang={lang} />

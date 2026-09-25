@@ -109,7 +109,7 @@ const analyticsOn = Boolean(ANALYTICS.ga4 || ANALYTICS.metaPixel || ANALYTICS.ti
     <main id="main">
       <slot />
     </main>
-    {!bare && !noFooter && <Footer lang={lang} />}
+    {!bare && !noFooter && <Footer lang={lang} path={path} />}
 
     <!-- BRIEF-4 §2: музыка и кнопка SOUND на всех страницах -->
     <button class="audio" type="button" data-audio-toggle aria-pressed="false" aria-label={`SOUND — ${content.ui.soundOn}`} data-label-on={`SOUND — ${content.ui.soundOn}`} data-label-off={`SOUND — ${content.ui.soundOff}`}>

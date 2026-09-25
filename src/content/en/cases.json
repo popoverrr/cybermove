@@ -7,37 +7,44 @@
     {
       "id": "experts",
       "label": "Personal brands & experts",
-      "lead": "Athletes, bloggers, experts: positioning, content, PR"
+      "lead": "Athletes, bloggers, experts: positioning, content, PR",
+      "short": "personal brand"
     },
     {
       "id": "politics",
       "label": "Politics, media & communications",
-      "lead": "Parties, radio, agencies: campaigns and public communications"
+      "lead": "Parties, radio, agencies: campaigns and public communications",
+      "short": "politics and media"
     },
     {
       "id": "retail",
       "label": "Fashion, retail & e-commerce",
-      "lead": "Chains, brands, marketplaces and online stores"
+      "lead": "Chains, brands, marketplaces and online stores",
+      "short": "fashion and retail"
     },
     {
       "id": "horeca",
       "label": "HoReCa, wellness & service",
-      "lead": "Restaurants, clubs, spas, gyms, barbershops"
+      "lead": "Restaurants, clubs, spas, gyms, barbershops",
+      "short": "HoReCa and service"
     },
     {
       "id": "b2b",
       "label": "HVAC, engineering & manufacturing",
-      "lead": "Heating, construction equipment, panels, furniture, medical"
+      "lead": "Heating, construction equipment, panels, furniture, medical",
+      "short": "B2B and engineering"
     },
     {
       "id": "pro",
       "label": "Real estate, legal & education",
-      "lead": "Lawyers, investment, educational projects"
+      "lead": "Lawyers, investment, educational projects",
+      "short": "real estate and law"
     },
     {
       "id": "tech",
       "label": "Digital, VR & products",
-      "lead": "Games, VR platforms, product startups"
+      "lead": "Games, VR platforms, product startups",
+      "short": "digital and VR"
     }
   ],
   "items": [

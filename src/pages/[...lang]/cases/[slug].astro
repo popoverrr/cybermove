@@ -8,9 +8,11 @@ import Base from '../../../layouts/Base.astro';
 import CtaBlock from '../../../components/CtaBlock.astro';
 import Button from '../../../components/Button.astro';
 import CaseFrame from '../../../components/CaseFrame.astro';
+import CaseTile from '../../../components/CaseTile.astro';
 import { getContent, localePath, findCase, findCaseDetails, type LangCode } from '../../../lib/i18n';
-import { LANGS } from '../../../../site.config';
+import { LANGS, SITE_URL } from '../../../../site.config';
 import { breadcrumbLd, canonical } from '../../../lib/seo';
+import { caseServices } from '../../../lib/case-services';
 
 export function getStaticPaths() {
   const out: Array<{ params: { lang: string | undefined; slug: string }; props: { lang: LangCode; slug: string } }> = [];
@@ -31,7 +33,14 @@ const path = `/cases/${slug}/`;
 const cat = c.cases.categories.find((x) => x.id === item.category);
 const idx = c.cases.items.findIndex((x) => x.id === slug);
 const next = c.cases.items[(idx + 1) % c.cases.items.length];
-const title = c.ui.meta.caseItem.title.replace('{name}', item.name);
+// BRIEF-SEO §3: «{name}: {категория} — кейс CYBERMOVE»; если длиннее 60 знаков — без категории
+const titleCat = cat ? c.ui.meta.caseItem.titleCat.replace('{name}', item.name).replace('{category}', cat.short) : '';
+const title = titleCat && titleCat.length <= 60 ? titleCat : c.ui.meta.caseItem.title.replace('{name}', item.name);
+const services = caseServices(c, slug, d?.disciplines ?? item.tags);
+// похожие кейсы: та же категория, по кругу от текущего
+const sameCat = c.cases.items.filter((x) => x.category === item.category && x.id !== slug);
+const pos = c.cases.items.filter((x) => x.category === item.category).findIndex((x) => x.id === slug);
+const similar = [...sameCat.slice(pos), ...sameCat.slice(0, pos)].slice(0, 3);
 const description = c.ui.meta.caseItem.description.replace('{summary}', item.summary);
 const jsonLd = [
   breadcrumbLd(lang, [
@@ -47,10 +56,16 @@ const jsonLd = [
     description: d?.project || item.summary,
     url: canonical(lang, path),
     inLanguage: lang,
-    about: (d?.industries || item.tags.join(' · ')).split('·').map((x) => x.trim()).filter(Boolean),
-    keywords: (d?.disciplines || item.tags).join(', '),
-    creator: { '@id': 'https://cybermove.kz/#organization' },
-    ...(item.url ? { sameAs: [item.url] } : {}),
+    // клиент — только имя и ссылка из данных кейса; личные бренды — Person
+    about: {
+      '@type': item.category === 'experts' ? 'Person' : 'Organization',
+      name: item.name,
+      ...(item.url ? { url: item.url } : {}),
+    },
+    genre: cat?.label,
+    keywords: [...(d?.disciplines || item.tags), ...(d?.industries || '').split('·').map((x) => x.trim()).filter(Boolean)].join(', '),
+    creator: { '@id': `${SITE_URL}/#organization` },
+    ...(services.length ? { mentions: services.map((x) => ({ '@type': 'Service', name: x.name, url: canonical(lang, x.href) })) } : {}),
   },
 ];
 ---
@@ -162,6 +177,31 @@ const jsonLd = [
         </section>
       )}
 
+      {services.length > 0 && (
+        <section class="cblock">
+          <h2 class="t-micro cblock__label">{c.ui.caseServices}</h2>
+          <ul class="csvc">
+            {services.map((x) => (
+              <li>
+                <a class="csvc__link" href={localePath(lang, x.href)}>
+                  <span class="t-micro csvc__dir">{x.direction}</span>
+                  <span class="csvc__name">{x.name}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {similar.length > 0 && (
+        <section class="cblock cblock--similar">
+          <h2 class="t-micro cblock__label">{c.ui.caseSimilar}</h2>
+          <div class="csim">
+            {similar.map((k) => <CaseTile lang={lang} item={k} compact sizes="(max-width: 720px) 45vw, 260px" />)}
+          </div>
+        </section>
+      )}
+
       <div class="cfoot">
         <Button href={localePath(lang, '/contact/')} arrow>{c.ui.caseDiscuss}</Button>
         <a class="t-micro cfoot__next" href={localePath(lang, `/cases/${next.id}/`)}>{c.ui.caseNext}: {next.name} →</a>
@@ -236,6 +276,37 @@ const jsonLd = [
   }
   .cblock__label {
     color: var(--accent);
+  }
+  /* BRIEF-SEO §3: услуги в проекте — ссылки на страницы услуг */
+  .csvc {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-3);
+  }
+  .csvc__link {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--hair);
+    height: 100%;
+    transition: border-color var(--dur-fast);
+  }
+  .csvc__link:hover {
+    border-color: var(--hair-strong);
+  }
+  .csvc__dir {
+    color: var(--fg-3);
+  }
+  .csim {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4) var(--space-3);
+    max-width: 820px;
+  }
+  @media (max-width: 720px) {
+    .csim {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
   .cblock__body {
     display: grid;

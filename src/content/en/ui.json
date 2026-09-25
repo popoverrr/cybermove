@@ -87,8 +87,8 @@
       "description": "USYK, Ukrainian Fashion Week, INTERTOP, BRSM-NAFTA, HYDROSTA and more: personal brands, retail, HoReCa, B2B, media, technology."
     },
     "about": {
-      "title": "About CYBERMOVE — CHAOS → CORE → SYSTEM → GROWTH",
-      "description": "How we work: diagnostics, the business core, the system, growth. One team: marketing, technology, finance, tenders and legal. From Bielefeld to Bali."
+      "title": "About CYBERMOVE — Business Consulting Company",
+      "description": "CYBERMOVE is a business consulting company with 34+ projects in 13 cities and 7 industries: audit, systems, brand, ads and tenders, from diagnosis to growth."
     },
     "contact": {
       "title": "Contact CYBERMOVE — get an initial review",
@@ -104,7 +104,8 @@
     },
     "caseItem": {
       "title": "{name} — CYBERMOVE case",
-      "description": "{summary}. What we did, the CYBERMOVE role and project disciplines."
+      "description": "{summary}. What we did, the CYBERMOVE role and project disciplines.",
+      "titleCat": "{name}: {category} — CYBERMOVE case"
     }
   },
   "notFound": {
@@ -155,5 +156,8 @@
   "articlesTitle": "Related insights",
   "directionCases": "Cases in this area",
   "servicesOfDirection": "Services in this area",
-  "stepsNote": "Timelines are indicative: exact ones depend on scope and are set after the initial review."
+  "stepsNote": "Timelines are indicative: exact ones depend on scope and are set after the initial review.",
+  "caseServices": "Services in this project",
+  "caseSimilar": "Similar cases",
+  "aboutLink": "How we work and measure results"
 }

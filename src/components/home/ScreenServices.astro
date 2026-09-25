@@ -33,6 +33,7 @@ const h2 = d.h2;
       <ul class="rows" data-rows>
         {d.services.map((s, i) => (
           <li class="row" data-row data-tw>
+            <h3 class="row__h">
             <button class="row__btn" type="button" data-service={s.id} data-direction={d.id} aria-haspopup="dialog" aria-controls="drawer" aria-expanded="false">
               <span class="row__idx t-micro">0{i + 1}</span>
               <span class="row__name">{s.name}</span>
@@ -41,6 +42,7 @@ const h2 = d.h2;
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 8h10M8.5 3.5 13 8l-4.5 4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="square" /></svg>
               </span>
             </button>
+            </h3>
           </li>
         ))}
       </ul>
@@ -104,6 +106,11 @@ const h2 = d.h2;
   /* верхняя линия списка — на первой строке, чтобы уходила вместе с текстом (строки твинятся по data-tw) */
   .row:first-child .row__btn {
     border-top: 1px solid var(--hair);
+  }
+  /* BRIEF-SEO §3: услуга — H3 внутри экрана направления; кнопка внутри заголовка (схема аккордеона WAI-ARIA), вид не меняется */
+  .row__h {
+    font: inherit;
+    letter-spacing: inherit;
   }
   .row__btn {
     display: grid;

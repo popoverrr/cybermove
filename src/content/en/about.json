@@ -78,5 +78,103 @@
   "team": [],
   "geoTitle": "Where we work",
   "geoLead": "Team and projects across Europe, Ukraine, Kazakhstan and Asia.",
-  "teamLead": "Behind every CYBERMOVE project are people with real operating experience — from strategy and brand launches to AI automation, tenders and legal support."
+  "teamLead": "Behind every CYBERMOVE project are people with real operating experience — from strategy and brand launches to AI automation, tenders and legal support.",
+  "kicker": "CYBERMOVE consulting company",
+  "factsTitle": "In numbers",
+  "directionsTitle": "What we do",
+  "servicesCount": "services",
+  "metricsTitle": "How we measure results",
+  "metricsLead": "We measure results in the business’s money, not in reach and clicks. Baselines are recorded before work starts so there is something to compare with, and we agree which metrics matter most for your task.",
+  "metrics": [
+    {
+      "k": "CPL",
+      "t": "Cost per lead",
+      "d": "Channel spend for the period divided by the number of leads it produced. It shows what an enquiry from each source really costs."
+    },
+    {
+      "k": "CAC",
+      "t": "Customer acquisition cost",
+      "d": "All marketing and sales spend for the period divided by the number of new customers. Cheap leads mean nothing if a customer ends up expensive."
+    },
+    {
+      "k": "CR",
+      "t": "Conversion rate",
+      "d": "The share that moves between funnel steps: visitor to lead, lead to meeting, meeting to payment. It shows at which step the money is lost."
+    },
+    {
+      "k": "LTV",
+      "t": "Customer lifetime value",
+      "d": "The revenue or margin a customer brings over the whole relationship. Together with CAC it tells you how much you can spend on acquisition."
+    },
+    {
+      "k": "ROMI",
+      "t": "Return on marketing investment",
+      "d": "Channel income minus channel spend, divided by the spend. Calculated for each channel separately, so paying channels are scaled and the rest switched off."
+    },
+    {
+      "k": "CASH FLOW · MARGIN",
+      "t": "Cash and margin",
+      "d": "How much the business earns after direct costs and whether there is enough cash for growth every month. Without it, revenue growth can end in a cash gap."
+    }
+  ],
+  "alsoTitle": "We also track",
+  "geoCasesTitle": "Work by region",
+  "geoRegions": [
+    {
+      "region": "Kazakhstan",
+      "cities": [
+        "Almaty",
+        "Astana",
+        "Shymkent"
+      ],
+      "text": "Engineering and B2B companies: websites, advertising, CRM and service, heavy equipment rental in Almaty.",
+      "cases": [
+        "hydrosta-kazakhstan",
+        "hydrosta-service",
+        "building-time"
+      ]
+    },
+    {
+      "region": "Ukraine",
+      "cities": [
+        "Kyiv",
+        "Odesa"
+      ],
+      "text": "Personal brands, fashion and media, retail and fuel station chains, HoReCa and services in Kyiv and Odesa.",
+      "cases": [
+        "usyk",
+        "ukrainian-fashion-week",
+        "brsm-nafta",
+        "tpk",
+        "barbershops-kyiv",
+        "gaia"
+      ]
+    },
+    {
+      "region": "Europe",
+      "cities": [
+        "Bielefeld",
+        "Paris",
+        "Barcelona",
+        "Prague",
+        "Milan"
+      ],
+      "text": "A brand in Milan, a fitness studio in Germany, an international exhibition in Cannes.",
+      "cases": [
+        "sii-concept",
+        "fitness-room-menden",
+        "art-mango-production"
+      ]
+    },
+    {
+      "region": "Asia",
+      "cities": [
+        "Shanghai",
+        "Tokyo",
+        "Bali"
+      ],
+      "text": "",
+      "cases": []
+    }
+  ]
 }

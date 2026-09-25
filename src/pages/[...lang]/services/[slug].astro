@@ -67,6 +67,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     <div class="container hub-intro__inner">
       <p class="hub-intro__text">{d.seo.intro}</p>
       {d.note && <p class="t-small hub-intro__note">{d.note}</p>}
+      <a class="t-micro hub-intro__about" href={`${localePath(lang, '/about/')}#metrics`}>{c.ui.aboutLink} →</a>
     </div>
   </section>
 
@@ -153,6 +154,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
     background: var(--accent);
     vertical-align: middle;
     margin-right: 10px;
+  }
+  .hub-intro__about {
+    justify-self: start;
+    color: var(--fg-2);
+  }
+  .hub-intro__about:hover {
+    color: var(--accent);
   }
   .hub {
     border-top: 1px solid var(--hair);

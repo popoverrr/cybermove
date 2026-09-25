@@ -47,10 +47,24 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: c.u
     ))}
   </section>
 
+  <p class="container about-link"><a class="t-micro" href={localePath(lang, '/about/')}>{c.ui.aboutLink} →</a></p>
+
   <CtaBlock lang={lang} />
 </Base>
 
 <style>
+  .about-link {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+    border-top: 1px solid var(--hair);
+    max-width: none;
+  }
+  .about-link a {
+    color: var(--fg-2);
+  }
+  .about-link a:hover {
+    color: var(--accent);
+  }
   .dir {
     background: var(--bg);
     color: var(--fg);

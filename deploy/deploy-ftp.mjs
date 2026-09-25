@@ -1,12 +1,22 @@
 // Деплой dist/ на хостинг Plesk по FTPS. Запуск из корня проекта: node deploy/deploy-ftp.mjs
 // Настройки — в deploy/ftp.env (не в git): FTP_HOST, FTP_USER, FTP_PASS, FTP_REMOTE_DIR (необязательно), SITE_URL (необязательно)
-// Что делает: сравнивает dist/ с тем, что уже лежит на сервере, и заливает только новое и изменившееся;
+// Что делает: сравнивает dist/ с тем, что уже лежит на сервере, и заливает только новое и изменившееся.
+// Сравнение — по хэшу содержимого: на сервере лежит манифест прошлой выкладки (/.deploy-manifest.json).
+// Размера мало: HTML с новым хэшем чанка в имени часто той же длины, и без хэша он не перезаливался бы.
+// Если манифеста нет (первая выкладка этим скриптом) — текстовые файлы заливаются всегда, картинки по размеру;
 // в _astro/ удаляет файлы, которых нет в новой сборке; api/config.php и api/.leads/ не трогает никогда.
 // Контрольное соединение Plesk рвёт на длинной заливке (ECONNRESET), поэтому каждая операция
 // переподключается и повторяется; прогресс печатается по ходу. В конце — HTTP-проверка страниц.
 import { Client } from 'basic-ftp';
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, statSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
+
+const MANIFEST = '.deploy-manifest.json';
+/** файлы, у которых при той же длине может смениться содержимое (хэши в именах чанков, даты) */
+const TEXT = /\.(html|js|mjs|css|xml|txt|json|webmanifest|svg|htaccess)$|(^|\/)\.htaccess$/;
+const sha1 = (file) => createHash('sha1').update(readFileSync(file)).digest('hex');
 
 const ROOT = process.cwd();
 /** --no-clean: не удалять устаревшие файлы в _astro (только заливка) */
@@ -133,8 +143,32 @@ async function main() {
     for (const f of list) if (f.isFile) remoteSizes.set((d ? `${d}/` : '') + f.name, f.size);
   }
 
-  const changed = local.filter((f) => remoteSizes.get(f) !== statSync(path.join(DIST, f)).size);
-  console.log(`Файлов в сборке: ${local.length}; уже совпадают: ${local.length - changed.length}; заливаю: ${changed.length}`);
+  // манифест прошлой выкладки: путь → sha1
+  const hashes = Object.fromEntries(local.map((f) => [f, sha1(path.join(DIST, f))]));
+  let manifest = null;
+  const tmp = mkdtempSync(path.join(tmpdir(), 'cm-deploy-'));
+  await withRetry('чтение манифеста', async () => {
+    try {
+      await client.downloadTo(path.join(tmp, MANIFEST), `${remote === '/' ? '' : remote}/${MANIFEST}`);
+      manifest = JSON.parse(readFileSync(path.join(tmp, MANIFEST), 'utf8'));
+    } catch (e) {
+      if (!String(e.message).includes('550')) throw e;
+      manifest = null; // манифеста нет — первая выкладка этим способом
+    }
+  });
+
+  const changed = local.filter((f) => {
+    const size = statSync(path.join(DIST, f)).size;
+    if (remoteSizes.get(f) !== size) return true; // файла нет или другой размер
+    if (manifest) return manifest[f] !== hashes[f];
+    return TEXT.test(f); // без манифеста текст заливаем всегда, картинки сверяем по размеру
+  });
+  // сначала ассеты, потом страницы: пока HTML не залит, старые страницы продолжают работать со старыми чанками
+  changed.sort((a, b) => Number(a.endsWith('.html')) - Number(b.endsWith('.html')));
+  console.log(
+    `Файлов в сборке: ${local.length}; уже совпадают: ${local.length - changed.length}; заливаю: ${changed.length}` +
+      (manifest ? ' (сверка по манифесту)' : ' (манифеста нет: текст заливается целиком)'),
+  );
 
   let done = 0;
   let lastDir = null;
@@ -172,6 +206,13 @@ async function main() {
     return n;
   });
   if (!NO_CLEAN) console.log(`_astro: удалено устаревших файлов — ${removed}`);
+
+  // манифест этой выкладки — для следующего сравнения
+  writeFileSync(path.join(tmp, MANIFEST), JSON.stringify(hashes));
+  await withRetry('запись манифеста', async () => {
+    await client.cd(remote);
+    await client.uploadFrom(path.join(tmp, MANIFEST), MANIFEST);
+  });
   client.close();
 
   // проверка по HTTP: страницы и свежий ассет

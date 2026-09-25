@@ -84,6 +84,6 @@ ErrorDocument 404 /404.html
 </IfModule>
 
 # ---------- служебные файлы закрыты
-<FilesMatch "^(\.htaccess|\.gitignore|package\.json|README\.md)$">
+<FilesMatch "^(\.htaccess|\.gitignore|\.deploy-manifest\.json|package\.json|README\.md)$">
     Require all denied
 </FilesMatch>

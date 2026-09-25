@@ -160,9 +160,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
     max-width: 68ch;
     text-wrap: pretty;
   }
+  /* функциональный текст — fg-2 (И2-D: axe требует 4.5:1 для 11–13px) */
   .hub-intro__note {
     max-width: 88ch;
-    color: var(--fg-3);
+    color: var(--fg-2);
   }
   .hub-intro__note::before {
     content: '';
@@ -291,7 +292,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     max-width: none;
   }
   .others__title {
-    color: var(--fg-3);
+    color: var(--fg-2);
   }
   .others__list {
     display: grid;
@@ -309,7 +310,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
   .others__link:hover {
     border-color: var(--hair-strong);
   }
-  .others__link .t-small {
+  .others__link .t-small,
+  .others__link .t-micro {
     color: var(--fg-2);
   }
   @media (max-width: 899px) {

@@ -7,3 +7,7 @@
     RewriteRule ^\.leads(/|$) - [F,L]
 </IfModule>
 Options -Indexes
+# BRIEF-SEO §8: /api/ не индексируется (кроме Disallow в robots.txt); always — ответы PHP идут через Apache
+<IfModule mod_headers.c>
+    Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>

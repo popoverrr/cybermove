@@ -98,7 +98,7 @@ export function organizationLd(lang: LangCode) {
     ],
     areaServed: [{ '@type': 'Country', name: 'Kazakhstan' }, ...GEOGRAPHY.map((city) => ({ '@type': 'City', name: city }))],
     knowsAbout: c.services.directions.map((d) => d.nameFull),
-    availableLanguage: ['ru', 'en'],
+    // языки обслуживания — в contactPoint.availableLanguage: у LocalBusiness такого свойства нет (validator.schema.org)
   };
 }
 
@@ -176,7 +176,6 @@ export function serviceItemLd(
     category: opts.category,
     description: opts.description,
     url,
-    inLanguage: lang,
     provider: { '@id': `${SITE_URL}/#organization` },
     areaServed: areaServed(),
     offers: {

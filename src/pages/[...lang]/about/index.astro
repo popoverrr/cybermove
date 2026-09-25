@@ -240,10 +240,16 @@ const also = a.measure.filter((m) => !['CAC', 'CPL'].includes(m) && !/^(конв
     display: grid;
     gap: var(--space-8);
   }
+  /* заголовки секций и подписи цифр — функциональные: fg-2 (И2-D, axe 4.5:1); номера и коды этапов — декоративные */
   .facts__title,
   .dirs__inner > h2,
-  .geo__sub {
-    color: var(--fg-3);
+  .approach__label,
+  .why__col > h2,
+  .geo__inner > h2,
+  .geo__sub,
+  .fact__label,
+  .metrics__also > p {
+    color: var(--fg-2);
   }
   .facts__list {
     display: grid;
@@ -339,7 +345,7 @@ const also = a.measure.filter((m) => !['CAC', 'CPL'].includes(m) && !/^(конв
     border-top: 1px solid var(--hair);
   }
   .region__cities {
-    color: var(--fg-3);
+    color: var(--fg-2);
   }
   .region .t-small {
     color: var(--fg-2);

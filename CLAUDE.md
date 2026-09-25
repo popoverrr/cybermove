@@ -1,7 +1,7 @@
 # CYBERMOVE — контекст для Claude Code
 
-Сайт консалтинговой компании CYBERMOVE (Cyber Move Consulting). Полное ТЗ: `docs/BRIEF.md`, итерация 2 (палитра, скролл, плейсхолдеры): `docs/BRIEF-2.md`, итерация 3 (жемчужная сфера, линии туши, модель движения): `docs/BRIEF-3.md`, итерация 4 (исправления v3, медиа, звук, подсказки, выбор языка): `docs/BRIEF-4.md` + `docs/MEDIA-INTEGRATION.md`, итерация 5 (кейсы разделами, живые кадры, логотипы, деплой): `docs/BRIEF-5.md` — где противоречат, действует более поздний. Тексты: `docs/CONTENT.md`. Референс стилистики: `reference/ref-12.jpg`.
-Если сессия начата заново или контекст сжат: прочитай `docs/BRIEF-5.md`, `docs/PROGRESS-5.md`, `docs/DECISIONS.md` и продолжай с первого незакрытого пункта `PROGRESS-5.md`. Закрытое не переделывай.
+Сайт консалтинговой компании CYBERMOVE (Cyber Move Consulting). Полное ТЗ: `docs/BRIEF.md`, итерация 2 (палитра, скролл, плейсхолдеры): `docs/BRIEF-2.md`, итерация 3 (жемчужная сфера, линии туши, модель движения): `docs/BRIEF-3.md`, итерация 4 (исправления v3, медиа, звук, подсказки, выбор языка): `docs/BRIEF-4.md` + `docs/MEDIA-INTEGRATION.md`, итерация 5 (кейсы разделами, живые кадры, логотипы, деплой): `docs/BRIEF-5.md`, итерация 6 (SEO: страницы услуг, «Разборы», OG, организация): `docs/BRIEF-SEO.md` + `docs/seo/` — где противоречат, действует более поздний. Тексты: `docs/CONTENT.md`. Референс стилистики: `reference/ref-12.jpg`.
+Если сессия начата заново или контекст сжат: прочитай последний бриф (`docs/BRIEF-SEO.md`), его чеклист (`docs/PROGRESS-6.md`; закрыт, итоги — `docs/REPORT-6.md`) и `docs/DECISIONS.md`; продолжай с первого незакрытого пункта. Закрытое не переделывай.
 `docs/` и `reference/` не публикуются: они в `.gitignore`, живут только на диске (решение заказчика, репозиторий публичный).
 
 ## Стек
@@ -18,12 +18,15 @@
 
 ```
 npm run dev          # dev-сервер (в этом окружении: preview_start "cybermove-dev", порт 4330)
-npm run build        # боевая сборка в dist/ (страницы /dev/* исключены)
+npm run build        # OG-картинки (scripts/og.mjs, с кэшем) + боевая сборка в dist/ (страницы /dev/* исключены)
 npm run build:labs   # сборка с лабораториями /dev/*
 # превью GitHub Pages: CYBERMOVE_BASE=/<репо>/ CYBERMOVE_SITE=https://<логин>.github.io PUBLIC_PREVIEW=1 npm run build (см. docs/DEPLOY.md)
 npm run preview      # предпросмотр dist/ (preview_start "cybermove-preview", порт 4331)
 npm run deploy       # боевая сборка + выкладка dist/ на cybermove.asia по FTPS (реквизиты в deploy/ftp.env, вне git)
-npm run check        # astro check
+npm run check        # astro check (одна ошибка выводится как «- 1 error»)
+npm run og           # только OG 1200×630 → public/og/<lang>/<путь>.jpg (не в git); --force — перерисовать все
+node scripts/seo-audit.mjs [--verbose]   # dist: H1, уровни заголовков, плейсхолдеры, title/description, canonical/hreflang, alt, граф ссылок
+node scripts/lighthouse-gate.mjs https://cybermove.asia 3 gpu   # 6 типов страниц × mobile/desktop × 3 прогона → docs/lighthouse-gate.json
 python scripts/build-logo.py [--active a|b|c]   # пересобрать логотип и favicon (активен a)
 node scripts/posters.mjs http://127.0.0.1:4330   # постеры экранов, рендеры направлений, OG
 node scripts/shots.mjs --out docs/screens/<фаза> --base http://127.0.0.1:4330 "/path:name" ...   # скриншоты Playwright (SwiftShader)
@@ -43,7 +46,8 @@ PHP локально: портативный `php.exe` (см. `docs/DECISIONS.md
 
 ```
 site.config.ts          параметры сайта (URL, языки, WhatsApp, аналитика, счётчики)
-src/content/{ru,en}/    ui, home, services, cases, about, contact — JSON, источник правды по текстам
+src/content/{ru,en}/    ui, home, services (у услуг и направлений — поле seo), cases, about, contact — JSON, источник правды по текстам
+src/content/insights/   «Разборы»: <lang>/<slug>.md, один slug на RU и EN; схема — src/content.config.ts
 src/lib/                i18n, seo, analytics, site (общий клиентский код), home (сценарий главной)
 src/webgl/              Engine, Environment, Story, scenes/, objects/, shaders/, backgrounds/
 src/components/         секции и UI; labs/ — лаборатории /dev/*
@@ -55,6 +59,8 @@ docs/                   BRIEF, CONTENT, PROGRESS, DECISIONS, TODO-CONTENT, DEPLO
 ## Правила
 
 - Все тексты из `docs/CONTENT.md`; чего нет — `[PLACEHOLDER]` и запись в `docs/TODO-CONTENT.md`. Цифры не выдумывать.
+- Реквизиты, адрес, e-mail, Telegram, соцсети — только `ORG` в `site.config.ts` (null не выводится ни на сайте, ни в JSON-LD). Людей на сайте нет: автор статей — организация.
+- Страницы услуг `/services/<направление>/<услуга>/`, тексты — `services.json` → `seo`; title ≤ 60, description 140–160. Функциональные микрометки — `--fg-2` (axe 4.5:1), декоративные — umber (DECISIONS И2-D).
 - Русские заголовки, английский только в микрометках.
 - Палитра BRIEF-2 §3: тёплая светлая шкала ivory / sand / stone / clay, текст ink, единственный акцент — `--ink`; тёмная зона — S8 «Контакт» (BRIEF-3 §8.1, один атрибут `data-theme`), футер и меню-оверлей (`--night`). Синего, хрома, свечения, bloom и хроматической аберрации нет. Запрещены фиолетовые градиенты, glassmorphism, тени-облака, скругления 16px+, эмодзи, стоковые иконки.
 - Микрометки: JetBrains Mono 11px, трекинг +0.12em, `--umber` (на stone/clay — `--bark`). Контраст: основной ≥ 4.5:1, микрометки ≥ 3:1 — проверять цифрами.

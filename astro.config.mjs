@@ -22,6 +22,7 @@ function insightDates() {
     if (!fs.existsSync(dir)) continue;
     for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.md'))) {
       const fm = fs.readFileSync(path.join(dir, f), 'utf8').split(/^---\s*$/m)[1] || '';
+      /** @param {string} k */
       const get = (k) => (fm.match(new RegExp(`^${k}:[ \\t]*['"]?([^'"\\r\\n]+)`, 'm')) || [])[1]?.trim();
       const direction = get('direction');
       const date = get('updated') || get('date');

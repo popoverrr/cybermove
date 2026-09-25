@@ -48,5 +48,8 @@
   "email": "[PLACEHOLDER: e-mail]",
   "telegram": "[PLACEHOLDER: Telegram]",
   "address": "[PLACEHOLDER: address]",
-  "geoTitle": "Where we work"
+  "geoTitle": "Where we work",
+  "napTitle": "Company",
+  "vatLabel": "BIN",
+  "phoneLabel": "Phone"
 }

@@ -1,6 +1,6 @@
 /** SEO: title/description, canonical, hreflang, Open Graph, JSON-LD. */
-import { SITE_URL, SITE_NAME, SITE_LEGAL_NAME, LANGS, DEFAULT_LANG, WHATSAPP_NUMBER, GEOGRAPHY, type LangCode } from '../../site.config';
-import { alternates, localePath } from './i18n';
+import { SITE_URL, SITE_NAME, SITE_LEGAL_NAME, LANGS, DEFAULT_LANG, WHATSAPP_NUMBER, GEOGRAPHY, ORG, type LangCode } from '../../site.config';
+import { alternates, localePath, getContent } from './i18n';
 import { BASE } from './base';
 
 export interface HeadMeta {
@@ -45,26 +45,60 @@ export function ogLocale(lang: LangCode): string {
 
 /* ---------- JSON-LD ---------- */
 
+/** Ссылка на Telegram из ника или URL (ORG.telegram) */
+export function telegramUrl(t: string): string {
+  return /^https?:\/\//.test(t) ? t : `https://t.me/${t.replace(/^@/, '')}`;
+}
+
+/**
+ * Организация (BRIEF-SEO §4): одна сущность ProfessionalService (подтип LocalBusiness) с @id #organization —
+ * на неё ссылаются Service, Article и WebSite. Поля из ORG со значением null в разметку не попадают.
+ */
 export function organizationLd(lang: LangCode) {
+  const c = getContent(lang);
+  const a = ORG.address;
+  const sameAs = [...ORG.sameAs, ...(ORG.telegram ? [telegramUrl(ORG.telegram)] : [])];
   return {
     '@context': 'https://schema.org',
-    '@type': 'Organization',
+    '@type': 'ProfessionalService',
     '@id': `${SITE_URL}/#organization`,
     name: SITE_NAME,
     legalName: SITE_LEGAL_NAME,
+    alternateName: SITE_LEGAL_NAME,
     url: absolute('/'),
     logo: absolute('/icon-512.png'),
-    slogan: lang === 'ru' ? 'Мы двигаем бизнес вперёд.' : 'We move business forward.',
+    image: absolute(`/og/${lang}/home.jpg`),
+    slogan: c.ui.tagline,
+    description: c.ui.meta.home.description,
     telephone: WHATSAPP_NUMBER,
+    ...(ORG.email ? { email: ORG.email } : {}),
+    ...(a
+      ? {
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: a.streetAddress,
+            addressLocality: a.addressLocality,
+            ...(a.addressRegion ? { addressRegion: a.addressRegion } : {}),
+            ...(a.postalCode ? { postalCode: a.postalCode } : {}),
+            addressCountry: a.addressCountry,
+          },
+        }
+      : {}),
+    ...(ORG.foundingYear ? { foundingDate: String(ORG.foundingYear) } : {}),
+    ...(ORG.vatId ? { vatID: ORG.vatId } : {}),
+    ...(sameAs.length ? { sameAs } : {}),
     contactPoint: [
       {
         '@type': 'ContactPoint',
         telephone: WHATSAPP_NUMBER,
+        ...(ORG.email ? { email: ORG.email } : {}),
         contactType: 'sales',
         availableLanguage: ['ru', 'en'],
       },
     ],
-    areaServed: GEOGRAPHY.map((city) => ({ '@type': 'City', name: city })),
+    areaServed: [{ '@type': 'Country', name: 'Kazakhstan' }, ...GEOGRAPHY.map((city) => ({ '@type': 'City', name: city }))],
+    knowsAbout: c.services.directions.map((d) => d.nameFull),
+    availableLanguage: ['ru', 'en'],
   };
 }
 

@@ -146,3 +146,11 @@ export type { LangCode };
 export function filled(v: string | null | undefined): v is string {
   return Boolean(v && v.trim() && !v.includes('[PLACEHOLDER'));
 }
+
+/** Адрес организации одной строкой в формате профиля компании (ORG.address) */
+export function formatAddress(lang: LangCode, a: { streetAddress: string; addressLocality: string; addressRegion: string | null; postalCode: string | null; addressCountry: string } | null): string {
+  if (!a) return '';
+  const country = a.addressCountry === 'KZ' ? (lang === 'ru' ? 'Казахстан' : 'Kazakhstan') : a.addressCountry;
+  return [a.streetAddress, a.addressLocality, a.addressRegion && a.addressRegion !== a.addressLocality ? a.addressRegion : null, a.postalCode, country].filter(Boolean).join(', ');
+}
+

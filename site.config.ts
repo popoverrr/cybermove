@@ -54,6 +54,37 @@ export const VERIFICATION = {
   yandex: '', // <meta name="yandex-verification" content="…">
 };
 
+/**
+ * Организация (BRIEF-SEO §4): NAP для /contact/, подвала и JSON-LD ProfessionalService.
+ * null — данных от заказчика ещё нет: поле не выводится ни на сайте, ни в разметке.
+ * Формат адреса — как в профиле Google Business Profile (название, адрес, телефон должны совпадать буква в букву).
+ */
+export interface OrgAddress {
+  streetAddress: string; // 'пр. Абая, 10, офис 5'
+  addressLocality: string; // 'Алматы'
+  addressRegion: string | null; // 'Алматы' / область
+  postalCode: string | null; // 'A05X0X0'
+  addressCountry: string; // 'KZ'
+}
+export const ORG: {
+  address: OrgAddress | null;
+  email: string | null;
+  /** ник без @ или ссылка t.me */
+  telegram: string | null;
+  foundingYear: number | null;
+  /** БИН / VAT ID */
+  vatId: string | null;
+  /** профили в соцсетях и справочниках: полные URL */
+  sameAs: string[];
+} = {
+  address: null,
+  email: null,
+  telegram: null,
+  foundingYear: null,
+  vatId: null,
+  sameAs: [],
+};
+
 /** Куда уходит форма. Относительный путь от корня сайта. */
 export const LEAD_ENDPOINT = '/api/lead.php';
 

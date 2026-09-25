@@ -4,8 +4,9 @@
  * контакты. Незаполненные контакты ([PLACEHOLDER…]) не выводятся.
  */
 import Logo from './Logo.astro';
-import { getContent, localePath, alternates, filled, type LangCode } from '../lib/i18n';
-import { WHATSAPP_NUMBER, WHATSAPP_URL, GEOGRAPHY } from '../../site.config';
+import { getContent, localePath, alternates, formatAddress, type LangCode } from '../lib/i18n';
+import { telegramUrl } from '../lib/seo';
+import { WHATSAPP_NUMBER, WHATSAPP_URL, GEOGRAPHY, ORG } from '../../site.config';
 
 export interface Props {
   lang: LangCode;
@@ -17,9 +18,10 @@ export interface Props {
 const { lang, path = '/', compact = false } = Astro.props;
 const c = getContent(lang);
 const year = new Date().getFullYear();
-const email = filled(c.ui.footer.email) ? c.ui.footer.email : '';
-const telegram = filled(c.ui.footer.telegram) ? c.ui.footer.telegram : '';
-const address = filled(c.ui.footer.address) ? c.ui.footer.address : '';
+// BRIEF-SEO §4: контакты и реквизиты — из ORG (site.config.ts); null не выводится
+const email = ORG.email ?? '';
+const telegram = ORG.telegram ?? '';
+const address = [formatAddress(lang, ORG.address), ORG.vatId ? `${c.contact.vatLabel} ${ORG.vatId}` : ''].filter(Boolean).join(' · ');
 const langs = alternates(path === '/404/' ? '/' : path);
 ---
 
@@ -31,7 +33,7 @@ const langs = alternates(path === '/404/' ? '/' : path);
         <p class="footer__tagline t-small">{c.ui.tagline}</p>
         <a class="footer__wa" href={WHATSAPP_URL} target="_blank" rel="noopener">{WHATSAPP_NUMBER}</a>
         {email && <a class="t-small" href={`mailto:${email}`}>{email}</a>}
-        {telegram && <p class="t-small">{telegram}</p>}
+        {telegram && <a class="t-small" href={telegramUrl(telegram)} target="_blank" rel="noopener">Telegram</a>}
       </div>
 
       <nav class="footer__nav" aria-label={c.ui.sections}>

@@ -20,7 +20,7 @@ const crumbs = [
 const jsonLd = [breadcrumbLd(lang, crumbs)];
 ---
 
-<Base lang={lang} path="/contact/" title={c.ui.meta.contact.title} description={c.ui.meta.contact.description} theme="ivory" jsonLd={jsonLd} ogImage="/posters/og-contact.jpg">
+<Base lang={lang} path="/contact/" title={c.ui.meta.contact.title} description={c.ui.meta.contact.description} theme="ivory" jsonLd={jsonLd}>
   <PageHero theme="ivory" label={`${k.title} · 07`} title={k.h1} lead={k.lead} render="/posters/dir-contact.webp" beam={0.4} size="md" crumbs={crumbs.map((x) => ({ name: x.name, href: localePath(lang, x.path) }))} ariaCrumbs={c.ui.crumbs} />
 
   <section class="contact">

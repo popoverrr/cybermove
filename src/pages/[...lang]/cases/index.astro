@@ -26,7 +26,7 @@ const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: k.t
 let shown = 0;
 ---
 
-<Base lang={lang} path="/cases/" title={c.ui.meta.cases.title} description={c.ui.meta.cases.description} theme="ivory" jsonLd={jsonLd} ogImage="/posters/og-cases.jpg">
+<Base lang={lang} path="/cases/" title={c.ui.meta.cases.title} description={c.ui.meta.cases.description} theme="ivory" jsonLd={jsonLd}>
   <PageHero theme="ivory" label={`${k.title} · ${k.items.length}`} title={k.h1} lead={k.lead} size="md" />
 
   <nav class="catnav" aria-label={c.ui.sections} data-catnav>

@@ -6,15 +6,16 @@
   "description": "CYBERMOVE — сайт консалтинговой компании. Astro (static) + Three.js + GSAP + Lenis, PHP-форма для Plesk.",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "build:labs": "cross-env CYBERMOVE_LABS=1 astro build",
+    "build": "node scripts/og.mjs && astro build",
+    "build:labs": "node scripts/og.mjs && cross-env CYBERMOVE_LABS=1 astro build",
     "preview": "astro preview",
     "check": "astro check",
     "logo": "node scripts/build-logo.mjs",
     "shots": "node scripts/shots.mjs",
     "posters": "node scripts/posters.mjs",
     "audit": "node scripts/audit-dist.mjs",
-    "deploy": "npm run build && node deploy/deploy-ftp.mjs"
+    "deploy": "npm run build && node deploy/deploy-ftp.mjs",
+    "og": "node scripts/og.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",
@@ -28,6 +29,9 @@
     "@astrojs/sitemap": "^3.7.4",
     "@fontsource-variable/inter-tight": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource/inter-tight": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@tweakpane/core": "^2.0.5",
     "@types/three": "^0.186.0",
     "astro": "^7.3.3",
@@ -37,6 +41,7 @@
     "lighthouse": "^13.5.0",
     "node-html-parser": "^9.0.4",
     "playwright": "^1.63.0",
+    "satori": "^0.33.5",
     "sharp": "^0.35.4",
     "typescript": "^5.9.3"
   },

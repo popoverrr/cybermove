@@ -60,7 +60,7 @@ let n = 0;
 const num = () => pad(++n);
 ---
 
-<Base lang={lang} path={path} title={seo.title} description={seo.description} theme={d.theme as never} jsonLd={jsonLd} ogImage={`/posters/og-${d.id}.jpg`}>
+<Base lang={lang} path={path} title={seo.title} description={seo.description} theme={d.theme as never} jsonLd={jsonLd}>
   <PageHero
     theme={d.theme as never}
     label={`${d.index} · ${d.name}`}

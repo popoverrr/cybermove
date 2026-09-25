@@ -25,7 +25,7 @@ const jsonLd = [breadcrumbLd(lang, crumbs)];
 const also = a.measure.filter((m) => !['CAC', 'CPL'].includes(m) && !/^(конверсия|conversion)$/i.test(m));
 ---
 
-<Base lang={lang} path="/about/" title={c.ui.meta.about.title} description={c.ui.meta.about.description} theme="ivory" jsonLd={jsonLd} ogImage="/posters/og-about.jpg">
+<Base lang={lang} path="/about/" title={c.ui.meta.about.title} description={c.ui.meta.about.description} theme="ivory" jsonLd={jsonLd}>
   <PageHero
     theme="sand"
     label={a.title}

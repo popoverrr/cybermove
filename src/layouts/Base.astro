@@ -15,7 +15,7 @@ import monoLatin from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getContent, type LangCode } from '../lib/i18n';
-import { canonical, hreflangLinks, ogLocale, absolute, organizationLd, websiteLd } from '../lib/seo';
+import { canonical, hreflangLinks, ogLocale, absolute, organizationLd, websiteLd, ogFor } from '../lib/seo';
 import { ANALYTICS, VERIFICATION } from '../../site.config';
 import { withBase, PREVIEW } from '../lib/base';
 
@@ -27,6 +27,9 @@ export interface Props {
   theme?: 'ivory' | 'sand' | 'stone' | 'clay';
   ogImage?: string;
   ogType?: 'website' | 'article';
+  /** BRIEF-SEO §5: даты статьи (ISO) → article:published_time / article:modified_time */
+  publishedTime?: string;
+  modifiedTime?: string;
   noindex?: boolean;
   jsonLd?: unknown[];
   bodyClass?: string;
@@ -42,8 +45,10 @@ const {
   title,
   description,
   theme = 'ivory',
-  ogImage = '/posters/og-default.jpg',
+  ogImage: ogImageProp,
   ogType = 'website',
+  publishedTime,
+  modifiedTime,
   noindex = false,
   jsonLd = [],
   bodyClass = '',
@@ -52,6 +57,8 @@ const {
 } = Astro.props;
 
 const content = getContent(lang);
+// BRIEF-SEO §5: у каждой индексируемой страницы своя OG-картинка (scripts/og.mjs); у служебных — общий постер
+const ogImage = ogImageProp ?? (noindex ? '/posters/og-default.jpg' : ogFor(lang, path));
 const canonicalUrl = canonical(lang, path);
 const alts = hreflangLinks(path);
 const ld = [organizationLd(lang), websiteLd(lang), ...jsonLd];
@@ -83,6 +90,9 @@ const analyticsOn = Boolean(ANALYTICS.ga4 || ANALYTICS.metaPixel || ANALYTICS.ti
     <meta property="og:image" content={ogImage.startsWith('http') ? ogImage : absolute(ogImage)} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+    {ogType === 'article' && publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {ogType === 'article' && modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />

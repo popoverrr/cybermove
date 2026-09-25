@@ -15,7 +15,7 @@ const idx = c.services.index;
 const jsonLd = [breadcrumbLd(lang, [{ name: c.ui.brand, path: '/' }, { name: c.ui.services, path: '/services/' }])];
 ---
 
-<Base lang={lang} path="/services/" title={c.ui.meta.services.title} description={c.ui.meta.services.description} theme="ivory" jsonLd={jsonLd} ogImage="/posters/og-services.jpg">
+<Base lang={lang} path="/services/" title={c.ui.meta.services.title} description={c.ui.meta.services.description} theme="ivory" jsonLd={jsonLd}>
   <PageHero theme="sand" label={`${c.ui.services} · 05 · 22`} title={idx.h1} lead={idx.lead} micro={c.ui.formula} render="/posters/dir-core.webp" />
 
   <section class="dirs">

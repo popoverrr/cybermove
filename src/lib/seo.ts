@@ -33,6 +33,12 @@ export function hreflangLinks(path: string): Array<{ hreflang: string; href: str
   return links;
 }
 
+/** OG-картинка страницы (scripts/og.mjs): /og/<lang>/<путь без слэшей>.jpg, главная — home */
+export function ogFor(lang: LangCode, path: string): string {
+  const key = path === '/' ? 'home' : path.replace(/^\/+|\/+$/g, '');
+  return `/og/${lang}/${key}.jpg`;
+}
+
 export function ogLocale(lang: LangCode): string {
   return LANGS.find((l) => l.code === lang)?.locale ?? 'ru_RU';
 }

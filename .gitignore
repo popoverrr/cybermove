@@ -2,6 +2,8 @@ node_modules/
 dist/
 .astro/
 public/api/config.php
+# OG-картинки генерирует scripts/og.mjs на каждой сборке
+public/og/
 deploy/ftp.env
 .DS_Store
 Thumbs.db

@@ -248,7 +248,8 @@
     "logo": "media/logos/morris-group.png",
     "kind": "photo",
     "hover": "zoom",
-    "alt": "MORIS (Moris Group)"
+    "alt": "MORIS: переговорная юридической фирмы",
+    "altEn": "MORIS: a law firm meeting room"
   },
   "cases-education": {
     "src": "media/cases/education-4x3.webp",
@@ -256,7 +257,8 @@
     "logo": null,
     "kind": "photo",
     "hover": "zoom",
-    "alt": "Образовательные проекты"
+    "alt": "Образовательные проекты: аудитория в утреннем свете",
+    "altEn": "Educational projects: a lecture hall in morning light"
   },
   "cases-cybermove-games": {
     "src": "media/cases/cybermove-games-4x3.webp",

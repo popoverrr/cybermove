@@ -13,7 +13,9 @@ import { writeFileSync } from 'node:fs';
 const base = (process.argv[2] || 'http://127.0.0.1:4331').replace(/\/+$/, '');
 const RUNS = Number(process.argv[3] || 3);
 const GPU = process.argv[4] === 'gpu';
-const PAGES = [
+/** 5-й аргумент — подписи страниц через запятую (например «главная»), по умолчанию все шесть */
+const ONLY = (process.argv[5] || '').split(',').filter(Boolean);
+const PAGES_ALL = [
   ['главная', '/'],
   ['направление', '/services/audit/'],
   ['услуга', '/services/audit/business-audit/'],
@@ -21,6 +23,8 @@ const PAGES = [
   ['кейс', '/cases/usyk/'],
   ['контакты', '/contact/'],
 ];
+const PAGES = ONLY.length ? PAGES_ALL.filter(([label]) => ONLY.includes(label)) : PAGES_ALL;
+const OUT = ONLY.length ? `docs/lighthouse-gate-${ONLY.join('-')}.json` : 'docs/lighthouse-gate.json';
 const port = 9334;
 const gl = GPU ? ['--use-angle=d3d11', '--enable-gpu'] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
 const median = (xs) => {
@@ -70,6 +74,6 @@ for (const [label, path] of PAGES) {
       med ? `P ${med.performance} · A ${med.accessibility} · BP ${med['best-practices']} · SEO ${med.seo} · LCP ${med.lcp} мс · TBT ${med.tbt} мс · CLS ${med.cls}` : 'ошибка',
       ok[0]?.fails?.length ? `· не пройдено: ${[...new Set(ok.flatMap((r) => r.fails))].join(', ')}` : '',
     );
-    writeFileSync('docs/lighthouse-gate.json', JSON.stringify(out, null, 1));
+    writeFileSync(OUT, JSON.stringify(out, null, 1));
   }
 }

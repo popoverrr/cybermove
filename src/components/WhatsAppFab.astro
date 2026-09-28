@@ -73,6 +73,10 @@ const href = `${WHATSAPP_URL}?text=${encodeURIComponent(c.ui.whatsappText)}`;
     :global(body.is-home.home-ready:is([data-screen='0'], [data-screen='1'], [data-screen='2'], [data-screen='3'], [data-screen='4'], [data-screen='5'])) .wa-fab {
       bottom: calc(112px + env(safe-area-inset-bottom, 0px));
     }
+    /* S1: над подписью «Больше, чем консалтинг» (.s1__corner--br, 116–160 px от низа) */
+    :global(body.is-home.home-ready[data-screen='0']) .wa-fab {
+      bottom: calc(176px + env(safe-area-inset-bottom, 0px));
+    }
   }
   @media (max-width: 899px) {
     :global(body.is-home.home-ready[data-screen='0']) .wa-fab {

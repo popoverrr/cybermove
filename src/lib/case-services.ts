@@ -43,14 +43,24 @@ export interface CaseService {
   direction: string;
 }
 
+/** BRIEF-7 §7: у раздела — фиксированный список услуг, остальные источники не используются */
+const BY_CATEGORY: Record<string, string[]> = {
+  maritime: ['strategy', 'contracts'],
+};
+
 export function caseServices(c: Content, caseId: string, disciplines: string[], limit = 4): CaseService[] {
   const ids: string[] = [];
+  const category = c.cases.items.find((x) => x.id === caseId)?.category;
+  const fixed = category ? BY_CATEGORY[category] : undefined;
   const add = (id: string | undefined) => {
     if (id && !ids.includes(id)) ids.push(id);
   };
-  for (const d of disciplines) add(BY_DISCIPLINE[d.trim().toUpperCase()]);
-  for (const dir of c.services.directions) for (const s of dir.services) if (s.cases.includes(caseId)) add(s.id);
-  for (const dir of c.services.directions) for (const s of dir.services) if (s.seo.cases.includes(caseId)) add(s.id);
+  if (fixed) fixed.forEach(add);
+  else for (const d of disciplines) add(BY_DISCIPLINE[d.trim().toUpperCase()]);
+  if (!fixed) {
+    for (const dir of c.services.directions) for (const s of dir.services) if (s.cases.includes(caseId)) add(s.id);
+    for (const dir of c.services.directions) for (const s of dir.services) if (s.seo.cases.includes(caseId)) add(s.id);
+  }
   const out: CaseService[] = [];
   for (const id of ids.slice(0, limit)) {
     for (const dir of c.services.directions) {

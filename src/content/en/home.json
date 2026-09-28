@@ -39,7 +39,7 @@
     "h2": "Results mean motion.",
     "counters": [
       {
-        "value": 34,
+        "value": 37,
         "suffix": "+",
         "label": "projects"
       },
@@ -49,7 +49,7 @@
         "label": "cities"
       },
       {
-        "value": 7,
+        "value": 8,
         "suffix": "",
         "label": "industries"
       },

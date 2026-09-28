@@ -13,6 +13,7 @@ import { getContent, localePath, findCase, findCaseDetails, type LangCode } from
 import { LANGS, SITE_URL } from '../../../../site.config';
 import { breadcrumbLd, canonical } from '../../../lib/seo';
 import { caseServices } from '../../../lib/case-services';
+import ships from '../../../content/cases-ships.json';
 
 export function getStaticPaths() {
   const out: Array<{ params: { lang: string | undefined; slug: string }; props: { lang: LangCode; slug: string } }> = [];
@@ -42,6 +43,25 @@ const sameCat = c.cases.items.filter((x) => x.category === item.category && x.id
 const pos = c.cases.items.filter((x) => x.category === item.category).findIndex((x) => x.id === slug);
 const similar = [...sameCat.slice(pos), ...sameCat.slice(0, pos)].slice(0, 3);
 const description = c.ui.meta.caseItem.description.replace('{summary}', item.summary);
+// BRIEF-7 §7: характеристики судна (cases-ships.json) — таблица под заголовком, источник VesselFinder, сноска о кадре
+const ship = ships.cases.find((x) => x.id === slug);
+const fmt = (v: number, frac = 2) => new Intl.NumberFormat(lang === 'ru' ? 'ru-RU' : 'en-GB', { maximumFractionDigits: frac }).format(v);
+const unit = lang === 'ru' ? { m: 'м', t: 'т' } : { m: 'm', t: 't' };
+const shipLabels = ships.text.specLabels[lang];
+const shipRows = ship
+  ? [
+      [shipLabels.type, ship.type[lang]],
+      [shipLabels.imo, ship.imo],
+      [shipLabels.built, String(ship.built)],
+      [shipLabels.flag, ship.flag[lang]],
+      [shipLabels.loa, `${fmt(ship.loa_m)} ${unit.m}`],
+      [shipLabels.beam, `${fmt(ship.beam_m)} ${unit.m}`],
+      [shipLabels.gt, fmt(ship.gt, 0)],
+      [shipLabels.dwt, `${fmt(ship.dwt_t, 0)} ${unit.t}`],
+    ]
+  : [];
+// в сноске — только публичная часть (первое предложение); указание «заменить фото» — в TODO-CONTENT
+const shipNote = ships.text.photoNote[lang].split(/(?<=\.)\s/)[0];
 const jsonLd = [
   breadcrumbLd(lang, [
     { name: c.ui.brand, path: '/' },
@@ -57,11 +77,13 @@ const jsonLd = [
     url: canonical(lang, path),
     inLanguage: lang,
     // клиент — только имя и ссылка из данных кейса; личные бренды — Person
-    about: {
-      '@type': item.category === 'experts' ? 'Person' : 'Organization',
-      name: item.name,
-      ...(item.url ? { url: item.url } : {}),
-    },
+    about: ship
+      ? { '@type': 'Vehicle', name: ship.name, identifier: `IMO ${ship.imo}`, productionDate: String(ship.built) }
+      : {
+          '@type': item.category === 'experts' ? 'Person' : 'Organization',
+          name: item.name,
+          ...(item.url ? { url: item.url } : {}),
+        },
     genre: cat?.label,
     keywords: [...(d?.disciplines || item.tags), ...(d?.industries || '').split('·').map((x) => x.trim()).filter(Boolean)].join(', '),
     creator: { '@id': `${SITE_URL}/#organization` },
@@ -109,6 +131,29 @@ const jsonLd = [
     </header>
 
     <div class="container cbody">
+      {ship && (
+        <section class="cblock cblock--ship">
+          <h2 class="t-micro cblock__label">{ships.text.specTitle[lang]}</h2>
+          <div class="cblock__body">
+            <dl class="ship">
+              {shipRows.map(([k, v]) => (
+                <div class="ship__row">
+                  <dt class="t-micro">{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))}
+            </dl>
+            {ship.formerNames.length > 0 && (
+              <p class="t-small ship__former">{c.ui.shipFormer}: {ship.formerNames.join(' · ')}</p>
+            )}
+            <p class="t-micro ship__src">
+              {c.ui.shipSource}: <a href={ship.source} target="_blank" rel="nofollow noopener">VesselFinder ↗</a>
+            </p>
+            <p class="t-small ship__note">{shipNote}</p>
+          </div>
+        </section>
+      )}
+
       {d?.project && (
         <section class="cblock">
           <h2 class="t-micro cblock__label">{c.ui.caseProject}</h2>
@@ -276,6 +321,44 @@ const jsonLd = [
   }
   .cblock__label {
     color: var(--accent);
+  }
+  /* BRIEF-7 §7: характеристики судна */
+  .ship {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0 var(--space-6);
+    margin: 0;
+    border-top: 1px solid var(--hair);
+  }
+  .ship__row {
+    display: grid;
+    gap: 0.2rem;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--hair);
+  }
+  .ship__row dt {
+    color: var(--fg-2);
+  }
+  .ship__row dd {
+    margin: 0;
+    font-size: 1.0625rem;
+  }
+  .ship__former {
+    margin-top: var(--space-4);
+    color: var(--fg-2);
+  }
+  .ship__src {
+    margin-top: var(--space-3);
+    color: var(--fg-2);
+  }
+  .ship__src a {
+    color: var(--fg);
+    border-bottom: 1px solid var(--hair-strong);
+  }
+  .ship__note {
+    margin-top: var(--space-3);
+    color: var(--fg-2);
+    max-width: 64ch;
   }
   /* BRIEF-SEO §3: услуги в проекте — ссылки на страницы услуг */
   .csvc {

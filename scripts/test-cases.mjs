@@ -44,7 +44,7 @@ for (const id of ids) {
     if (!existsSync(f) || !readFileSync(f, 'utf8').includes('frame__img')) heroMissing.push(p);
   }
 }
-check(heroMissing.length === 0, `шапка 16:9 на страницах кейсов (34 × 2 языка): без кадра ${heroMissing.length}`);
+check(heroMissing.length === 0, `шапка 16:9 на страницах кейсов (37 × 2 языка): без кадра ${heroMissing.length}`);
 
 const home = readFileSync(path.join(dist, 'index.html'), 'utf8');
 const s7cards = (home.match(/class="[^"]*card__photo/g) || []).length;
@@ -66,6 +66,8 @@ for (const [lang, url] of [
   });
   await page.goto(base + url, { waitUntil: 'networkidle', timeout: 180000 });
   await page.waitForTimeout(800);
+  // вес первой загрузки — до прокрутки и замеров (дальше ленивые кадры догружаются проверками)
+  const firstLoad = bytes.total;
 
   const r = await page.evaluate(() => {
     const secs = Array.from(document.querySelectorAll('[data-cat]'));
@@ -87,11 +89,11 @@ for (const [lang, url] of [
       cols: getComputedStyle(document.querySelector('.grid-tiles')).gridTemplateColumns.split(' ').length,
     };
   });
-  check(r.sections === 7 && r.chips === 7, `${lang}: разделов ${r.sections}, чипов ${r.chips}`);
-  check(r.tiles === 34, `${lang}: плиток ${r.tiles}`);
+  check(r.sections === 8 && r.chips === 8, `${lang}: разделов ${r.sections}, чипов ${r.chips}`);
+  check(r.tiles === 37, `${lang}: плиток ${r.tiles}`);
   check(r.filter === 0, `${lang}: фильтра на странице нет (кнопок ${r.filter})`);
   check(r.logos === withLogo.length, `${lang}: логотипов на кадрах ${r.logos} (в наборе ${withLogo.length})`);
-  check(r.names === 34, `${lang}: имя кейса на кадре у ${r.names} плиток`);
+  check(r.names === 37, `${lang}: имя кейса на кадре у ${r.names} плиток`);
   check(r.noAlt === 0 && r.broken === 0, `${lang}: alt у всех кадров, битых кадров ${r.broken}`);
   check(r.docW <= r.vw + 1 && r.cols === 4, `${lang}: сетка 4 колонки, страница не едет вбок (${r.docW} ≤ ${r.vw})`);
 
@@ -241,7 +243,7 @@ for (const [lang, url] of [
       document.querySelectorAll('.frame__name').forEach((n) => (n.style.visibility = ''));
     });
 
-    check(bytes.total <= 1.2 * 1024 * 1024, `вес первой загрузки /cases/ ${(bytes.total / 1024).toFixed(0)} КБ ≤ 1229 КБ`);
+    check(firstLoad <= 1.2 * 1024 * 1024, `вес первой загрузки /cases/ ${(firstLoad / 1024).toFixed(0)} КБ ≤ 1229 КБ`);
   }
   await ctx.close();
 }

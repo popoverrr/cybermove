@@ -1109,5 +1109,71 @@
     "externalLinks": [],
     "linkLabels": [],
     "image": "furniture-factory.png"
+  },
+  {
+    "id": "fort-desaix",
+    "title": "FORT DESAIX",
+    "tagsLine": "УПРАВЛЕНИЕ СУДАМИ · ОПЕРАЦИОННОЕ УПРАВЛЕНИЕ · ЛОГИСТИКА",
+    "source": null,
+    "monogram": "FORT DESAIX",
+    "project": "FORT DESAIX — контейнеровоз (Panamax) постройки 2010 года, длина 268,8 м, ширина 32,2 м, дедвейт 52 788 т, флаг — Мальта. Судно в составе флота, с которым команда CYBERMOVE работала по направлению управления судами.",
+    "industries": "Управление судами · Операционное управление · Логистика",
+    "task": null,
+    "role": "[PLACEHOLDER: роль CYBERMOVE — уточнить у руководства: технический/коммерческий менеджмент, экипаж, снабжение, документы, страхование, фрахт]",
+    "done": [],
+    "extraBlocks": [],
+    "result": null,
+    "disciplines": [
+      "SHIP MANAGEMENT",
+      "OPERATIONS",
+      "LOGISTICS"
+    ],
+    "externalLinks": [],
+    "linkLabels": [],
+    "image": null
+  },
+  {
+    "id": "as-claudia",
+    "title": "AS CLAUDIA",
+    "tagsLine": "УПРАВЛЕНИЕ СУДАМИ · ОПЕРАЦИОННОЕ УПРАВЛЕНИЕ · ЛОГИСТИКА",
+    "source": null,
+    "monogram": "AS CLAUDIA",
+    "project": "AS CLAUDIA — контейнеровоз постройки 2007 года, длина 222,16 м, ширина 30 м, дедвейт 39 337 т, флаг — Либерия. Судно в составе флота, с которым команда CYBERMOVE работала по направлению управления судами.",
+    "industries": "Управление судами · Операционное управление · Логистика",
+    "task": null,
+    "role": "[PLACEHOLDER: роль CYBERMOVE — уточнить у руководства: технический/коммерческий менеджмент, экипаж, снабжение, документы, страхование, фрахт]",
+    "done": [],
+    "extraBlocks": [],
+    "result": null,
+    "disciplines": [
+      "SHIP MANAGEMENT",
+      "OPERATIONS",
+      "LOGISTICS"
+    ],
+    "externalLinks": [],
+    "linkLabels": [],
+    "image": null
+  },
+  {
+    "id": "as-constantina",
+    "title": "AS CONSTANTINA",
+    "tagsLine": "УПРАВЛЕНИЕ СУДАМИ · ОПЕРАЦИОННОЕ УПРАВЛЕНИЕ · ЛОГИСТИКА",
+    "source": null,
+    "monogram": "AS CONSTANTINA",
+    "project": "AS CONSTANTINA — контейнеровоз постройки 2005 года, длина 221,69 м, ширина 29,86 м, дедвейт 37 883 т, флаг — Либерия. Судно в составе флота, с которым команда CYBERMOVE работала по направлению управления судами.",
+    "industries": "Управление судами · Операционное управление · Логистика",
+    "task": null,
+    "role": "[PLACEHOLDER: роль CYBERMOVE — уточнить у руководства: технический/коммерческий менеджмент, экипаж, снабжение, документы, страхование, фрахт]",
+    "done": [],
+    "extraBlocks": [],
+    "result": null,
+    "disciplines": [
+      "SHIP MANAGEMENT",
+      "OPERATIONS",
+      "LOGISTICS"
+    ],
+    "externalLinks": [],
+    "linkLabels": [],
+    "image": null
   }
 ]

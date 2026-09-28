@@ -1109,5 +1109,71 @@
     "externalLinks": [],
     "linkLabels": [],
     "image": "furniture-factory.png"
+  },
+  {
+    "id": "fort-desaix",
+    "title": "FORT DESAIX",
+    "tagsLine": "SHIP MANAGEMENT · OPERATIONS · LOGISTICS",
+    "source": null,
+    "monogram": "FORT DESAIX",
+    "project": "FORT DESAIX is a container ship (Panamax) built in 2010: 268.8 m long, 32.2 m beam, 52,788 t deadweight, Malta flag. One of the vessels the CYBERMOVE team worked with in ship management.",
+    "industries": "Ship management · Operations · Logistics",
+    "task": null,
+    "role": "[PLACEHOLDER: CYBERMOVE role — to be confirmed by management]",
+    "done": [],
+    "extraBlocks": [],
+    "result": null,
+    "disciplines": [
+      "SHIP MANAGEMENT",
+      "OPERATIONS",
+      "LOGISTICS"
+    ],
+    "externalLinks": [],
+    "linkLabels": [],
+    "image": null
+  },
+  {
+    "id": "as-claudia",
+    "title": "AS CLAUDIA",
+    "tagsLine": "SHIP MANAGEMENT · OPERATIONS · LOGISTICS",
+    "source": null,
+    "monogram": "AS CLAUDIA",
+    "project": "AS CLAUDIA is a container ship built in 2007: 222.16 m long, 30 m beam, 39,337 t deadweight, Liberia flag. One of the vessels the CYBERMOVE team worked with in ship management.",
+    "industries": "Ship management · Operations · Logistics",
+    "task": null,
+    "role": "[PLACEHOLDER: CYBERMOVE role — to be confirmed by management]",
+    "done": [],
+    "extraBlocks": [],
+    "result": null,
+    "disciplines": [
+      "SHIP MANAGEMENT",
+      "OPERATIONS",
+      "LOGISTICS"
+    ],
+    "externalLinks": [],
+    "linkLabels": [],
+    "image": null
+  },
+  {
+    "id": "as-constantina",
+    "title": "AS CONSTANTINA",
+    "tagsLine": "SHIP MANAGEMENT · OPERATIONS · LOGISTICS",
+    "source": null,
+    "monogram": "AS CONSTANTINA",
+    "project": "AS CONSTANTINA is a container ship built in 2005: 221.69 m long, 29.86 m beam, 37,883 t deadweight, Liberia flag. One of the vessels the CYBERMOVE team worked with in ship management.",
+    "industries": "Ship management · Operations · Logistics",
+    "task": null,
+    "role": "[PLACEHOLDER: CYBERMOVE role — to be confirmed by management]",
+    "done": [],
+    "extraBlocks": [],
+    "result": null,
+    "disciplines": [
+      "SHIP MANAGEMENT",
+      "OPERATIONS",
+      "LOGISTICS"
+    ],
+    "externalLinks": [],
+    "linkLabels": [],
+    "image": null
   }
 ]

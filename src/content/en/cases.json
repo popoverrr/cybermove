@@ -1,6 +1,6 @@
 {
   "title": "Cases",
-  "h1": "34 projects. 13 cities. 7 industries.",
+  "h1": "37 projects. 13 cities. 8 industries.",
   "lead": "From a world champion's personal brand to engineering systems in Kazakhstan. Categories are assigned by the nature of each project; result figures will follow.",
   "placeholderNote": "[PLACEHOLDER: result figures for the cases]",
   "categories": [
@@ -33,6 +33,12 @@
       "label": "HVAC, engineering & manufacturing",
       "lead": "Heating, construction equipment, panels, furniture, medical",
       "short": "B2B and engineering"
+    },
+    {
+      "id": "maritime",
+      "label": "Maritime fleet & logistics",
+      "lead": "Container vessels: ship management and operational support",
+      "short": "maritime"
     },
     {
       "id": "pro",
@@ -460,6 +466,48 @@
     },
     {
       "n": 30,
+      "id": "fort-desaix",
+      "name": "FORT DESAIX",
+      "url": "",
+      "urlLabel": "",
+      "summary": "Ship management experience: FORT DESAIX, container ship (Panamax), 268.8 m, built 2010",
+      "tags": [
+        "Ship Management",
+        "Operations",
+        "Logistics"
+      ],
+      "category": "maritime"
+    },
+    {
+      "n": 31,
+      "id": "as-claudia",
+      "name": "AS CLAUDIA",
+      "url": "",
+      "urlLabel": "",
+      "summary": "Ship management experience: AS CLAUDIA, container ship, 222.16 m, built 2007",
+      "tags": [
+        "Ship Management",
+        "Operations",
+        "Logistics"
+      ],
+      "category": "maritime"
+    },
+    {
+      "n": 32,
+      "id": "as-constantina",
+      "name": "AS CONSTANTINA",
+      "url": "",
+      "urlLabel": "",
+      "summary": "Ship management experience: AS CONSTANTINA, container ship, 221.69 m, built 2005",
+      "tags": [
+        "Ship Management",
+        "Operations",
+        "Logistics"
+      ],
+      "category": "maritime"
+    },
+    {
+      "n": 33,
       "id": "art-mango-production",
       "name": "ART MANGO PRODUCTION",
       "url": "https://ilpgroup.uk",
@@ -473,7 +521,7 @@
       "category": "pro"
     },
     {
-      "n": 31,
+      "n": 34,
       "id": "morris-group",
       "name": "MORIS (Moris Group)",
       "url": "",
@@ -487,7 +535,7 @@
       "category": "pro"
     },
     {
-      "n": 32,
+      "n": 35,
       "id": "education",
       "name": "Educational projects",
       "url": "",
@@ -501,7 +549,7 @@
       "category": "pro"
     },
     {
-      "n": 33,
+      "n": 36,
       "id": "cybermove-games",
       "name": "CYBERMOVE GAMES",
       "url": "https://cybermovegames.com",
@@ -515,7 +563,7 @@
       "category": "tech"
     },
     {
-      "n": 34,
+      "n": 37,
       "id": "apicapsules",
       "name": "APICAPSULES",
       "url": "",

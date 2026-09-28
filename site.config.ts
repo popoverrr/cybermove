@@ -90,9 +90,9 @@ export const LEAD_ENDPOINT = '/api/lead.php';
 
 /** Счётчики экрана «Рост» (реальные, с текущего сайта). */
 export const COUNTERS = {
-  projects: 34,
+  projects: 37,
   cities: 13,
-  industries: 7,
+  industries: 8,
   yearsWithUsyk: 6,
 };
 

@@ -35,7 +35,7 @@ export const GET: APIRoute = async () => {
   }
 
   lines.push('## Кейсы', '');
-  lines.push(`- [${ru.cases.h1}](${url('ru', '/cases/')}): ${ru.cases.items.length} проектов в семи разделах`);
+  lines.push(`- [${ru.cases.h1}](${url('ru', '/cases/')}): ${ru.cases.items.length} проектов в ${ru.cases.categories.length} разделах`);
   lines.push('');
 
   lines.push('## Компания и контакты', '');

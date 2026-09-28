@@ -340,5 +340,32 @@
     "kind": "render",
     "hover": "none",
     "alt": ""
+  },
+  "cases-fort-desaix": {
+    "src": "media/cases/fort-desaix-4x3.webp",
+    "hero": "media/cases/fort-desaix-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Контейнеровоз в открытом море, вид сверху",
+    "altEn": "A container ship on the open sea, top view"
+  },
+  "cases-as-claudia": {
+    "src": "media/cases/as-claudia-4x3.webp",
+    "hero": "media/cases/as-claudia-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Палуба контейнеровоза с рядами контейнеров, вид с мостика",
+    "altEn": "Container ship deck with rows of containers, view from the bridge"
+  },
+  "cases-as-constantina": {
+    "src": "media/cases/as-constantina-4x3.webp",
+    "hero": "media/cases/as-constantina-16x9.webp",
+    "logo": null,
+    "kind": "photo",
+    "hover": "zoom",
+    "alt": "Контейнеровоз на ходу, аэросъёмка",
+    "altEn": "A container ship under way, aerial view"
   }
 }

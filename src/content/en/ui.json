@@ -83,12 +83,12 @@
       "description": "Business consulting services: 5 areas and 22 services — audit, digitalization, branding, PPC and SEO, tenders and legal. Get a free initial review today."
     },
     "cases": {
-      "title": "CYBERMOVE cases — 34 projects in 13 cities",
-      "description": "USYK, Ukrainian Fashion Week, INTERTOP, BRSM-NAFTA, HYDROSTA and more: personal brands, retail, HoReCa, B2B, media, technology."
+      "title": "CYBERMOVE cases — 37 projects in 13 cities",
+      "description": "USYK, Ukrainian Fashion Week, INTERTOP, BRSM-NAFTA, HYDROSTA and more: personal brands, retail, HoReCa, B2B, maritime, media, technology."
     },
     "about": {
       "title": "About CYBERMOVE — Business Consulting Company",
-      "description": "CYBERMOVE is a business consulting company with 34+ projects in 13 cities and 7 industries: audit, systems, brand, ads and tenders, from diagnosis to growth."
+      "description": "CYBERMOVE is a business consulting company with 37+ projects in 13 cities and 8 industries: audit, systems, brand, ads and tenders, from diagnosis to growth."
     },
     "contact": {
       "title": "Contact CYBERMOVE — get an initial review",
@@ -184,5 +184,7 @@
   "allInsights": "All insights",
   "insightsByDirection": "Insights in this area",
   "insightsCount": "insights",
-  "whatsappText": "Hello! I'd like to get a first review"
+  "whatsappText": "Hello! I'd like to get a first review",
+  "shipFormer": "Former names",
+  "shipSource": "Vessel data"
 }

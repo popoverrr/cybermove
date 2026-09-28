@@ -161,8 +161,9 @@ body.gl-fallback .gl-poster {
 .anchor[data-anchor='figure'] > span[data-figure].is-on {
   display: inline;
 }
-/* BRIEF-7 §2: на S7 карточки кейсов на всю ширину — подписи колец (дубли счётчиков) не ложатся на фото */
-body[data-screen='6'] .anchor[data-anchor^='ring-'] {
+/* BRIEF-7 §2: на S7 карточки кейсов на всю ширину — подписи колец (дубли счётчиков) и строка RINGS не ложатся на фото */
+body[data-screen='6'] .anchor[data-anchor^='ring-'],
+body[data-screen='6'] .status {
   opacity: 0 !important;
 }
 [data-theme-now='night'] .anchor {

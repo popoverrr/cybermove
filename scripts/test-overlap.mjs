@@ -54,6 +54,12 @@ for (const s of SIZES) {
       const foot = rect(document.querySelector('.screen--s7 .g__foot'));
       const ticker = rect(document.querySelector('.screen--s7 .g__ticker'));
       const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 72;
+      // «Все кейсы» и кнопки ленты не под плавающими кнопками SOUND и WhatsApp
+      const hit = (a, b) => (b.width && b.height ? Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)) : 0);
+      const floats = ['.audio', '[data-wa-fab]'].map((q) => document.querySelector(q)).filter((el) => el && getComputedStyle(el).display !== 'none').map(rect);
+      const under = (el) => (el ? floats.reduce((m, f) => Math.max(m, hit(rect(el), f)), 0) : 0);
+      const footHit = under(document.querySelector('.screen--s7 .g__foot a'));
+      const barHit = Math.max(...Array.from(document.querySelectorAll('.screen--s7 .ribbon__btn')).map(under));
       let overlap = 0;
       for (const b of cards) overlap = Math.max(overlap, Math.min(b.bottom, counters.bottom) - Math.max(b.top, counters.top));
       return {
@@ -65,6 +71,8 @@ for (const s of SIZES) {
         tickerTop: ticker.top,
         firstCardLeft: cards[0] ? cards[0].left : null,
         header,
+        footHit,
+        barHit,
       };
     });
     // пиксельная проверка полосы шапки: в ней не должно быть линий сцены (канвас под шапкой = чистый фон)
@@ -91,13 +99,13 @@ for (const s of SIZES) {
     const inkOk = !headerInk || headerInk.dark < headerInk.total * 0.002;
     const restOk =
       rest === 'верх'
-        ? r.overlap < 1 && r.cardsBottom <= r.tickerTop + 1 && r.cardsTop >= r.header
-        : r.overlap < 1 && r.footBottom <= r.tickerTop + 1 && r.countersTop >= r.header;
+        ? r.overlap < 1 && r.cardsBottom <= r.tickerTop + 1 && r.cardsTop >= r.header && r.barHit < 1
+        : r.overlap < 1 && r.footBottom <= r.tickerTop + 1 && r.countersTop >= r.header && r.footHit < 1;
     if (!(inkOk && restOk)) ok = false;
     lines.push(
       rest === 'верх'
-        ? `верх: карточки ${r.cardsTop.toFixed(0)}–${r.cardsBottom.toFixed(0)} при тикере ${r.tickerTop.toFixed(0)}, наложение на счётчики ${Math.max(0, r.overlap).toFixed(0)} px, первая карточка x ${r.firstCardLeft === null ? '—' : r.firstCardLeft.toFixed(0)}, тёмных в полосе шапки ${headerInk ? headerInk.dark : '—'}`
-        : `низ: счётчики с ${r.countersTop.toFixed(0)}, «Все кейсы» до ${r.footBottom.toFixed(0)} при тикере ${r.tickerTop.toFixed(0)}, тёмных в полосе шапки ${headerInk ? headerInk.dark : '—'}`,
+        ? `верх: карточки ${r.cardsTop.toFixed(0)}–${r.cardsBottom.toFixed(0)} при тикере ${r.tickerTop.toFixed(0)}, наложение на счётчики ${Math.max(0, r.overlap).toFixed(0)} px, кнопки ленты под SOUND/WhatsApp ${r.barHit.toFixed(0)} px², первая карточка x ${r.firstCardLeft === null ? '—' : r.firstCardLeft.toFixed(0)}, тёмных в полосе шапки ${headerInk ? headerInk.dark : '—'}`
+        : `низ: счётчики с ${r.countersTop.toFixed(0)}, «Все кейсы» до ${r.footBottom.toFixed(0)} при тикере ${r.tickerTop.toFixed(0)}, под SOUND/WhatsApp ${r.footHit.toFixed(0)} px², тёмных в полосе шапки ${headerInk ? headerInk.dark : '—'}`,
     );
   }
   if (!ok) fails++;

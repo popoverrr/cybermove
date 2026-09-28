@@ -104,9 +104,16 @@ if (sizes.includes('desktop')) {
   let bad = 0;
   for (let t = 0; t < 8; t++) {
     const dir = Math.random() < 0.6 ? 1 : -1;
-    await wheel(page, dir * (20 + Math.random() * 130), 1 + Math.floor(Math.random() * 12), 10 + Math.random() * 60);
+    const dy = Math.round(dir * (20 + Math.random() * 130));
+    const n = 1 + Math.floor(Math.random() * 12);
+    const gap = Math.round(10 + Math.random() * 60);
+    const y0 = s.y;
+    await wheel(page, dy, n, gap);
     s = await settle(page);
-    if (s.d > TOL && s.y < s.zoneEnd - 1) bad++;
+    if (s.d > TOL && s.y < s.zoneEnd - 1) {
+      bad++;
+      console.log(`  серия ${t + 1}: ${n} × ${dy} px через ${gap} мс из y ${y0} → y ${s.y}, ближайшая точка ${s.k} (${s.rests[s.k]}), отклонение ${Math.round(s.d)} px`);
+    }
   }
   check(bad === 0, `8 случайных серий колеса: покой вне точек ${bad} раз`);
 

@@ -71,8 +71,12 @@ const state = (page) =>
   const afterScroll = await state(page);
   check(afterScroll.playing === false, `скролл активацией не считается: playing ${afterScroll.playing}`);
   await page.mouse.click(640, 700);
-  await page.waitForTimeout(2500);
-  const after = await state(page);
+  // play() ждёт загрузки трека: на медленной сети или под нагрузкой дольше 2.5 с — ждём до 10 с
+  let after = await state(page);
+  for (let i = 0; i < 20 && !after.playing; i++) {
+    await page.waitForTimeout(500);
+    after = await state(page);
+  }
   check(after.playing === true && after.pressed === 'true', `после клика играет: ${after.playing}, кнопка ${after.pressed} (${after.last})`);
   check(errors.length === 0, `без ошибок в консоли (${errors.slice(0, 2).join(' | ') || '—'})`);
   console.log(`   запросов к /audio/ до жеста: ${reqsBefore}, после: ${audioReqs.length} (${audioReqs.join(', ')})`);

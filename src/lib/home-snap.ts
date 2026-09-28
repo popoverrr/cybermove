@@ -14,9 +14,9 @@
  * форма и подвал прокручиваются обычно.
  *
  *   колесо / трекпад — накопленная дельта жеста не выводит дальше соседней точки покоя, лишнее отбрасывается до конца снапа;
- *   тач — ведёт Lenis (syncTouch), после touchend доводка с учётом скорости (быстрый свайп: вперёд уже с 0.4 перехода);
+ *   тач — ведёт Lenis (syncTouch), после touchend доводка с учётом скорости (быстрый свайп — вперёд при любом сдвиге в его сторону);
  *   клавиатура — ↓ PageDown Пробел: следующая точка, ↑ PageUp Shift+Пробел: предыдущая, Home — верх, End — низ страницы;
- *   ввод прекратился на 120 мс, а положение не в точке покоя (допуск 2 % перехода) — доводка 0.55–0.75 с, power2.out;
+ *   ввод прекратился на 120 мс, а положение не в точке покоя (допуск 2 px) — доводка 0.55–0.75 с, power2.out;
  *   новый ввод отменяет доводку; prefers-reduced-motion — доводка мгновенная.
  */
 import gsap from 'gsap';
@@ -52,7 +52,7 @@ export function createSnap(opt: SnapOptions) {
   let gesture: { lo: number; hi: number; from: number; startRest: number | null; touch: boolean; full?: boolean } | null = null;
   let touching = false;
   let nativeTouch = false;
-  let touchFast = 0; // направление быстрого свайпа (±1) для порога 0.4
+  let touchFast = 0; // направление быстрого свайпа (±1): в его сторону порог намерения не действует
   let scrollbarDrag = false;
   let settledAt = -1;
   let tween: gsap.core.Tween | null = null;
@@ -220,7 +220,7 @@ export function createSnap(opt: SnapOptions) {
       touching = false;
       inputNow();
       if (nativeTouch) return false;
-      // скорость Lenis — px за кадр; быстрый свайп задаёт порог 0.4 в своём направлении, инерцию Lenis не применяем
+      // скорость Lenis — px за кадр; быстрый свайп снимает порог намерения в своём направлении, инерцию Lenis не применяем
       const l = opt.lenis();
       const v = l ? l.velocity : 0;
       touchFast = Math.abs(v) > 3 ? Math.sign(v) : 0;

@@ -103,7 +103,8 @@ const langs = alternates(path === '/404/' ? '/' : path);
     position: relative;
     background: var(--night);
     color: var(--fg);
-    padding: var(--space-16) 0 var(--space-8);
+    /* BRIEF-7 §3: последняя строка не уходит под плавающую кнопку WhatsApp */
+    padding: var(--space-16) 0 calc(var(--space-8) + 76px);
   }
   .footer--compact {
     padding-top: var(--space-8);

@@ -311,12 +311,6 @@
     "hover": "zoom",
     "alt": "Hydrosta Kazakhstan"
   },
-  "about-home": {
-    "src": "media/about/about-home-3x4.webp",
-    "kind": "photo",
-    "hover": "none",
-    "alt": "Рабочее место CYBERMOVE: стол, ноутбуки, блокнот, утренний свет"
-  },
   "dir-audit": {
     "src": "media/dir/dir-audit.webp",
     "kind": "render",

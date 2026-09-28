@@ -1,10 +1,9 @@
 ---
 /**
  * Блок «О компании» на главной (BRIEF-2 §6): в потоке между S7 и S8, вне стейджа, без pin.
- * Слева фотослот 3:4, справа метка / ABOUT, заголовок в две строки (вторая — bark), три тезиса
- * «Почему CYBERMOVE» (CONTENT.md §3) и ссылка «О компании →». Непрозрачный фон sand закрывает канвас.
+ * BRIEF-7 §4: без фото — слева (5/12) метка / ABOUT и заголовок в две строки (вторая — bark), справа (7/12)
+ * три тезиса «Почему CYBERMOVE» (CONTENT.md §3) и ссылка «О компании →». Непрозрачный фон sand закрывает канвас.
  */
-import ImageSlot from '../ImageSlot.astro';
 import { getContent, localePath, type LangCode } from '../../lib/i18n';
 
 export interface Props {
@@ -17,14 +16,13 @@ const a = c.home.about;
 
 <section class="habout" data-theme="sand" aria-labelledby="h-habout">
   <div class="habout__inner container">
-    <div class="habout__photo">
-      <ImageSlot id="about-home" ratio="3:4" alt="" sizes="(max-width: 899px) 100vw, 44vw" />
-    </div>
-    <div class="habout__text">
+    <div class="habout__head">
       <p class="t-micro habout__label">{a.label}</p>
       <h2 class="t-h1 habout__h2" id="h-habout">
         {a.h2a}<br /><span class="t-dim">{a.h2b}</span>
       </h2>
+    </div>
+    <div class="habout__text">
       <ul class="habout__why">
         {c.about.why.map((w, i) => (
           <li class="habout__item">
@@ -47,16 +45,21 @@ const a = c.home.about;
     color: var(--fg);
     padding: var(--section-pad) 0;
   }
+  /* на всю ширину контейнера: заголовок 5/12, тезисы 7/12 */
   .habout__inner {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-    gap: clamp(2rem, 6vw, 6rem);
-    align-items: center;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-8) clamp(2rem, 6vw, 6rem);
+    align-items: start;
+  }
+  .habout__head {
+    display: grid;
+    gap: var(--space-6);
+    align-content: start;
   }
   .habout__text {
     display: grid;
     gap: var(--space-6);
-    max-width: 560px;
   }
   .habout__label {
     color: var(--fg-2);
@@ -95,7 +98,7 @@ const a = c.home.about;
     grid-area: desc;
     color: var(--fg-2);
     margin-top: 0.25em;
-    max-width: 44ch;
+    max-width: 56ch;
   }
   .habout__link {
     color: var(--fg);
@@ -111,9 +114,6 @@ const a = c.home.about;
     .habout__inner {
       grid-template-columns: 1fr;
       gap: var(--space-8);
-    }
-    .habout__photo {
-      max-width: 420px;
     }
     .habout__h2 {
       font-size: clamp(1.9rem, 7vw, 2.6rem);

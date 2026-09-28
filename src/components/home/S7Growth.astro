@@ -1,5 +1,9 @@
 ---
-/** S7 · РОСТ — GROWTH. Счётчики, горизонтальная лента избранных кейсов внутри pin, кнопка «Все кейсы», тикер. */
+/**
+ * S7 · РОСТ — GROWTH. BRIEF-7 §2: заголовок → лента избранных кейсов (полноразмерные карточки 4:5, 3 / 2 / 1 в ряд,
+ * горизонтальная прокрутка: свайп, перетаскивание, кнопки, индикатор «03 / 05») → счётчики → «Все кейсы» → тикер.
+ * Если содержимое выше экрана, блок доезжает вверх внутри pin в фазе удержания (home-extra.ts) — у S7 две точки покоя снапа.
+ */
 import Button from '../Button.astro';
 import CaseFrame from '../CaseFrame.astro';
 import { getContent, localePath, findCase, type LangCode } from '../../lib/i18n';
@@ -16,15 +20,41 @@ const featured = s7.featured.map((id) => findCase(c, id)).filter(Boolean) as Non
 /** id фотослотов избранных кейсов (media.json) */
 const SLOT: Record<string, string> = { usyk: 'case-usyk', 'ukrainian-fashion-week': 'case-ufw', intertop: 'case-intertop', 'brsm-nafta': 'case-brsm', 'hydrosta-kazakhstan': 'case-hydrosta' };
 const tickerItems = [...TICKER, ...TICKER];
+const total = String(featured.length).padStart(2, '0');
 ---
 
-<section class="screen screen--s7" data-screen="growth" data-dur="220" data-dur-mobile="180" id="growth" data-theme="ivory" aria-labelledby="h-growth">
+<section class="screen screen--s7" data-screen="growth" data-dur="240" data-dur-mobile="220" id="growth" data-theme="ivory" aria-labelledby="h-growth">
   <div class="screen__pin">
     <div class="g container" data-growth>
       <p class="g__corner g__corner--tr t-micro" data-tw>GROWTH · RINGS · {c.home.s7.counters[0].value}+</p>
       <div class="g__head" data-tw>
         <p class="t-micro g__label">{s7.label}</p>
         <h2 class="t-h1 g__h2" id="h-growth" set:html={h2} />
+      </div>
+
+      <div class="ribbon-wrap" data-tw>
+        <ul class="ribbon" data-ribbon data-lenis-prevent-horizontal>
+          {featured.map((k) => (
+            <li class="ribbon__item" data-ribbon-item>
+              <a class="card" href={localePath(lang, `/cases/${k.id}/`)} draggable="false">
+                {/* BRIEF-7 §2: кадр = карточка (4:5, cover), логотип в углу и имя на градиенте — правила CaseTile */}
+                <CaseFrame id={SLOT[k.id] ?? `case-${k.id}`} name={k.name} lang={lang} ratio="4:5" sizes="(max-width: 699px) 90vw, (max-width: 1099px) 46vw, 30vw" class="card__photo" />
+                <span class="card__tags t-micro">{k.tags.join(' · ')}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="ribbon__bar">
+          <span class="t-micro ribbon__count" data-ribbon-count aria-live="polite"><span data-ribbon-pos>03</span> / {total}</span>
+          <span class="ribbon__nav">
+            <button class="ribbon__btn" type="button" data-ribbon-prev aria-label={lang === 'ru' ? 'Предыдущие кейсы' : 'Previous cases'}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8h-10M7.5 3.5 3 8l4.5 4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="square" /></svg>
+            </button>
+            <button class="ribbon__btn" type="button" data-ribbon-next aria-label={lang === 'ru' ? 'Следующие кейсы' : 'Next cases'}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8h10M8.5 3.5 13 8l-4.5 4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="square" /></svg>
+            </button>
+          </span>
+        </div>
       </div>
 
       <ul class="counters" data-counters data-tw>
@@ -35,25 +65,6 @@ const tickerItems = [...TICKER, ...TICKER];
           </li>
         ))}
       </ul>
-
-      <div class="ribbon-wrap" data-tw>
-        <div class="ribbon" data-ribbon>
-          {featured.map((k, i) => (
-            <a class="card" href={localePath(lang, `/cases/${k.id}/`)}>
-              {/* BRIEF-5 §4: имя и логотип — на кадре; отдельной строкой ниже их не повторяем */}
-              <CaseFrame id={SLOT[k.id] ?? `case-${k.id}`} name={k.name} lang={lang} ratio="4:5" sizes="(max-width: 899px) 72vw, 22vw" class="card__photo" />
-              <span class="card__idx t-micro">0{i + 1} / 0{featured.length}</span>
-              <span class="card__sum t-small">{k.summary}</span>
-              <span class="card__tags t-micro">{k.tags.join(' · ')}</span>
-              <span class="card__result t-micro">{s7.resultsPlaceholder}</span>
-            </a>
-          ))}
-          <a class="card card--more" href={localePath(lang, '/cases/')}>
-            <span class="card__name t-h4">{s7.cta} →</span>
-            <span class="card__sum t-small">{c.cases.h1}</span>
-          </a>
-        </div>
-      </div>
 
       <div class="g__foot" data-tw>
         <Button href={localePath(lang, '/cases/')} variant="ghost" arrow>{s7.cta}</Button>
@@ -72,16 +83,26 @@ const tickerItems = [...TICKER, ...TICKER];
 
 <style>
   .g {
+    --gap: var(--space-4);
+    /* высота, которую над карточками и под ними занимают шапка, заголовок, теги и тикер: карточка в верхней точке
+       покоя помещается целиком вместе с заголовком */
+    --reserve: calc(var(--header-h) + 262px);
     position: relative;
-    height: 100%;
-    overflow: hidden;
+    /* высота по содержимому: если оно выше экрана, блок доезжает вверх (home-extra.ts), обрезает pin */
+    min-height: 100%;
     display: grid;
-    grid-template-rows: auto auto 1fr auto;
+    grid-template-rows: auto auto auto auto;
     align-content: start;
     padding-top: calc(var(--header-h) + var(--space-6));
-    padding-bottom: calc(var(--space-4) + 48px);
+    padding-bottom: calc(var(--space-6) + 48px);
     max-width: none;
-    row-gap: var(--space-3);
+    row-gap: var(--space-6);
+    will-change: transform;
+  }
+  /* полоса шапки: доехавшее вверх содержимое уходит под неё мягко, без наложения на логотип */
+  :global(.screen--s7) > :global(.screen__pin) {
+    mask-image: linear-gradient(180deg, transparent calc(var(--header-h) - 6px), #000 calc(var(--header-h) + 18px));
+    -webkit-mask-image: linear-gradient(180deg, transparent calc(var(--header-h) - 6px), #000 calc(var(--header-h) + 18px));
   }
   .g__corner {
     position: absolute;
@@ -100,14 +121,105 @@ const tickerItems = [...TICKER, ...TICKER];
   .g__h2 {
     font-size: min(var(--fs-h1), 7.5vh);
   }
-  /* BRIEF-4 §1.2: счётчики уже — сфера с кольцами живёт в правой трети и не ложится на цифры */
+
+  /* ---------- лента: три карточки в ряд, дальше — горизонтальная прокрутка ---------- */
+  .ribbon-wrap {
+    display: grid;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+  .ribbon {
+    --per: 3;
+    display: flex;
+    gap: var(--gap);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    touch-action: pan-x pan-y;
+    cursor: grab;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ribbon::-webkit-scrollbar {
+    display: none;
+  }
+  .ribbon.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+  }
+  .ribbon.is-dragging .card {
+    pointer-events: none;
+  }
+  .ribbon__item {
+    /* ширина = (контейнер − зазоры) / N, но не выше свободной высоты экрана (4:5) */
+    flex: 0 0 min(calc((100% - (var(--per) - 1) * var(--gap)) / var(--per)), calc((100svh - var(--reserve)) * 0.8));
+    scroll-snap-align: start;
+  }
+  .card {
+    display: grid;
+    gap: var(--space-2);
+    color: inherit;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .card :global(.card__photo) {
+    width: 100%;
+    --frame-name-fs: clamp(15px, 1.3vw, 20px);
+  }
+  .card :global(img) {
+    -webkit-user-drag: none;
+  }
+  .card__tags {
+    color: var(--fg-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* индикатор и кнопки слева: правый нижний угол занимает кнопка WhatsApp */
+  .ribbon__bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-4);
+  }
+  .ribbon__count {
+    color: var(--fg-2);
+  }
+  .ribbon__nav {
+    display: inline-flex;
+    gap: var(--space-2);
+  }
+  .ribbon__btn {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--hair-strong);
+    color: var(--fg);
+    transition: border-color var(--dur-fast), opacity var(--dur-fast);
+  }
+  .ribbon__btn:hover {
+    border-color: var(--fg);
+  }
+  .ribbon__btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .ribbon__btn:disabled:hover {
+    border-color: var(--hair-strong);
+  }
+
+  /* ---------- счётчики ниже карточек ---------- */
   .counters {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-5);
-    max-width: 56%;
+    gap: var(--space-5, 1.25rem);
     border-top: 1px solid var(--hair);
     padding-top: var(--space-3);
+    margin: 0;
+    list-style: none;
   }
   .counter {
     display: grid;
@@ -120,94 +232,12 @@ const tickerItems = [...TICKER, ...TICKER];
   .counter__label {
     color: var(--fg-2);
   }
-  .ribbon-wrap {
-    align-self: end;
-    overflow: hidden;
-    margin-right: calc(var(--gutter) * -1);
-    padding-right: var(--gutter);
-    mask-image: linear-gradient(90deg, #000 0, #000 96%, transparent);
-    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 96%, transparent);
-  }
-  .ribbon {
-    display: flex;
-    gap: var(--space-4);
-    width: max-content;
-    will-change: transform;
-  }
-  .card {
-    contain: paint;
-    display: grid;
-    align-content: start;
-    gap: var(--space-2);
-    width: clamp(220px, 19vw, 260px);
-    padding: var(--space-3);
-    border: 1px solid var(--hair);
-    background: var(--paper);
-    transition: border-color var(--dur-fast), transform var(--dur) var(--ease-out);
-  }
-  .card :global(.card__photo) {
-    margin: calc(var(--space-3) * -1) calc(var(--space-3) * -1) var(--space-2);
-    aspect-ratio: auto;
-    height: min(21vh, 200px);
-  }
-  .card__name {
-    font-size: 1rem;
-    line-height: 1.2;
-  }
-  .card__sum {
-    font-size: 0.8rem;
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .card:hover {
-    border-color: var(--hair-strong);
-    transform: translateY(-4px);
-  }
-  .card__idx {
-    color: var(--fg-3);
-  }
-  .card__sum {
-    color: var(--fg-2);
-  }
-  .card__tags {
-    color: var(--fg-3);
-    margin-top: auto;
-  }
-  .card__result {
-    color: var(--fg-3);
-  }
-  .card--more {
-    justify-content: center;
-    align-content: center;
-    border-color: var(--hair-strong);
-    background: transparent;
-  }
   .g__foot {
     display: flex;
     justify-content: flex-start;
   }
-  @media (max-height: 820px) and (min-width: 900px) {
-    .g__foot {
-      display: none;
-    }
-  }
-  /*
-   * Короткий экран (в том числе десктоп 1280×720): треки по содержимому, лента сверху своего трека.
-   * Трек 1fr при `overflow: hidden` у ленты схлопывался, и `align-self: end` клал карточки на счётчики.
-   */
-  @media (max-height: 820px) {
-    .g {
-      grid-template-rows: auto auto auto auto;
-    }
-    .ribbon-wrap {
-      align-self: start;
-      min-height: 0;
-    }
-  }
-  /* тикер поверх ленты: своя бумага, чтобы карточки не просвечивали под ним (BRIEF-4 §1.1) */
+
+  /* тикер поверх содержимого: своя бумага, чтобы карточки не просвечивали под ним (BRIEF-4 §1.1) */
   .g__ticker {
     position: absolute;
     left: 0;
@@ -251,23 +281,23 @@ const tickerItems = [...TICKER, ...TICKER];
       animation: none;
     }
   }
-  @media (max-width: 899px) {
-    /*
-     * BRIEF-4 §1.1: четыре ряда по содержимому. Раньше третий трек был 1fr, а `.ribbon-wrap` с overflow: hidden
-     * имеет нулевой минимальный размер — на короткой высоте (iPhone с панелями ≈ 660 px) трек схлопывался,
-     * `align-self: end` поднимал ленту на счётчики. Переполнение решает сдвиг `.g` по прогрессу (home-extra.ts).
-     */
-    .g {
-      grid-template-rows: auto auto auto auto;
-      padding-top: calc(var(--header-h) + 10vh);
-      row-gap: var(--space-3);
-      padding-bottom: calc(var(--space-4) + 40px);
-      overflow: hidden;
-      will-change: transform;
+
+  /* планшет: две карточки в ряд */
+  @media (max-width: 1099px) {
+    .ribbon {
+      --per: 2;
     }
-    .ribbon-wrap {
-      align-self: start;
-      min-height: 0;
+  }
+  /* телефон: одна карточка на ширину контейнера (−16 px, край следующей виден), не выше 62vh */
+  @media (max-width: 699px) {
+    .g {
+      --reserve: calc(var(--header-h) + 170px);
+      padding-top: calc(var(--header-h) + var(--space-4));
+      padding-bottom: calc(var(--space-4) + 40px);
+      row-gap: var(--space-4);
+    }
+    .ribbon__item {
+      flex-basis: min(calc(100% - 16px), calc(62vh * 0.8), calc((100svh - var(--reserve)) * 0.8));
     }
     .g__corner {
       display: none;
@@ -278,51 +308,32 @@ const tickerItems = [...TICKER, ...TICKER];
     .g__h2 {
       font-size: clamp(1.6rem, 6.6vw, 2.2rem);
     }
-    /*
-     * На телефоне сцена (шар и кольца) проходит за счётчиками: полоса бумаги во всю ширину не даёт
-     * шару лечь на цифры, как на скриншоте заказчика (docs/review/01), и держит ритм карточек.
-     */
+    /* на телефоне сцена проходит за счётчиками: полоса бумаги во всю ширину не даёт шару лечь на цифры */
     .counters {
-      max-width: 100%;
       grid-template-columns: repeat(2, 1fr);
       gap: var(--space-2);
       background: var(--paper);
       margin-inline: calc(var(--gutter) * -1);
       padding: var(--space-3) var(--gutter);
-      border-top: 1px solid var(--hair);
       border-bottom: 1px solid var(--hair);
     }
     .counter__value {
       font-size: clamp(1.6rem, 6.4vw, 2rem);
     }
-    .card {
-      width: 58vw;
-      padding: var(--space-3);
-      gap: 0.3rem;
-    }
-    .card :global(.card__photo) {
-      height: min(14vh, 120px);
-    }
-    .card__name {
-      font-size: 0.95rem;
-    }
-    .card__sum {
-      font-size: 0.75rem;
-    }
-    .card__result {
-      display: none;
-    }
-    .g__foot {
-      display: none;
+    .ribbon__btn {
+      width: 36px;
+      height: 36px;
     }
     .g__ticker {
       height: 40px;
     }
   }
-  /* на высоких телефонах место под лентой есть — карточка крупнее, пустоты внизу нет */
-  @media (max-width: 899px) and (min-height: 780px) {
-    .card :global(.card__photo) {
-      height: min(22vh, 190px);
+  @media (max-width: 899px) {
+    .g__corner {
+      display: none;
+    }
+    .g__head {
+      max-width: 100%;
     }
   }
 </style>

@@ -9,7 +9,7 @@ import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 import { state, setHover } from './state';
 import { initRows, initDrawer, initAnchors, updateAnchors } from './home-ui';
-import { runCounters, measureRibbon, updateRibbon, initRail, updateRail, initPreloader } from './home-extra';
+import { runCounters, measureRibbon, updateRibbon, initRibbon, growthRests, initRail, updateRail, initPreloader } from './home-extra';
 import { initForms } from './form';
 import { initAudio } from './audio';
 import { initHints } from './home-hints';
@@ -457,7 +457,9 @@ const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t 
 export function scrollToScreen(index: number, hold = true) {
   const s = screens[index];
   if (!s) return;
-  const y = s.inFlow ? s.start + s.dur : s.start + (hold ? s.dur * (index === 0 ? 0.3 : 0.45) : 0);
+  // S7 (BRIEF-7 §2): приземление в верхнюю точку покоя — заголовок и карточки целиком
+  const holdAt = index === 0 ? 0.3 : index === growthIdx ? growthRests()[0] : 0.45;
+  const y = s.inFlow ? s.start + s.dur : s.start + (hold ? s.dur * holdAt : 0);
   if (state.reduced) {
     window.scrollTo(0, y);
     return;
@@ -566,6 +568,7 @@ export function initHome() {
   growthIdx = screens.findIndex((s) => s.el.id === 'growth');
   layoutScreens(true);
   initRows();
+  initRibbon();
   initDrawer();
   initAnchors();
   initRail((i) => scrollToScreen(i));

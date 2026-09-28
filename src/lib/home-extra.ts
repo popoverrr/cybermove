@@ -35,45 +35,113 @@ export function runCounters(duration: number) {
   }
 }
 
-/* ---------- S7: лента кейсов и сдвиг блока; размеры меряются только в layoutScreens (BRIEF-3 §7.4) ---------- */
-let ribbonEl: HTMLElement | null = null;
-let ribbonMax = 0;
-let ribbonX = 1e9;
+/* ---------- S7: сдвиг блока внутри pin; размеры меряются только в layoutScreens (BRIEF-3 §7.4) ---------- */
 let growthEl: HTMLElement | null = null;
-/** на сколько содержимое S7 выше пина (телефон с короткой высотой) и максимум сдвига */
+/** на сколько содержимое S7 выше пина (заголовок, карточки, счётчики, ссылка) */
 let growthOverflow = 0;
 let growthY = 1e9;
+/**
+ * BRIEF-7 §2: если содержимое S7 выше экрана, оно доезжает вверх в фазе удержания (local 0.35 → 0.65), до выхода текста.
+ * Точки покоя снапа у S7 — начало и конец этого доезда (GROWTH_REST), иначе одна — удержание 0.45.
+ */
+export const GROWTH_SLIDE: [number, number] = [0.35, 0.65];
+export function growthRests(): number[] {
+  return growthOverflow > 24 ? [GROWTH_SLIDE[0] - 0.01, GROWTH_SLIDE[1] + 0.01] : [0.45];
+}
 export function measureRibbon() {
-  ribbonEl = document.querySelector<HTMLElement>('[data-ribbon]');
   growthEl = document.querySelector<HTMLElement>('[data-growth]');
   if (growthEl) {
     growthEl.style.transform = '';
-    // BRIEF-4 §1.1: если содержимое выше пина — во второй половине экрана блок уезжает вверх, но не больше 40 vh
-    growthOverflow = Math.min(Math.max(0, growthEl.scrollHeight - growthEl.clientHeight), window.innerHeight * 0.4);
+    const pin = growthEl.parentElement as HTMLElement;
+    growthOverflow = Math.max(0, growthEl.offsetHeight - pin.clientHeight);
     growthY = 1e9;
   }
-  if (!ribbonEl) return;
-  const wrap = ribbonEl.parentElement as HTMLElement;
-  ribbonMax = Math.max(0, ribbonEl.scrollWidth - wrap.clientWidth + 48);
-  ribbonX = 1e9;
 }
 export function updateRibbon(local: number, reduced: boolean) {
-  if (ribbonEl) {
-    // на входе лента стоит на нуле: первая карточка видна целиком (BRIEF-4 §1.1)
-    const t = reduced ? 0 : smooth((local - 0.45) / 0.45);
-    const x = -ribbonMax * t;
-    if (Math.abs(x - ribbonX) >= 0.5) {
-      ribbonX = x;
-      ribbonEl.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0)`;
-    }
-  }
   if (growthEl && growthOverflow > 1) {
-    const y = -growthOverflow * (reduced ? 1 : smooth((local - 0.45) / 0.35));
+    const [a, b] = GROWTH_SLIDE;
+    const k = reduced ? (local >= (a + b) / 2 ? 1 : 0) : smooth((local - a) / (b - a));
+    const y = -growthOverflow * k;
     if (Math.abs(y - growthY) >= 0.5) {
       growthY = y;
       growthEl.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)`;
     }
   }
+}
+
+/**
+ * BRIEF-7 §2: лента кейсов S7 — нативная горизонтальная прокрутка со снапом карточек (свайп, трекпад),
+ * перетаскивание мышью, кнопки и индикатор «последняя видимая / всего». Вертикальное колесо листает экраны.
+ */
+export function initRibbon() {
+  const ribbon = document.querySelector<HTMLElement>('[data-ribbon]');
+  if (!ribbon) return;
+  const items = Array.from(ribbon.querySelectorAll<HTMLElement>('[data-ribbon-item]'));
+  const pos = document.querySelector<HTMLElement>('[data-ribbon-pos]');
+  const prev = document.querySelector<HTMLButtonElement>('[data-ribbon-prev]');
+  const next = document.querySelector<HTMLButtonElement>('[data-ribbon-next]');
+  const step = () => (items[1] ? items[1].offsetLeft - items[0].offsetLeft : ribbon.clientWidth);
+  const update = () => {
+    const edge = ribbon.scrollLeft + ribbon.clientWidth + 2;
+    let last = 0;
+    items.forEach((it, i) => {
+      if (it.offsetLeft - items[0].offsetLeft + it.offsetWidth <= edge) last = i + 1;
+    });
+    if (pos) pos.textContent = String(Math.max(1, last)).padStart(2, '0');
+    if (prev) prev.disabled = ribbon.scrollLeft <= 2;
+    if (next) next.disabled = ribbon.scrollLeft + ribbon.clientWidth >= ribbon.scrollWidth - 2;
+  };
+  prev?.addEventListener('click', () => ribbon.scrollBy({ left: -step(), behavior: 'smooth' }));
+  next?.addEventListener('click', () => ribbon.scrollBy({ left: step(), behavior: 'smooth' }));
+  ribbon.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update, { passive: true });
+  update();
+
+  // перетаскивание мышью (на таче работает нативная прокрутка)
+  let down = false;
+  let moved = 0;
+  let x0 = 0;
+  let s0 = 0;
+  ribbon.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    down = true;
+    moved = 0;
+    x0 = e.clientX;
+    s0 = ribbon.scrollLeft;
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!down) return;
+    const dx = e.clientX - x0;
+    moved = Math.max(moved, Math.abs(dx));
+    if (moved > 4) {
+      ribbon.classList.add('is-dragging');
+      ribbon.scrollLeft = s0 - dx;
+    }
+  });
+  const up = () => {
+    if (!down) return;
+    down = false;
+    if (ribbon.classList.contains('is-dragging')) {
+      ribbon.classList.remove('is-dragging');
+      // доводка до ближайшей карточки
+      const w = step();
+      ribbon.scrollTo({ left: Math.round(ribbon.scrollLeft / w) * w, behavior: 'smooth' });
+    }
+  };
+  window.addEventListener('pointerup', up);
+  window.addEventListener('pointercancel', up);
+  // клик после перетаскивания не открывает кейс
+  ribbon.addEventListener(
+    'click',
+    (e) => {
+      if (moved > 4) {
+        e.preventDefault();
+        e.stopPropagation();
+        moved = 0;
+      }
+    },
+    true,
+  );
 }
 
 /* ---------- Rail ---------- */

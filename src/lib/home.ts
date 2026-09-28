@@ -2,7 +2,8 @@
  * Сценарий главной (BRIEF-3 §6–7): «время решает, скролл выбирает».
  * Один цикл (gsap.ticker): lenis.raf → цели из скролла → сглаживание с лимитом скорости и очередью экранов →
  * DOM (только изменившееся) → engine.frame(). Дискретные события (текст, счётчики, сцены) идут по времени
- * при смене фазы экрана; непрерывные величины читают сглаженный прогресс. Snap нет; автоскролл 1.8 с.
+ * при смене фазы экрана; непрерывные величины читают сглаженный прогресс. Автоскролл 1.8 с.
+ * BRIEF-7 §1: снап к точкам покоя экранов (lib/home-snap.ts) — остановка только на экране, никогда между.
  */
 import gsap from 'gsap';
 import Lenis from 'lenis';
@@ -13,6 +14,7 @@ import { runCounters, measureRibbon, updateRibbon, initRibbon, growthRests, init
 import { initForms } from './form';
 import { initAudio } from './audio';
 import { initHints } from './home-hints';
+import { createSnap } from './home-snap';
 import type { Engine } from '../webgl/boot';
 
 const q = new URLSearchParams(location.search);
@@ -92,6 +94,11 @@ let countersRan = false;
 let pastStage = false;
 let rushFwd = false;
 let rushBack = false;
+/** BRIEF-7 §1: точки покоя снапа (документ Y): S1 — верх, S2–S6 — удержание 0.45, S7 — 1–2 точки, выход в поток */
+const rests: number[] = [];
+/** ?nosnap — модель движения без снапа (scripts/test-scroll.mjs проверяет сглаживание, очередь и догон) */
+const SNAP_ON = !STILL && PROGRESS === null && LOCAL === null && !POSTER && !q.has('nosnap');
+let snap: ReturnType<typeof createSnap> | null = null;
 
 function layoutScreens(force = false) {
   const w = window.innerWidth;
@@ -140,6 +147,15 @@ function layoutScreens(force = false) {
   state.layout.vh = vh;
   measureRibbon();
   totalScroll = document.documentElement.scrollHeight - vh;
+  rests.length = 0;
+  for (let i = 0; i < screens.length; i++) {
+    const s = screens[i];
+    if (s.inFlow) continue;
+    if (i === 0) rests.push(0);
+    else if (i === growthIdx) for (const l of growthRests()) rests.push(s.start + s.dur * l);
+    else rests.push(s.start + s.dur * 0.45);
+  }
+  rests.push(stageEnd);
 }
 let contactTop = 1e6;
 let contactH = 0;
@@ -273,6 +289,7 @@ function tick(_time: number, deltaMs: number) {
   state.frame.dt = dt;
   state.frame.t = now;
   if (lenis) lenis.raf(now);
+  snap?.tick();
   const moving = smoothStep(dt);
   const next = pickActive();
   if (next !== active) {
@@ -291,7 +308,9 @@ function tick(_time: number, deltaMs: number) {
     fpsAt = now;
     if (statsEl) {
       const e = engine;
-      statsEl.textContent = `${fpsNow} FPS · ${e ? e.stats.frameMs.toFixed(1) : '—'} MS · ${e ? e.tier.name.toUpperCase() : 'NO GL'} · DPR ${(e ? e.renderer.getPixelRatio() : window.devicePixelRatio).toFixed(2)} · CALLS ${e ? e.stats.calls : 0} · S${active + 1} ${state.screens[active].toFixed(2)}`;
+      const sn = snap?.state;
+      const dir = sn ? (sn.dir > 0 ? '↓' : sn.dir < 0 ? '↑' : '·') : '·';
+      statsEl.textContent = `${fpsNow} FPS · ${e ? e.stats.frameMs.toFixed(1) : '—'} MS · ${e ? e.tier.name.toUpperCase() : 'NO GL'} · DPR ${(e ? e.renderer.getPixelRatio() : window.devicePixelRatio).toFixed(2)} · CALLS ${e ? e.stats.calls : 0} · S${active + 1} LOCAL ${state.screens[active].toFixed(2)} · SNAP ${sn ? (sn.snapping ? 'SNAPPING' : 'IDLE') : 'OFF'} · DIR ${dir}`;
     }
   }
 }
@@ -388,11 +407,29 @@ function updateText(s: ScreenDef, i: number, local: number, dt: number) {
 /* ---------- скролл ---------- */
 function initScroll() {
   const fine = matchMedia('(pointer: fine)').matches;
-  if (fine && !state.reduced && !STILL) {
-    lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.85, smoothWheel: true, syncTouch: false, autoRaf: false });
+  if (SNAP_ON) {
+    snap = createSnap({
+      lenis: () => lenis,
+      rests: () => rests,
+      reduced: state.reduced,
+      busy: () => autoScrolling || document.body.classList.contains('drawer-open') || document.body.classList.contains('menu-open'),
+    });
+  }
+  if (!state.reduced && !STILL && (fine || snap)) {
+    // BRIEF-7 §1: на таче в зоне снапа прокрутку ведёт Lenis (syncTouch), в потоке («О компании», форма) — нативная
+    lenis = new Lenis({
+      lerp: 0.075,
+      wheelMultiplier: 0.85,
+      smoothWheel: true,
+      syncTouch: !fine,
+      syncTouchLerp: 0.1,
+      autoRaf: false,
+      virtualScroll: snap ? snap.virtualScroll : undefined,
+    });
     lenis.on('scroll', measureTargets);
     (window as unknown as { __cmLenis: Lenis }).__cmLenis = lenis;
   }
+  snap?.init();
   window.addEventListener('scroll', measureTargets, { passive: true });
   window.addEventListener(
     'resize',
@@ -458,7 +495,7 @@ export function scrollToScreen(index: number, hold = true) {
   const s = screens[index];
   if (!s) return;
   // S7 (BRIEF-7 §2): приземление в верхнюю точку покоя — заголовок и карточки целиком
-  const holdAt = index === 0 ? 0.3 : index === growthIdx ? growthRests()[0] : 0.45;
+  const holdAt = index === 0 ? 0 : index === growthIdx ? growthRests()[0] : 0.45;
   const y = s.inFlow ? s.start + s.dur : s.start + (hold ? s.dur * holdAt : 0);
   if (state.reduced) {
     window.scrollTo(0, y);
@@ -625,4 +662,6 @@ export function initHome() {
   // BRIEF-4 §4: карточка языка (первый визит) и подсказка прокрутки — после готовности сценария
   initHints(state.reduced);
   (window as unknown as { __cmScrollTo: typeof scrollToScreen }).__cmScrollTo = scrollToScreen;
+  // для проверок (scripts/test-snap.mjs): точки покоя и состояние снапа
+  (window as unknown as { __cmSnap: unknown }).__cmSnap = { rests, state: snap?.state ?? null, debug: () => snap?.debug() };
 }

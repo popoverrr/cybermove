@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Модель движения главной (BRIEF-3 §6.7). Четыре проверки на десктопе (1440×900) и тач-эмуляции (Pixel 7):
+ * Модель движения главной (BRIEF-3 §6.7), без снапа (?nosnap; снап BRIEF-7 §1 — scripts/test-snap.mjs). Четыре проверки на десктопе (1440×900) и тач-эмуляции (Pixel 7):
  *   (a) флик на тач: 2200 px за 250 мс (и 3600 px — через два экрана) — каждый переход ≥ 1.4 с, переходы последовательны;
  *   (b) колесо на десктопе: 12 шагов по 120 px за 400 мс — то же;
  *   (c) равномерная прокрутка всей страницы — |Δ сглаженного прогресса| за кадр ≤ 0.008;
@@ -150,7 +150,7 @@ for (const size of opt.sizes) {
   const page = await ctx.newPage();
   page.on('framenavigated', (f) => f === page.mainFrame() && console.warn(size, 'навигация:', f.url()));
   page.on('pageerror', (e) => console.warn(size, 'pageerror:', e.message));
-  await page.goto(`${opt.base}/?tier=${opt.tier}${opt.nogl ? '&nogl' : ''}`, { waitUntil: 'networkidle', timeout: 180000 });
+  await page.goto(`${opt.base}/?nosnap&tier=${opt.tier}${opt.nogl ? '&nogl' : ''}`, { waitUntil: 'networkidle', timeout: 180000 });
   await page.waitForTimeout(4500); // интро + движок
   await page.evaluate(RECORDER);
   const scr = await screenStarts(page);

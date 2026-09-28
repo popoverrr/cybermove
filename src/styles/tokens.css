@@ -76,8 +76,14 @@
   --dur: 480ms;
   --dur-slow: 900ms;
 
-  --header-h: 72px;
+  /* BRIEF-7 §6: шапка под логотип 40 px (десктоп) / 34 px (телефон) */
+  --header-h: 84px;
   --rail-w: 56px;
+}
+@media (max-width: 899px) {
+  :root {
+    --header-h: 72px;
+  }
 }
 
 /*

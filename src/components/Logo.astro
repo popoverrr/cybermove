@@ -11,17 +11,18 @@ export interface Props {
   class?: string;
   height?: number;
 }
-const { compact = false, class: cls = '', height = 28 } = Astro.props;
+// height не задан — высоту даёт CSS-переменная --logo-h контейнера (шапка: 40 / 34 px, BRIEF-7 §6)
+const { compact = false, class: cls = '', height } = Astro.props;
 const svg = compact ? markSvg : logoSvg;
 ---
 
-<span class:list={['logo', cls, { 'logo--mark': compact }]} style={`--logo-h:${height}px`} set:html={svg} />
+<span class:list={['logo', cls, { 'logo--mark': compact }]} style={height ? `--logo-h:${height}px` : undefined} set:html={svg} />
 
 <style>
   .logo {
     display: inline-flex;
     align-items: center;
-    height: var(--logo-h);
+    height: var(--logo-h, 28px);
     color: var(--fg);
     --logo-accent: var(--accent);
   }

@@ -169,6 +169,28 @@ def lockup(variant, ink, accent, cm_face, wide_face, mono_face):
     return svg(width, 100, body), width
 
 
+# BRIEF-7 §6: словесная часть v2 — знак как есть, справа две строки Inter Tight: «CYBER MOVE» 600 и «CONSULTING» 500
+# с разрядкой 0.18em; капитель CONSULTING = 55 % от CYBER MOVE, блок выровнен по нижней линии знака.
+# При высоте логотипа 40 px капитель CONSULTING = 21 × 0.4 = 8.4 px (≥ 8 px), при 34 px — 7.1 px.
+WM_CAP = 38.0        # капитель CYBER MOVE, единицы viewBox (высота 100)
+DESC_CAP = 21.0      # капитель CONSULTING
+WM_GAP = 13.0        # просвет между строками
+WM_BASE = 95.0       # базовая линия CONSULTING — нижняя линия кольца (r 46, штрих 4.4)
+
+
+def lockup_v2(variant, ink, accent, cm_face, word_face, desc_face):
+    x0 = 124
+    desc_base = WM_BASE
+    word_base = desc_base - DESC_CAP - WM_GAP
+    word, ww = text_group(word_face, 'CYBER MOVE', x0, word_base, WM_CAP, ink, tracking_em=0.02)
+    # tracking в text_paths — доля капители; 0.18em → 0.18 × (upm / cap) капители
+    track = 0.18 * desc_face.upm / desc_face.cap
+    desc, dw = text_group(desc_face, 'CONSULTING', x0 + 1.5, desc_base, DESC_CAP, ink, tracking_em=track)
+    width = math.ceil(x0 + max(ww, dw + 1.5) + 4)
+    body = f'<g>{mark(variant, ink, accent, cm_face)}</g>\n{word}\n{desc}'
+    return svg(width, 100, body), width
+
+
 def write(path: Path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     mode = 'wb' if isinstance(data, bytes) else 'w'
@@ -210,6 +232,8 @@ def ico_from_pngs(pngs):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--active', default='a', choices=['a', 'b', 'c'])
+    ap.add_argument('--logo-only', action='store_true',
+                    help='собрать только logo.svg шапки (словесная часть v2), не трогая варианты и favicon')
     args = ap.parse_args()
 
     inter_woff = FONTS / 'inter-tight' / 'files' / 'inter-tight-latin-wght-normal.woff2'
@@ -217,6 +241,14 @@ def main():
     inter_cm = Face(load_instance(inter_woff, {'wght': 460}))    # CM варианта A: обычный гротеск
     unbounded = Face(load_instance(inter_woff, {'wght': 700}))   # словесный знак: Inter Tight 700 (Unbounded удалён)
     mono = Face(load_instance(FONTS / 'jetbrains-mono' / 'files' / 'jetbrains-mono-latin-wght-normal.woff2', {'wght': 520}))
+
+    if args.logo_only:
+        word600 = Face(load_instance(inter_woff, {'wght': 600}))
+        desc500 = Face(load_instance(inter_woff, {'wght': 500}))
+        s_, w_ = lockup_v2(args.active, 'currentColor', 'var(--logo-accent, currentColor)', inter_cm if args.active == 'a' else inter, word600, desc500)
+        write(OUT / 'logo.svg', s_)
+        print(f'logo.svg (v2) собран: ширина {w_} при высоте 100')
+        return
 
     schemes = {
         'color-dark': (INK_DARK, ACCENT_DARK),

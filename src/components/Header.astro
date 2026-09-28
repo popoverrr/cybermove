@@ -17,7 +17,7 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
 <header class="header" data-header>
   <div class="header__inner">
     <a class="header__logo" href={localePath(lang, '/')} aria-label={c.ui.brand}>
-      <Logo height={26} />
+      <Logo />
     </a>
 
     <nav class="header__nav" aria-label={c.ui.menu}>
@@ -121,9 +121,16 @@ const current = (href: string) => path !== '/' && href !== '/' && path.startsWit
     align-items: center;
     gap: var(--space-8);
   }
+  /* BRIEF-7 §6: логотип 40 px на десктопе, 34 px на телефоне */
   .header__logo {
     display: inline-flex;
     justify-self: start;
+    --logo-h: 40px;
+  }
+  @media (max-width: 899px) {
+    .header__logo {
+      --logo-h: 34px;
+    }
   }
   .header__list {
     display: flex;

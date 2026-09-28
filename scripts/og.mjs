@@ -148,7 +148,8 @@ const clip = (s, n = 150) => {
   return `${t.slice(0, n).replace(/[\s,.;:—-]+\S*$/, '')}…`;
 };
 
-const logoRaw = fs.readFileSync(path.join(ROOT, 'src', 'assets', 'logo', 'logo.svg'), 'utf8');
+// BRIEF-7 §6: OG-логотип не меняется — прежняя словесная часть (logo-og.svg), в шапке сайта — v2 (logo.svg)
+const logoRaw = fs.readFileSync(path.join(ROOT, 'src', 'assets', 'logo', 'logo-og.svg'), 'utf8');
 const logo = (color) => `data:image/svg+xml;base64,${Buffer.from(logoRaw.replace(/currentColor/g, color)).toString('base64')}`;
 
 /* ---------- вёрстка ---------- */

@@ -58,10 +58,10 @@ const shipRows = ship
       [shipLabels.beam, `${fmt(ship.beam_m)} ${unit.m}`],
       [shipLabels.gt, fmt(ship.gt, 0)],
       [shipLabels.dwt, `${fmt(ship.dwt_t, 0)} ${unit.t}`],
+      // BRIEF-8 §2: оценочная стоимость «$ 32 000 000» с пометкой мелким текстом
+      ...(ship.value_usd ? [[ships.text.valueLabel[lang], `$ ${String(ship.value_usd).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`, ships.text.valueNote[lang]]] : []),
     ]
   : [];
-// в сноске — только публичная часть (первое предложение); указание «заменить фото» — в TODO-CONTENT
-const shipNote = ships.text.photoNote[lang].split(/(?<=\.)\s/)[0];
 const jsonLd = [
   breadcrumbLd(lang, [
     { name: c.ui.brand, path: '/' },
@@ -136,10 +136,10 @@ const jsonLd = [
           <h2 class="t-micro cblock__label">{ships.text.specTitle[lang]}</h2>
           <div class="cblock__body">
             <dl class="ship">
-              {shipRows.map(([k, v]) => (
+              {shipRows.map(([k, v, note]) => (
                 <div class="ship__row">
                   <dt class="t-micro">{k}</dt>
-                  <dd>{v}</dd>
+                  <dd>{v}{note && <span class="t-micro ship__vnote">{note}</span>}</dd>
                 </div>
               ))}
             </dl>
@@ -149,7 +149,6 @@ const jsonLd = [
             <p class="t-micro ship__src">
               {c.ui.shipSource}: <a href={ship.source} target="_blank" rel="nofollow noopener">VesselFinder ↗</a>
             </p>
-            <p class="t-small ship__note">{shipNote}</p>
           </div>
         </section>
       )}
@@ -350,10 +349,10 @@ const jsonLd = [
     color: var(--fg);
     border-bottom: 1px solid var(--hair-strong);
   }
-  .ship__note {
-    margin-top: var(--space-3);
+  .ship__vnote {
+    display: block;
+    margin-top: 2px;
     color: var(--fg-2);
-    max-width: 64ch;
   }
   /* BRIEF-SEO §3: услуги в проекте — ссылки на страницы услуг */
   .csvc {

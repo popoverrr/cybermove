@@ -1,132 +1,148 @@
 {
-  "category": {
-    "id": "maritime",
-    "title": {
-      "ru": "Морской флот и логистика",
-      "en": "Maritime fleet & logistics"
-    },
-    "lead": {
-      "ru": "Контейнеровозы: операционное сопровождение и управление судами",
-      "en": "Container vessels: ship management and operational support"
-    },
-    "order": [
-      "fort-desaix",
-      "as-claudia",
-      "as-constantina"
-    ]
+ "category": {
+  "id": "maritime",
+  "title": {
+   "ru": "Морской флот и логистика",
+   "en": "Maritime fleet & logistics"
   },
-  "cases": [
-    {
-      "id": "fort-desaix",
-      "name": "FORT DESAIX",
-      "type": {
-        "ru": "Контейнеровоз (Panamax)",
-        "en": "Container ship (Panamax)"
-      },
-      "imo": "9400174",
-      "built": 2010,
-      "flag": {
-        "ru": "Мальта",
-        "en": "Malta"
-      },
-      "loa_m": 268.8,
-      "beam_m": 32.2,
-      "gt": 42609,
-      "dwt_t": 52788,
-      "formerNames": [
-        "CMA CGM FORT DESAIX",
-        "JPO TAURUS",
-        "UASC AJMAN"
-      ],
-      "source": "https://www.vesselfinder.com/ru/vessels/details/9400174"
-    },
-    {
-      "id": "as-claudia",
-      "name": "AS CLAUDIA",
-      "type": {
-        "ru": "Контейнеровоз",
-        "en": "Container ship"
-      },
-      "imo": "9330549",
-      "built": 2007,
-      "flag": {
-        "ru": "Либерия",
-        "en": "Liberia"
-      },
-      "loa_m": 222.16,
-      "beam_m": 30.0,
-      "gt": 28616,
-      "dwt_t": 39337,
-      "formerNames": [],
-      "source": "https://www.vesselfinder.com/ru/vessels/details/9330549"
-    },
-    {
-      "id": "as-constantina",
-      "name": "AS CONSTANTINA",
-      "type": {
-        "ru": "Контейнеровоз",
-        "en": "Container ship"
-      },
-      "imo": "9308390",
-      "built": 2005,
-      "flag": {
-        "ru": "Либерия",
-        "en": "Liberia"
-      },
-      "loa_m": 221.69,
-      "beam_m": 29.86,
-      "gt": 27786,
-      "dwt_t": 37883,
-      "formerNames": [],
-      "source": "https://www.vesselfinder.com/ru/vessels/details/9308390"
-    }
-  ],
-  "text": {
-    "summary": {
-      "ru": "Опыт управления контейнеровозами: {name}, {type}, {loa} м, {built} г. постройки",
-      "en": "Ship management experience: {name}, {type}, {loa} m, built {built}"
-    },
-    "project": {
-      "ru": "{name} — {type} постройки {built} года, длина {loa} м, ширина {beam} м, дедвейт {dwt} т, флаг — {flag}. Судно в составе флота, с которым команда CYBERMOVE работала по направлению управления судами.",
-      "en": "{name} is a {type} built in {built}: {loa} m long, {beam} m beam, {dwt} t deadweight, {flag} flag. One of the vessels the CYBERMOVE team worked with in ship management."
-    },
-    "role": {
-      "ru": "[PLACEHOLDER: роль CYBERMOVE — уточнить у руководства: технический/коммерческий менеджмент, экипаж, снабжение, документы, страхование, фрахт]",
-      "en": "[PLACEHOLDER: CYBERMOVE role — to be confirmed by management]"
-    },
-    "tagsLine": {
-      "ru": "УПРАВЛЕНИЕ СУДАМИ · ОПЕРАЦИОННОЕ УПРАВЛЕНИЕ · ЛОГИСТИКА",
-      "en": "SHIP MANAGEMENT · OPERATIONS · LOGISTICS"
-    },
-    "specTitle": {
-      "ru": "Судно",
-      "en": "Vessel"
-    },
-    "specLabels": {
-      "ru": {
-        "type": "Тип",
-        "imo": "IMO",
-        "built": "Год постройки",
-        "flag": "Флаг",
-        "loa": "Длина",
-        "beam": "Ширина",
-        "gt": "GT",
-        "dwt": "Дедвейт"
-      },
-      "en": {
-        "type": "Type",
-        "imo": "IMO",
-        "built": "Built",
-        "flag": "Flag",
-        "loa": "Length",
-        "beam": "Beam",
-        "gt": "GT",
-        "dwt": "Deadweight"
-      }
-    },
-    "photoNote": {
-      "ru": "На плитках — иллюстративные кадры контейнеровозов (Unsplash), не фотографии именно этих судов. Заменить на собственные фото судов, когда заказчик их предоставит.",
-      "en": "Tiles use illustrative container-ship imagery (Unsplash), not photos of these exact vessels."
-    }
+  "lead": {
+   "ru": "Контейнеровозы: операционное сопровождение и управление судами",
+   "en": "Container vessels: ship management and operational support"
+  },
+  "order": [
+   "fort-desaix",
+   "as-claudia",
+   "as-constantina"
+  ]
+ },
+ "cases": [
+  {
+   "id": "fort-desaix",
+   "name": "FORT DESAIX",
+   "type": {
+    "ru": "Контейнеровоз (Panamax)",
+    "en": "Container ship (Panamax)"
+   },
+   "imo": "9400174",
+   "built": 2010,
+   "flag": {
+    "ru": "Мальта",
+    "en": "Malta"
+   },
+   "loa_m": 268.8,
+   "beam_m": 32.2,
+   "gt": 42609,
+   "dwt_t": 52788,
+   "formerNames": [
+    "CMA CGM FORT DESAIX",
+    "JPO TAURUS",
+    "UASC AJMAN"
+   ],
+   "source": "https://www.vesselfinder.com/ru/vessels/details/9400174",
+   "value_usd": 32000000
+  },
+  {
+   "id": "as-claudia",
+   "name": "AS CLAUDIA",
+   "type": {
+    "ru": "Контейнеровоз",
+    "en": "Container ship"
+   },
+   "imo": "9330549",
+   "built": 2007,
+   "flag": {
+    "ru": "Либерия",
+    "en": "Liberia"
+   },
+   "loa_m": 222.16,
+   "beam_m": 30.0,
+   "gt": 28616,
+   "dwt_t": 39337,
+   "formerNames": [],
+   "source": "https://www.vesselfinder.com/ru/vessels/details/9330549",
+   "value_usd": 17000000
+  },
+  {
+   "id": "as-constantina",
+   "name": "AS CONSTANTINA",
+   "type": {
+    "ru": "Контейнеровоз",
+    "en": "Container ship"
+   },
+   "imo": "9308390",
+   "built": 2005,
+   "flag": {
+    "ru": "Либерия",
+    "en": "Liberia"
+   },
+   "loa_m": 221.69,
+   "beam_m": 29.86,
+   "gt": 27786,
+   "dwt_t": 37883,
+   "formerNames": [],
+   "source": "https://www.vesselfinder.com/ru/vessels/details/9308390",
+   "value_usd": 15000000
   }
+ ],
+ "text": {
+  "summary": {
+   "ru": "Опыт управления контейнеровозами: {name}, {type}, {loa} м, {built} г. постройки",
+   "en": "Ship management experience: {name}, {type}, {loa} m, built {built}"
+  },
+  "project": {
+   "ru": "{name} — {type} постройки {built} года, длина {loa} м, ширина {beam} м, дедвейт {dwt} т, флаг — {flag}. Судно в составе флота, с которым команда CYBERMOVE работала по направлению управления судами.",
+   "en": "{name} is a {type} built in {built}: {loa} m long, {beam} m beam, {dwt} t deadweight, {flag} flag. One of the vessels the CYBERMOVE team worked with in ship management."
+  },
+  "role": {
+   "ru": "Управление организацией работы на борту: экипаж и вахты, судовые процессы и регламенты, снабжение и бункеровка, документооборот, отчётность и взаимодействие с оператором, портами и классификационным обществом.",
+   "en": "Management of shipboard organisation: crew and watches, onboard processes and procedures, supplies and bunkering, documentation, reporting and liaison with the operator, ports and the classification society."
+  },
+  "tagsLine": {
+   "ru": "УПРАВЛЕНИЕ СУДАМИ · ОПЕРАЦИОННОЕ УПРАВЛЕНИЕ · ЛОГИСТИКА",
+   "en": "SHIP MANAGEMENT · OPERATIONS · LOGISTICS"
+  },
+  "specTitle": {
+   "ru": "Судно",
+   "en": "Vessel"
+  },
+  "specLabels": {
+   "ru": {
+    "type": "Тип",
+    "imo": "IMO",
+    "built": "Год постройки",
+    "flag": "Флаг",
+    "loa": "Длина",
+    "beam": "Ширина",
+    "gt": "GT",
+    "dwt": "Дедвейт"
+   },
+   "en": {
+    "type": "Type",
+    "imo": "IMO",
+    "built": "Built",
+    "flag": "Flag",
+    "loa": "Length",
+    "beam": "Beam",
+    "gt": "GT",
+    "dwt": "Deadweight"
+   }
+  },
+  "result": {
+   "ru": "Судно в регулярной эксплуатации: рейсы и заходы в порты по расписанию, без простоев по организационным причинам.",
+   "en": "Vessel in regular service: voyages and port calls on schedule, no downtime for organisational reasons."
+  },
+  "valueLabel": {
+   "ru": "Стоимость судна",
+   "en": "Vessel value"
+  },
+  "valueNote": {
+   "ru": "оценочная рыночная стоимость, 2025",
+   "en": "estimated market value, 2025"
+  }
+ },
+ "valueSources": [
+  "https://www.bimco.org/news-insights/market-analysis/shipping-number-of-the-week/2025/0904-snow/",
+  "https://splash247.com/panamax-boxships-experience-some-of-the-sharpest-price-appreciation-in-the-history-of-shipping/",
+  "https://blog.vesselsvalue.com/2024-half-year-review-containers/"
+ ]
 }

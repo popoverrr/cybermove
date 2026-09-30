@@ -68,7 +68,7 @@ The most tedious part of a rep's job is data entry. An agent can fill in the rec
 1. **A narrow task.** One agent, one scenario: qualifying leads, answering delivery questions, sending reminders. A universal "does everything" agent does each task worse.
 2. **Answers only from the knowledge base.** Anything not in it goes to a person. Prices and terms come from current sources, not from the model's memory.
 3. **Explicit hand-over to a human.** Triggered by keywords, topic, customer request or deal size — and the customer can see they have been handed over.
-4. **Conversation review.** In the first weeks someone reads every conversation and updates the knowledge base. Later, sampled but regular reviews.
+4. **Conversation review.** In the first weeks someone reads every conversation and updates the knowledge base. Later, selective but regular reviews.
 5. **Honesty.** The customer knows they are talking to an assistant, not a person.
 
 ## Data and security

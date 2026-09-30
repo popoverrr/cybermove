@@ -5,7 +5,7 @@
  * Принимает POST JSON: name, contact, company, format, service, service_name, message, lang, page, utm, ts, elapsed, website (honeypot).
  * Валидация, honeypot, минимальное время заполнения, rate-limit по IP на файлах.
  * Доставка: письмо (LEADS_EMAIL), Telegram (Bot API через curl), опциональный вебхук CRM.
- * Каналы независимы: сбой одного не ломает остальные. Настройки — в config.php (см. config.sample.php).
+ * Каналы независимы: сбой одного не ломает остальные. Настройки — в config.php (см. config.example.php).
  *
  * Ответ: JSON {"ok": true} или {"ok": false, "error": "..."}.
  */

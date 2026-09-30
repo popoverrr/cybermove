@@ -208,12 +208,7 @@ const jsonLd = [
           <h2 class="t-micro cblock__label">{c.ui.caseResult}</h2>
           <p class="t-body cblock__text">{d.result}</p>
         </section>
-      ) : (
-        <section class="cblock">
-          <h2 class="t-micro cblock__label">{c.ui.caseResult}</h2>
-          <p class="t-small cblock__ph">{c.cases.resultPlaceholder}</p>
-        </section>
-      )}
+      ) : null}
 
       {d && d.disciplines.length > 0 && (
         <section class="cblock">

@@ -19,7 +19,7 @@ faq:
 
 Unit economics answers a simple question: does the business make money on each customer after everything it spent to acquire them? If the answer is yes, advertising can be scaled. If it is no, every new customer adds to the loss, and revenue growth only speeds the problem up.
 
-It sounds like a job for a finance department, but for a small business three metrics and data you already have are enough. Below are the definitions, formulas, where to find the numbers, the most common mistakes and a worked example with illustrative figures.
+It sounds like a job for a finance department, but for a small business three metrics and data you already have are enough. Below are the definitions, formulas, where to find the numbers, the most common mistakes and a worked example.
 
 ## Three metrics are enough
 
@@ -94,7 +94,7 @@ If repeat purchases by existing customers end up in the CAC denominator, acquisi
 
 ## A worked example
 
-Below is an **illustrative example** with rounded numbers to show the logic. It is not client data and not a benchmark for your market. Amounts are in tenge (₸).
+Below is an **example** with rounded numbers to show the logic. It is not client data and not a benchmark for your market. Amounts are in tenge (₸).
 
 An online store spent the following on two channels in a month:
 

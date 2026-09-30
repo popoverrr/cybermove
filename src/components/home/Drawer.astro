@@ -41,12 +41,14 @@ const c = getContent(lang);
             <p class="t-micro">{c.ui.result}</p>
             <p class="drawer__result">{s.result}</p>
           </div>
-          <div class="drawer__block drawer__block--row">
-            <div>
-              <p class="t-micro">{c.ui.format}</p>
-              <p class="t-small">{s.format}</p>
+          {s.format && (
+            <div class="drawer__block drawer__block--row">
+              <div>
+                <p class="t-micro">{c.ui.format}</p>
+                <p class="t-small">{s.format}</p>
+              </div>
             </div>
-          </div>
+          )}
           {s.cases && s.cases.length > 0 && (
             <div class="drawer__block">
               <p class="t-micro">{c.ui.relatedCases}</p>

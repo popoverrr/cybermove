@@ -11,7 +11,7 @@
 - WebGL главной: `src/webgl/Engine.ts` (рендер по вызову `frame(now)`), `Story.ts` (rig, фазы вход/удержание/выход, раскладка сферы в долях вьюпорта `scenes/layout.ts`), `scenes/*` (таймлайны по времени), `objects/*` (Sphere — жемчуг, LineSet/Dots — линии туши, Orbits/Grid/Satellites/Figures/Ribbons/Sheets/Rings/Dust).
 - Свой CSS на custom properties: `src/styles/tokens.css`, `base.css`, `typography.css`. Без Tailwind, без UI-китов, без иконочных паков.
 - Шрифты self-hosted (Fontsource): Inter Tight (основной, заголовки 300–350), JetBrains Mono (микрометки, меню). Unbounded удалён.
-- Форма: `public/api/lead.php` (PHP 8+, настройки в `public/api/config.php`, в git только `config.sample.php`).
+- Форма: `public/api/lead.php` (PHP 8+, настройки в `public/api/config.php`, в git только `config.example.php`).
 - Хостинг: Plesk shared, Apache + PHP, без Node на сервере. Деплой: `docs/DEPLOY.md`.
 
 ## Команды
@@ -52,7 +52,7 @@ src/lib/                i18n, seo, analytics, site (общий клиентск�
 src/webgl/              Engine, Environment, Story, scenes/, objects/, shaders/, backgrounds/
 src/components/         секции и UI; labs/ — лаборатории /dev/*
 src/pages/[...lang]/    маршруты: ru в корне, en в /en/
-public/api/             lead.php, config.sample.php, .htaccess
+public/api/             lead.php, config.example.php, .htaccess
 docs/                   BRIEF, CONTENT, PROGRESS, DECISIONS, TODO-CONTENT, DEPLOY, REPORT, screens/
 ```
 

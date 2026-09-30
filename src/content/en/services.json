@@ -42,7 +42,7 @@
             "analytics and data"
           ],
           "result": "A structured diagnosis and a map of problems and opportunities.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -183,7 +183,7 @@
             "cost structure"
           ],
           "result": "A clear picture of where the business earns and where it loses.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -318,7 +318,7 @@
             "growth scenarios with payback calculations"
           ],
           "result": "A financial plan for change, with numbers.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -453,7 +453,7 @@
             "building sales processes"
           ],
           "result": "A plan you can execute with us or on your own.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -633,7 +633,7 @@
             "support"
           ],
           "result": "A website that brings in leads and is connected to sales.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -771,7 +771,7 @@
           "name": "CRM: implementation & setup",
           "line": "Pipelines, automated tasks, integrations with the website, ads and messengers.",
           "includes": [
-            "platform selection [PLACEHOLDER: which CRMs we work with]",
+            "platform selection to fit the process",
             "pipelines and deal cards",
             "automated tasks and scenarios",
             "integrations",
@@ -779,7 +779,7 @@
             "management reports"
           ],
           "result": "No lead gets lost; sales become transparent.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -919,7 +919,7 @@
             "CRM integration"
           ],
           "result": "Every call is recorded and tied to a deal and a source.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -1060,7 +1060,7 @@
             "content systems, AI avatars and video generation"
           ],
           "result": "AI that works inside the process rather than impressing in a pitch.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -1199,7 +1199,7 @@
             "dashboards"
           ],
           "result": "Processes that don't depend on manual work or anyone's memory.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -1369,7 +1369,7 @@
             "tone of voice"
           ],
           "result": "A brand core that the website, content and advertising all build on.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -1513,7 +1513,7 @@
             "AI video and avatars"
           ],
           "result": "Content ready to publish and to run in ads.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -1658,7 +1658,7 @@
             "metric reports"
           ],
           "result": "Social media that works for trust and sales.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -1802,7 +1802,7 @@
             "organising and running events"
           ],
           "result": "A brand present where people already trust.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -1942,7 +1942,7 @@
             "personal PR"
           ],
           "result": "A name that sells. Experience: six years with Oleksandr Usyk's personal brand.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "",
           "cases": [
@@ -2112,7 +2112,7 @@
             "CPL and CAC reports"
           ],
           "result": "A steady flow of leads at a controlled cost.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "CPL",
           "kind": "",
           "cases": [
@@ -2252,7 +2252,7 @@
             "bid and budget optimisation"
           ],
           "result": "Hot demand from search with clear payback.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "CAC",
           "kind": "",
           "cases": [
@@ -2392,7 +2392,7 @@
             "analytics"
           ],
           "result": "A new client channel with a low cost per contact.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "CPL",
           "kind": "",
           "cases": [
@@ -2532,7 +2532,7 @@
             "local search"
           ],
           "result": "Organic traffic that grows without paying per click.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "ROMI",
           "kind": "",
           "cases": [
@@ -2705,7 +2705,7 @@
             "assessing whether participation pays off"
           ],
           "result": "A list of tenders worth bidding for.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "tender",
           "cases": [
@@ -2840,7 +2840,7 @@
             "contract signing"
           ],
           "result": "A correct bid, submitted on time.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "tender",
           "cases": [
@@ -2980,7 +2980,7 @@
             "pre-litigation claims"
           ],
           "result": "Deals where the risks were handled in advance.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "legal",
           "cases": [
@@ -3118,7 +3118,7 @@
             "working with external lawyers"
           ],
           "result": "Order in the paperwork and predictability in disputes.",
-          "format": "[PLACEHOLDER: format and timeline]",
+          "format": "",
           "metric": "",
           "kind": "legal",
           "cases": [

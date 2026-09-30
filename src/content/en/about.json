@@ -71,10 +71,6 @@
     }
   ],
   "teamTitle": "Team",
-  "teamPlaceholder": "[PLACEHOLDER: team names, roles, photos]",
-  "teamPhotoPlaceholder": "[PLACEHOLDER: portrait]",
-  "teamNamePlaceholder": "[PLACEHOLDER: name]",
-  "teamRolePlaceholder": "[PLACEHOLDER: role]",
   "team": [],
   "geoTitle": "Where we work",
   "geoLead": "Team and projects across Europe, Ukraine, Kazakhstan and Asia.",

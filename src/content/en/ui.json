@@ -55,7 +55,6 @@
   "relatedCases": "Related cases",
   "services": "Services",
   "directions": "Service areas",
-  "placeholder": "To be confirmed",
   "filterAll": "All",
   "casesCount": "projects",
   "caseUnit": {
@@ -68,9 +67,9 @@
     "rights": "All rights reserved.",
     "privacy": "Privacy policy",
     "contactsTitle": "Contact",
-    "email": "[PLACEHOLDER: e-mail]",
-    "telegram": "[PLACEHOLDER: Telegram]",
-    "address": "[PLACEHOLDER: address and company details]",
+    "email": "",
+    "telegram": "",
+    "address": "",
     "geographyTitle": "Where we work"
   },
   "meta": {
@@ -124,7 +123,7 @@
   },
   "privacy": {
     "title": "Privacy policy",
-    "lead": "[PLACEHOLDER] The full privacy policy text will be provided by the client.",
+    "lead": "",
     "sections": [
       {
         "h": "What data we collect",
@@ -133,10 +132,6 @@
       {
         "h": "Why",
         "p": "To answer the request and propose an engagement format. Data is not shared with third parties except the delivery services configured for the site (e-mail, Telegram, CRM)."
-      },
-      {
-        "h": "Retention and your rights",
-        "p": "[PLACEHOLDER] Retention period, data controller, company details and the contact for deletion requests — to be provided by the client."
       }
     ]
   },

@@ -1,7 +1,7 @@
 ---
 title: "Positioning: how to explain what makes you different in one sentence"
 seoTitle: "Company Positioning in One Sentence — CYBERMOVE"
-description: "Company positioning in one sentence: the segment, problem, difference and proof method, illustrative before-and-after examples and how to test it on customers."
+description: "Company positioning in one sentence: the segment, problem, difference and proof method, before-and-after examples and how to test it on customers."
 date: 2026-09-25
 direction: brand-content
 services: [brand-core, pr]
@@ -19,7 +19,7 @@ faq:
 
 Ask five people at the same company what makes it different from competitors. You will probably hear five different answers, and most of them will sound like everyone else's: "quality", "a personal approach", "a team of professionals", "affordable prices". Customers hear the same thing from every company they consider — and end up choosing on price.
 
-Positioning is a decision about the place you occupy in the mind of a specific customer. It is not an advertising line or a mission statement on the office wall; it is a working tool from which the website, advertising, sales scripts and content grow. A good test: can you state it in one sentence that a competitor could not repeat without lying? Below is a method for building that sentence, illustrative examples and ways to check whether it works.
+Positioning is a decision about the place you occupy in the mind of a specific customer. It is not an advertising line or a mission statement on the office wall; it is a working tool from which the website, advertising, sales scripts and content grow. A good test: can you state it in one sentence that a competitor could not repeat without lying? Below is a method for building that sentence, examples and ways to check whether it works.
 
 ## Why "quality and a personal approach" doesn't work
 
@@ -78,7 +78,7 @@ Write the answers down word for word. Repeated words and phrases are ready-made 
 
 Template: **"For [segment] who [problem], we [difference] — [proof]."** In the final version the template disappears and a natural sentence remains.
 
-Below are **illustrative examples** for fictional companies, to show the difference between "before" and "after".
+Below are **examples** for fictional companies, to show the difference between "before" and "after".
 
 **Boiler maintenance service.**
 Before: "Quality maintenance of heating equipment by professionals."

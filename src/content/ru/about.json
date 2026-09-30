@@ -71,10 +71,6 @@
     }
   ],
   "teamTitle": "Команда",
-  "teamPlaceholder": "[PLACEHOLDER: имена, роли, фото команды]",
-  "teamPhotoPlaceholder": "[PLACEHOLDER: портрет]",
-  "teamNamePlaceholder": "[PLACEHOLDER: имя]",
-  "teamRolePlaceholder": "[PLACEHOLDER: роль]",
   "team": [],
   "geoTitle": "География",
   "geoLead": "Команда и проекты в Европе, Украине, Казахстане и Азии.",
